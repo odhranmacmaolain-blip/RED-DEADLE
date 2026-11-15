@@ -782,8 +782,7 @@
         ]
       },
       {
-        id: "mac_callander",
-        name: "Mac Callander",
+        
         aliases: ["Mac"],
         gender: "Male",
         faction: "Van der Linde Gang",
