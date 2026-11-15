@@ -1,0 +1,2625 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RED-DEADLE — Daily RDR2 Deduction &amp; Map Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-leather: #120e0b;
+      --bg-panel: #1d1611;
+      --bg-panel-alt: #251c15;
+      --gold-border: #c89d54;
+      --cream-text: #f3e9d2;
+      --tile-exact: #2e6f40;
+      --tile-partial: #b5892e;
+      --tile-miss: #8b261d;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background-color: #120e0b;
+      color: #f3e9d2;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body {
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(139, 38, 29, 0.22), transparent 55%),
+        radial-gradient(circle at 50% 100%, rgba(200, 157, 84, 0.12), transparent 60%);
+    }
+
+    .font-western {
+      font-family: 'Cinzel', Georgia, serif;
+    }
+
+    .font-ledger {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+
+    .outlaw-panel {
+      background-color: #1d1611;
+      border: 1px solid rgba(200, 157, 84, 0.35);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    }
+
+    .tile-exact {
+      background-color: #2e6f40;
+      border-color: #4ea867;
+      color: #f4fbf6;
+    }
+
+    .tile-partial {
+      background-color: #b5892e;
+      border-color: #e2b857;
+      color: #fffdf7;
+    }
+
+    .tile-miss {
+      background-color: #8b261d;
+      border-color: #c94a3e;
+      color: #fff5f5;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-pop {
+      animation: popIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #120e0b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #5c4328;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-700 selection:text-amber-50">
+
+  <!-- Toast Banner -->
+  <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center gap-2 w-[92%] max-w-md"></div>
+
+  <!-- ======================================================================= -->
+  <!-- TOP HEADER & CONTROLS                                                   -->
+  <!-- ======================================================================= -->
+  <header class="sticky top-0 z-30 bg-[#120e0b]/95 backdrop-blur-md border-b border-[#c89d54]/30">
+    <div class="max-w-5xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-2">
+      <!-- Brand & Day Badge -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-b from-[#8b261d] to-[#4a120d] border border-[#c89d54]/60 flex items-center justify-center shadow-md shrink-0">
+          <span class="text-xl">🤠</span>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="font-western text-lg sm:text-2xl font-black tracking-wider text-[#f3e9d2] leading-none">
+              RED-DEADLE
+            </h1>
+            <span id="day-badge" class="text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#8b261d]/80 text-[#f3e9d2] border border-[#c89d54]/50">
+              DAY #2
+            </span>
+          </div>
+          <p class="text-[11px] text-[#f3e9d2]/65 truncate mt-0.5">
+            Van der Linde Daily Deduction &amp; Frontier Map
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Toolbar -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button id="btn-practice-toggle" onclick="togglePracticeMode()" class="px-2.5 py-2 rounded-xl bg-[#1d1611] hover:bg-[#2a2018] border border-[#c89d54]/40 text-xs font-semibold text-[#f3e9d2] flex items-center gap-1.5 transition" title="Toggle Practice Mode">
+          <span id="practice-indicator" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="practice-btn-text">Daily</span>
+        </button>
+
+        <button id="btn-new-practice" onclick="resetPracticeRound()" class="hidden px-2.5 py-2 rounded-xl bg-[#b5892e] hover:bg-[#c89d54] text-[#120e0b] text-xs font-bold transition">
+          New Roll
+        </button>
+
+        <button onclick="openRosterModal()" class="p-2 rounded-xl bg-[#1d1611] hover:bg-[#2a2018] border border-[#c89d54]/40 text-[#f3e9d2] text-xs sm:text-sm font-semibold transition" title="Character Ledger">
+          📖 <span class="hidden md:inline ml-1">Ledger</span>
+        </button>
+
+        <button onclick="openShareModal()" class="px-3 py-2 rounded-xl bg-gradient-to-b from-[#8b261d] to-[#631912] hover:from-[#a32e23] hover:to-[#781f17] border border-[#c89d54]/60 text-[#f3e9d2] text-xs sm:text-sm font-western font-bold tracking-wide shadow transition">
+          Share
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================================= -->
+  <!-- MAIN APPLICATION CONTAINER                                              -->
+  <!-- ======================================================================= -->
+  <main class="flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex flex-col gap-4 sm:gap-5">
+
+    <!-- 3-Mode Navigation Tabs -->
+    <nav class="grid grid-cols-3 gap-1.5 sm:gap-2.5 p-1.5 rounded-2xl bg-[#1d1611] border border-[#c89d54]/35 shadow-inner">
+      <button id="tab-character" onclick="switchMode('character')" class="py-2.5 px-2 sm:px-3 rounded-xl font-western text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-gradient-to-b from-[#8b261d] to-[#591610] text-[#f3e9d2] border border-[#c89d54]/60 shadow">
+        <span>🤠</span>
+        <span>1. Character</span>
+        <span id="badge-character" class="text-[10px] sm:text-xs font-sans px-1.5 py-0.5 rounded-full bg-black/40 text-[#f3e9d2]">0/6</span>
+      </button>
+
+      <button id="tab-map" onclick="switchMode('map')" class="py-2.5 px-2 sm:px-3 rounded-xl font-western text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-[#f3e9d2]/75 hover:text-[#f3e9d2] hover:bg-white/5">
+        <span>📍</span>
+        <span>2. Map (5 Rds)</span>
+        <span id="badge-map" class="text-[10px] sm:text-xs font-sans px-1.5 py-0.5 rounded-full bg-black/30 text-[#f3e9d2]/80">R1/5</span>
+      </button>
+
+      <button id="tab-dossier" onclick="switchMode('dossier')" class="py-2.5 px-2 sm:px-3 rounded-xl font-western text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-[#f3e9d2]/75 hover:text-[#f3e9d2] hover:bg-white/5">
+        <span id="dossier-lock-icon">🔒</span>
+        <span>3. Dossier</span>
+        <span id="badge-dossier" class="text-[10px] sm:text-xs font-sans px-1.5 py-0.5 rounded-full bg-black/30 text-[#f3e9d2]/80">Locked</span>
+      </button>
+    </nav>
+
+    <!-- ===================================================================== -->
+    <!-- MODE 1: CHARACTER DEDUCTION (6 GUESSES MAX, AGE IN 1899)              -->
+    <!-- ===================================================================== -->
+    <section id="panel-character" class="flex flex-col gap-4">
+      <!-- Top Prompt & 6-Chamber Pip Bar -->
+      <div class="outlaw-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-[#c89d54]">Wanted Outlaw or Associate</span>
+            <h2 class="font-ledger text-xl sm:text-2xl font-bold text-[#f3e9d2] mt-0.5">
+              Identify Today's RDR2 Character
+            </h2>
+          </div>
+
+          <!-- 6-Chamber Revolver Pips -->
+          <div class="flex items-center gap-2 bg-[#120e0b] px-3 py-2 rounded-xl border border-[#c89d54]/30">
+            <span class="text-[11px] uppercase tracking-wider font-semibold text-[#f3e9d2]/70">Chambers</span>
+            <div id="character-pips" class="flex items-center gap-1.5"></div>
+          </div>
+        </div>
+
+        <!-- Search Input + Autocomplete Dropdown -->
+        <div id="character-search-wrapper" class="relative">
+          <div class="flex gap-2">
+            <input
+              id="character-input"
+              type="text"
+              autocomplete="off"
+              placeholder="Type a name (e.g., Arthur, Sadie, Charles, Dutch, Micah)..."
+              oninput="handleCharacterInput()"
+              onkeydown="handleCharacterKeydown(event)"
+              class="flex-1 px-4 py-3 rounded-xl bg-[#120e0b] border border-[#c89d54]/50 focus:border-[#c89d54] focus:outline-none text-sm sm:text-base text-[#f3e9d2] placeholder-[#f3e9d2]/40"
+            />
+            <button
+              onclick="submitTopCharacterMatch()"
+              class="px-4 sm:px-6 py-3 rounded-xl bg-gradient-to-b from-[#8b261d] to-[#5e1711] hover:from-[#a32e23] hover:to-[#731c15] border border-[#c89d54]/60 font-western font-bold text-xs sm:text-sm tracking-wider text-[#f3e9d2] shadow transition shrink-0">
+              Guess
+            </button>
+          </div>
+          <div id="character-autocomplete" class="hidden absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto rounded-xl bg-[#1d1611] border border-[#c89d54]/60 shadow-2xl z-30 divide-y divide-[#c89d54]/15"></div>
+        </div>
+
+        <!-- Character Outcome Banner -->
+        <div id="character-outcome" class="hidden rounded-xl p-4 border"></div>
+      </div>
+
+      <!-- Color Legend -->
+      <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs text-[#f3e9d2]/80 px-2">
+        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded tile-exact border inline-block"></span> Exact Match</span>
+        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded tile-partial border inline-block"></span> Close (±5 Yrs / ±1 Ch)</span>
+        <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded tile-miss border inline-block"></span> No Match</span>
+        <span class="text-[#c89d54] font-semibold">↑ Higher • ↓ Lower</span>
+      </div>
+
+      <!-- Guess Grid Table -->
+      <div class="outlaw-panel rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[640px] border-collapse text-center">
+            <thead>
+              <tr class="bg-[#120e0b] border-b border-[#c89d54]/35 text-[11px] font-western uppercase tracking-wider text-[#c89d54]">
+                <th class="py-3 px-2 text-left pl-4">Character</th>
+                <th class="py-3 px-2">Gender</th>
+                <th class="py-3 px-2">Role / Faction</th>
+                <th class="py-3 px-2">Primary Weapon</th>
+                <th class="py-3 px-2">Age (1899)</th>
+                <th class="py-3 px-2 pr-4">First Chapter</th>
+              </tr>
+            </thead>
+            <tbody id="character-guesses-tbody" class="divide-y divide-[#c89d54]/15 text-xs sm:text-sm">
+              <tr>
+                <td colspan="6" class="py-8 text-[#f3e9d2]/50 italic">
+                  Fire your first guess above to begin narrowing down today's target.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- MODE 2: 5-ROUND MAP PINPOINT (REAL UPLOADED / HOSTED RDR2 MAP ONLY)   -->
+    <!-- ===================================================================== -->
+    <section id="panel-map" class="hidden flex-col gap-4">
+      <!-- Prompt Header -->
+      <div class="outlaw-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="flex-1 min-w-[240px]">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="map-round-pill" class="text-[11px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-[#8b261d] text-[#f3e9d2] border border-[#c89d54]/50">
+                Round 1 of 5
+              </span>
+              <span id="map-category-pill" class="text-[11px] font-semibold uppercase tracking-wider text-[#c89d54]">
+                First Meeting
+              </span>
+            </div>
+            <h2 id="map-question-text" class="font-ledger text-xl sm:text-2xl font-bold text-[#f3e9d2] mt-1.5 leading-snug">
+              Where did Arthur first meet Sadie Adler?
+            </h2>
+            <p id="map-hint-text" class="text-xs text-[#f3e9d2]/70 mt-1 italic">
+              Zoom and pan across the Five States map, tap to drop your pin, then lock in your guess.
+            </p>
+          </div>
+
+          <!-- 5-Round Pips + Running Score -->
+          <div class="flex flex-col items-start sm:items-end gap-1.5 shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] uppercase tracking-wider text-[#f3e9d2]/65 font-semibold">Progress</span>
+              <div id="map-round-pips" class="flex items-center gap-1.5"></div>
+            </div>
+            <div class="text-xs flex items-center gap-2">
+              <span class="text-[#f3e9d2]/65">Score:</span>
+              <span id="map-score-badge" class="px-2.5 py-0.5 rounded-lg bg-[#120e0b] border border-[#c89d54]/50 font-western font-bold text-[#c89d54]">
+                0 / 5,000
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Round Result Banner -->
+      <div id="map-result-banner" class="hidden rounded-2xl p-4 sm:p-5 border shadow-lg"></div>
+
+      <!-- Interactive Map Card -->
+      <div class="outlaw-panel rounded-2xl overflow-hidden flex flex-col">
+        <!-- Map Toolbar -->
+        <div class="bg-[#120e0b] px-3 sm:px-4 py-2.5 border-b border-[#c89d54]/30 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button onclick="zoomMapBy(1.35)" class="w-8 h-8 rounded-lg bg-[#1d1611] hover:bg-[#2a2018] border border-[#c89d54]/45 text-[#f3e9d2] font-bold text-base flex items-center justify-center transition" title="Zoom In">+</button>
+            <button onclick="zoomMapBy(1 / 1.35)" class="w-8 h-8 rounded-lg bg-[#1d1611] hover:bg-[#2a2018] border border-[#c89d54]/45 text-[#f3e9d2] font-bold text-base flex items-center justify-center transition" title="Zoom Out">−</button>
+            <button onclick="resetMapTransform()" class="px-2.5 h-8 rounded-lg bg-[#1d1611] hover:bg-[#2a2018] border border-[#c89d54]/45 text-[#f3e9d2] text-xs font-semibold transition">
+              Reset
+            </button>
+            <span id="map-zoom-readout" class="text-[11px] font-mono text-[#c89d54] mx-1">1.0x</span>
+
+            <!-- Upload Map Image Button -->
+            <label class="px-2.5 h-8 rounded-lg bg-[#1d1611] hover:bg-[#2a2018] border border-[#c89d54]/50 text-[#f3e9d2] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition">
+              <span>🗺️</span>
+              <span id="map-upload-btn-text">Upload Map</span>
+              <input type="file" id="map-file-input" accept="image/*" onchange="handleMapFileSelected(event)" class="hidden" />
+            </label>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span id="map-pin-status" class="text-[11px] text-[#f3e9d2]/65 hidden sm:inline">Tap map to place pin</span>
+            <button
+              id="btn-lock-pin"
+              onclick="submitMapPinGuess()"
+              disabled
+              class="px-4 py-1.5 rounded-xl bg-gradient-to-b from-[#8b261d] to-[#5e1711] disabled:from-stone-800 disabled:to-stone-900 disabled:text-stone-500 disabled:border-stone-700 hover:from-[#a32e23] hover:to-[#731c15] border border-[#c89d54]/60 font-western font-bold text-xs tracking-wider text-[#f3e9d2] shadow transition">
+              Lock In Guess
+            </button>
+          </div>
+        </div>
+
+        <!-- Map Viewport (Strictly Real Uploaded / Hosted Map Image — No Fake Drawn Map) -->
+        <div id="map-viewport" class="relative w-full h-[380px] sm:h-[480px] bg-[#120e0b] overflow-hidden select-none touch-none">
+
+          <!-- Empty State Prompt Shown Until User Uploads Map Image or Places map.jpg in Repo -->
+          <div id="map-upload-placeholder" class="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-[#15100c]">
+            <div class="w-16 h-16 rounded-2xl bg-[#1d1611] border border-[#c89d54]/50 flex items-center justify-center text-3xl mb-3 shadow">
+              🗺️
+            </div>
+            <h3 class="font-western text-lg sm:text-xl font-bold text-[#f3e9d2]">
+              Load Your RDR2 World Map Image
+            </h3>
+            <p class="text-xs sm:text-sm text-[#f3e9d2]/75 max-w-md mt-1.5 leading-relaxed">
+              Select the official Red Dead Redemption 2 Five States map image from your phone's gallery (it stays saved on your device), or upload <code class="px-1.5 py-0.5 rounded bg-black/50 text-[#c89d54]">map.jpg</code> into your GitHub folder so every visitor gets it automatically.
+            </p>
+            <label class="mt-4 px-5 py-3 rounded-xl bg-gradient-to-b from-[#8b261d] to-[#5e1711] hover:from-[#a32e23] hover:to-[#731c15] border border-[#c89d54]/70 font-western font-bold text-xs sm:text-sm tracking-wider text-[#f3e9d2] shadow-lg cursor-pointer transition">
+              📁 Select RDR2 Map Image
+              <input type="file" accept="image/*" onchange="handleMapFileSelected(event)" class="hidden" />
+            </label>
+          </div>
+
+          <!-- Zoomable & Pannable Stage -->
+          <div id="map-stage" class="hidden relative w-full h-full origin-top-left will-change-transform">
+            <img id="rdr2-map-img" src="" alt="Red Dead Redemption 2 World Map" draggable="false" class="w-full h-full object-fill block pointer-events-none" />
+
+            <!-- SVG Overlay Strictly for Precision Pins & Distance Line -->
+            <svg id="map-overlay-svg" viewBox="0 0 1000 680" preserveAspectRatio="none" class="absolute inset-0 w-full h-full pointer-events-none">
+              <g id="map-revealed-layer"></g>
+              <g id="map-pending-marker" class="hidden">
+                <circle cx="0" cy="0" r="16" fill="rgba(220, 38, 38, 0.32)" stroke="#ef4444" stroke-width="2.5" />
+                <circle cx="0" cy="0" r="5.5" fill="#ef4444" stroke="#ffffff" stroke-width="1.8" />
+              </g>
+            </svg>
+          </div>
+
+          <!-- Floating Gesture Hint -->
+          <div id="map-gesture-hint" class="hidden absolute bottom-3 left-3 z-10 pointer-events-none px-2.5 py-1 rounded-lg bg-[#120e0b]/85 border border-[#c89d54]/40 text-[11px] text-[#f3e9d2]/85">
+            Drag to pan • Pinch or +/− to zoom • Tap to drop pin
+          </div>
+        </div>
+
+        <!-- 5-Round History Strip -->
+        <div id="map-rounds-strip" class="bg-[#120e0b] border-t border-[#c89d54]/25 p-3 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-[#f3e9d2]/55 italic">Round 1 of 5 — place your pin on the map above.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- MODE 3: LORE DOSSIER (SPOILER-LOCKED UNTIL CHARACTER ROUND FINISHES)  -->
+    <!-- ===================================================================== -->
+    <section id="panel-dossier" class="hidden flex-col gap-4">
+      <!-- Locked Screen -->
+      <div id="dossier-locked-view" class="outlaw-panel rounded-2xl p-6 sm:p-10 text-center flex flex-col items-center justify-center gap-4">
+        <div class="w-16 h-16 rounded-2xl bg-[#8b261d]/30 border border-[#c89d54]/50 flex items-center justify-center text-3xl">
+          🔒
+        </div>
+        <div class="max-w-md">
+          <span class="text-[11px] font-bold uppercase tracking-widest text-[#c89d54]">Spoiler Protection</span>
+          <h2 class="font-western text-xl sm:text-2xl font-bold text-[#f3e9d2] mt-1">
+            Dossier Sealed Until Target Is Resolved
+          </h2>
+          <p class="text-xs sm:text-sm text-[#f3e9d2]/75 mt-2 leading-relaxed">
+            The Dossier tests deep lore trivia directly about today's secret character. Finish <strong class="text-[#c89d54]">1. Character</strong> first (either solve it or use all 6 chambers) to unlock these 3 questions.
+          </p>
+        </div>
+        <button onclick="switchMode('character')" class="mt-1 px-5 py-3 rounded-xl bg-gradient-to-b from-[#8b261d] to-[#5e1711] hover:from-[#a32e23] hover:to-[#731c15] border border-[#c89d54]/60 font-western font-bold text-xs sm:text-sm tracking-wider text-[#f3e9d2] shadow transition">
+          ← Return to 1. Character
+        </button>
+      </div>
+
+      <!-- Unlocked Questions View -->
+      <div id="dossier-unlocked-view" class="hidden outlaw-panel rounded-2xl p-4 sm:p-6">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-[#c89d54]/30 pb-4">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-[#c89d54]">Hardcore Lore Trial</span>
+            <h2 class="font-western text-xl sm:text-2xl font-bold text-[#f3e9d2] mt-0.5">Character Lore Dossier</h2>
+            <p class="text-xs sm:text-sm text-[#f3e9d2]/75 mt-1">
+              3 deep-cut questions about <span id="dossier-character-name" class="font-bold text-[#c89d54]">today's character</span>.
+            </p>
+          </div>
+          <div class="px-3.5 py-2 rounded-xl bg-[#120e0b] border border-[#c89d54]/45 text-right">
+            <span class="text-[10px] uppercase tracking-wider text-[#f3e9d2]/60 block">Score</span>
+            <span id="dossier-score-readout" class="font-western text-lg font-bold text-[#c89d54]">0 / 3</span>
+          </div>
+        </div>
+
+        <div id="dossier-questions-list" class="mt-5 flex flex-col gap-4"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================================================================= -->
+  <!-- FOOTER                                                                  -->
+  <!-- ======================================================================= -->
+  <footer class="border-t border-[#c89d54]/25 bg-[#120e0b] py-4 px-4 text-center text-xs text-[#f3e9d2]/55">
+    <p class="font-western tracking-wider text-[#c89d54]/85">RED-DEADLE • OUTLAW LEDGER EDITION</p>
+    <p class="mt-1">New daily challenge every midnight • Built for mobile &amp; desktop</p>
+  </footer>
+
+  <!-- ======================================================================= -->
+  <!-- CHARACTER ROSTER LEDGER MODAL                                           -->
+  <!-- ======================================================================= -->
+  <div id="roster-modal" class="hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm p-3 sm:p-6 flex items-center justify-center">
+    <div class="outlaw-panel rounded-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-[#c89d54]/35 flex items-center justify-between gap-2 bg-[#120e0b]">
+        <div>
+          <h3 class="font-western text-lg font-bold text-[#f3e9d2]">Van der Linde &amp; Frontier Ledger</h3>
+          <p class="text-xs text-[#f3e9d2]/65">56 verified RDR2 characters in the database</p>
+        </div>
+        <button onclick="closeRosterModal()" class="w-9 h-9 rounded-xl bg-[#1d1611] hover:bg-[#2a2018] border border-[#c89d54]/40 text-[#f3e9d2] font-bold">✕</button>
+      </div>
+      <div class="p-3 bg-[#17110d] border-b border-[#c89d54]/20">
+        <input id="roster-filter-input" type="text" oninput="renderRosterList()" placeholder="Filter ledger by name, faction, or weapon..." class="w-full px-3.5 py-2 rounded-xl bg-[#120e0b] border border-[#c89d54]/40 text-xs sm:text-sm text-[#f3e9d2] focus:outline-none" />
+      </div>
+      <div id="roster-list-container" class="p-3 sm:p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- SHARE RESULTS MODAL                                                     -->
+  <!-- ======================================================================= -->
+  <div id="share-modal" class="hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm p-3 sm:p-6 flex items-center justify-center">
+    <div class="outlaw-panel rounded-2xl w-full max-w-md overflow-hidden flex flex-col">
+      <div class="p-4 border-b border-[#c89d54]/35 flex items-center justify-between bg-[#120e0b]">
+        <h3 class="font-western text-lg font-bold text-[#f3e9d2]">Daily Frontier Dispatch</h3>
+        <button onclick="closeShareModal()" class="w-9 h-9 rounded-xl bg-[#1d1611] hover:bg-[#2a2018] border border-[#c89d54]/40 text-[#f3e9d2] font-bold">✕</button>
+      </div>
+      <div class="p-4 sm:p-5 flex flex-col gap-4">
+        <pre id="share-preview-box" class="p-3.5 rounded-xl bg-[#120e0b] border border-[#c89d54]/40 text-xs sm:text-sm text-[#f3e9d2] whitespace-pre-wrap font-mono leading-relaxed"></pre>
+        <button onclick="copyShareSummary()" class="w-full py-3 rounded-xl bg-gradient-to-b from-[#8b261d] to-[#5e1711] hover:from-[#a32e23] hover:to-[#731c15] border border-[#c89d54]/70 font-western font-bold text-sm tracking-wider text-[#f3e9d2] shadow transition">
+          📋 Copy Results to Clipboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ==========================================================================
+     * 1. COMPLETE 56-CHARACTER RDR2 DATABASE (WITH 1899 AGE & LORE DOSSIER)
+     * ==========================================================================
+     */
+    const CHARACTERS = [
+      {
+        id: "arthur_morgan",
+        name: "Arthur Morgan",
+        aliases: ["arthur", "tacitus kilgore", "fenton", "morgan"],
+        gender: "Male",
+        role: "Van der Linde Enforcer",
+        weapon: "Revolver",
+        age: 36,
+        chapter: 1,
+        dossier: [
+          { q: "Which alias does Arthur frequently use when collecting mail at post offices?", options: ["Tacitus Kilgore", "Rip Van Winkle", "Jim Milton", "Aiden O'Malley"], answer: 0 },
+          { q: "What was the name of Arthur's son with Eliza?", options: ["Isaac", "Jack", "Lyle", "Colm"], answer: 0 },
+          { q: "What color was Arthur's original dark bay horse that died before Blackwater?", options: ["Boadicea (Liver Chestnut)", "Taima (Buckskin)", "Baylock (Black)", "Silver Dollar (Dapple)"], answer: 0 }
+        ]
+      },
+      {
+        id: "john_marston",
+        name: "John Marston",
+        aliases: ["john", "jim milton", "rip van winkle", "marston"],
+        gender: "Male",
+        role: "Van der Linde Gunslinger",
+        weapon: "Revolver",
+        age: 26,
+        chapter: 1,
+        dossier: [
+          { q: "What alias did John impulsively give Agent Milton at Clemens Point?", options: ["Rip Van Winkle", "Jim Milton", "Tacitus Kilgore", "Arthur Callahan"], answer: 0 },
+          { q: "Where did John work as a ranch hand in 1907 before buying Beecher's Hope?", options: ["Pronghorn Ranch", "Painted Sky", "Emerald Ranch", "Downes Ranch"], answer: 0 },
+          { q: "Which animal mauled John on Mount Hagen before Chapter 1?", options: ["Wolves", "Grizzly Bear", "Cougar", "Panther"], answer: 0 }
+        ]
+      },
+      {
+        id: "dutch_van_der_linde",
+        name: "Dutch van der Linde",
+        aliases: ["dutch", "van der linde", "aiden o'malley"],
+        gender: "Male",
+        role: "Van der Linde Leader",
+        weapon: "Dual Revolvers",
+        age: 44,
+        chapter: 1,
+        dossier: [
+          { q: "Who is the author of the philosophy books Dutch constantly reads in camp?", options: ["Evelyn Miller", "J.J. Rittenhouse", "Otis Miller", "Josiah Trelawny"], answer: 0 },
+          { q: "What is the name of Dutch's albino Arabian stallion?", options: ["The Count", "Baylock", "Old Boy", "Ennis"], answer: 0 },
+          { q: "What item does Dutch ask Arthur to find for him as a camp request?", options: ["A smoking pipe", "A silver pocket watch", "A fountain pen", "A harmonica"], answer: 0 }
+        ]
+      },
+      {
+        id: "hosea_matthews",
+        name: "Hosea Matthews",
+        aliases: ["hosea", "fenton", "melvin", "matthews"],
+        gender: "Male",
+        role: "Van der Linde Co-Founder",
+        weapon: "Dual Revolvers",
+        age: 55,
+        chapter: 1,
+        dossier: [
+          { q: "What was the name of Hosea's late wife?", options: ["Bessie", "Annabelle", "Eliza", "Milly"], answer: 0 },
+          { q: "What alias did Hosea use when running the moonshine scam in Rhodes?", options: ["Melvin", "Fenton", "Tacitus", "Leviticus"], answer: 0 },
+          { q: "Which book does Hosea request Arthur bring back to camp?", options: ["The Case of the Shrew in the Fog", "Crime and Punishment", "American Inferno", "Wild West Tales"], answer: 0 }
+        ]
+      },
+      {
+        id: "sadie_adler",
+        name: "Sadie Adler",
+        aliases: ["sadie", "mrs. adler", "adler"],
+        gender: "Female",
+        role: "Van der Linde Gunslinger",
+        weapon: "Repeater",
+        age: 25,
+        chapter: 1,
+        dossier: [
+          { q: "What was the name of Sadie's murdered husband?", options: ["Jake Adler", "Lyle Adler", "Sean Adler", "Caleb Adler"], answer: 0 },
+          { q: "What personal keepsake does Sadie ask Arthur to recover from Lemoyne Raiders?", options: ["A harmonica", "A silver locket", "A wedding ring", "A fountain pen"], answer: 0 },
+          { q: "What is the name of Sadie's golden Turkoman horse in the Epilogue?", options: ["Hera", "Bob", "Boadicea", "Nell"], answer: 0 }
+        ]
+      },
+      {
+        id: "charles_smith",
+        name: "Charles Smith",
+        aliases: ["charles", "smith"],
+        gender: "Male",
+        role: "Van der Linde Hunter",
+        weapon: "Bow & Sawed-Off",
+        age: 27,
+        chapter: 1,
+        dossier: [
+          { q: "What is the name of Charles's Appaloosa horse?", options: ["Taima", "Boadicea", "Gwen", "Maggie"], answer: 0 },
+          { q: "What camp item request does Charles give Arthur in Chapter 2?", options: ["Eagle feathers (or Moonshine)", "A harmonica", "A thimble", "A pocket mirror"], answer: 0 },
+          { q: "Where does Charles earn money bare-knuckle prize fighting in 1907?", options: ["Saint Denis", "Blackwater", "Valentine", "Van Horn"], answer: 0 }
+        ]
+      },
+      {
+        id: "micah_bell",
+        name: "Micah Bell",
+        aliases: ["micah", "bell"],
+        gender: "Male",
+        role: "Van der Linde Gunslinger",
+        weapon: "Dual Revolvers",
+        age: 39,
+        chapter: 1,
+        dossier: [
+          { q: "What phrase is engraved along the barrel of Micah's Double-Action Revolvers?", options: ["Vengeance is hereby mine", "God forgives, I don't", "No mercy for rats", "Death rides with me"], answer: 0 },
+          { q: "What is the name of Micah's black Missouri Fox Trotter horse?", options: ["Baylock", "The Count", "Branwen", "Brown Jack"], answer: 0 },
+          { q: "Who was Micah's old running partner whom he robbed a stagecoach with near Strawberry?", options: ["Norman", "Cleet", "Joe", "Skinny"], answer: 0 }
+        ]
+      },
+      {
+        id: "abigail_roberts",
+        name: "Abigail Roberts",
+        aliases: ["abigail", "abigail marston", "roberts"],
+        gender: "Female",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 22,
+        chapter: 1,
+        dossier: [
+          { q: "Who originally introduced Abigail to the Van der Linde gang in 1894?", options: ["Uncle", "Hosea Matthews", "John Marston", "Susan Grimshaw"], answer: 0 },
+          { q: "How much money does Abigail give Arthur in Chapter 2 to take Jack fishing?", options: ["$5", "$10", "$2", "$20"], answer: 0 },
+          { q: "What secret gift does Abigail hide in the barn loft at Beecher's Hope?", options: ["A portrait of the Marston family", "A gold nugget", "John's old hat", "A silver ring"], answer: 0 }
+        ]
+      },
+      {
+        id: "jack_marston",
+        name: "Jack Marston",
+        aliases: ["jack"],
+        gender: "Male",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 4,
+        chapter: 1,
+        dossier: [
+          { q: "Which Penny Dreadful book does Jack ask Arthur to find for him?", options: ["Otis Miller and the Boy from Twin Rocks", "The Boy Who Cried Wolf", "Robin Hood", "Treasure Island"], answer: 0 },
+          { q: "What gift does Jack craft for Arthur after returning from Angelo Bronte's mansion?", options: ["A thimble", "A wooden horse", "A drawing", "A feather necklace"], answer: 0 },
+          { q: "What breed of dog does Jack adopt in the Epilogue?", options: ["Rufus (Labrador Retriever)", "Cain (Catahoula Cur)", "Copper (Bloodhound)", "Buster (Husky)"], answer: 0 }
+        ]
+      },
+      {
+        id: "lenny_summers",
+        name: "Lenny Summers",
+        aliases: ["lenny", "ynnel", "summers"],
+        gender: "Male",
+        role: "Van der Linde Gunslinger",
+        weapon: "Repeater",
+        age: 19,
+        chapter: 1,
+        dossier: [
+          { q: "What personal family heirloom does Lenny ask Arthur to recover for him?", options: ["His father's silver pocket watch", "A brass compass", "A leather journal", "A gold ring"], answer: 0 },
+          { q: "What is the name of Lenny's light-colored Mustang horse?", options: ["Maggie", "Silver Dollar", "Old Belle", "Nell IV"], answer: 0 },
+          { q: "What was Lenny's father's profession before he was murdered?", options: ["A lawyer (former slave)", "A blacksmith", "A preacher", "A sheriff"], answer: 0 }
+        ]
+      },
+      {
+        id: "javier_escuella",
+        name: "Javier Escuella",
+        aliases: ["javier", "escuella"],
+        gender: "Male",
+        role: "Van der Linde Gunslinger",
+        weapon: "Revolver",
+        age: 26,
+        chapter: 1,
+        dossier: [
+          { q: "What is the name of Javier's painted American Paint horse?", options: ["Boaz", "Baylock", "Taima", "Ennis"], answer: 0 },
+          { q: "Which Mexican state does Javier hail from?", options: ["Nuevo Paraíso", "Chihuahua", "Sonora", "Jalisco"], answer: 0 },
+          { q: "What camp request item does Javier ask Arthur for to craft poison arrows?", options: ["Oleander Sage", "Yarrow", "Burdock Root", "Indian Tobacco"], answer: 0 }
+        ]
+      },
+      {
+        id: "bill_williamson",
+        name: "Bill Williamson",
+        aliases: ["bill", "marion williamson", "williamson"],
+        gender: "Male",
+        role: "Van der Linde Gunslinger",
+        weapon: "Repeater",
+        age: 33,
+        chapter: 1,
+        dossier: [
+          { q: "What is Bill Williamson's real first name?", options: ["Marion", "William", "Bartholomew", "Martin"], answer: 0 },
+          { q: "What is the name of Bill's massive brown Ardennes warhorse?", options: ["Brown Jack", "Old Boy", "Boaz", "Branwen"], answer: 0 },
+          { q: "What item does Bill famously ask Arthur to fetch for him in camp?", options: ["Hair pomade", "Kentucky Bourbon", "Gun oil", "A harmonica"], answer: 0 }
+        ]
+      },
+      {
+        id: "uncle",
+        name: "Uncle",
+        aliases: ["uncle", "one shot kid"],
+        gender: "Male",
+        role: "Van der Linde Camp",
+        weapon: "Revolver",
+        age: 50,
+        chapter: 1,
+        dossier: [
+          { q: "What terminal medical condition does Uncle constantly complain about?", options: ["Lumbago", "Tuberculosis", "Gout", "Cholera"], answer: 0 },
+          { q: "What nickname did Uncle claim he earned in his youth?", options: ["The One-Shot Kid", "The Red Harlow", "Quickdraw McGraw", "The Blackwater Ghost"], answer: 0 },
+          { q: "What is the name of Uncle's mustachioed Appaloosa horse?", options: ["Nell II", "Boadicea", "Maggie", "Taima"], answer: 0 }
+        ]
+      },
+      {
+        id: "susan_grimshaw",
+        name: "Susan Grimshaw",
+        aliases: ["susan", "miss grimshaw", "grimshaw"],
+        gender: "Female",
+        role: "Van der Linde Camp",
+        weapon: "Shotgun",
+        age: 43,
+        chapter: 1,
+        dossier: [
+          { q: "What seasoning does Miss Grimshaw ask Arthur to bring back for camp stew?", options: ["Wild Mint (or Oregano)", "Thyme", "Ginseng", "Wintergreen"], answer: 0 },
+          { q: "Which gang member does Susan Grimshaw personally execute for betraying the gang?", options: ["Molly O'Shea", "Micah Bell", "Kieran Duffy", "Leopold Strauss"], answer: 0 },
+          { q: "Who rescued Tilly Jackson from the Foreman Brothers alongside Arthur?", options: ["Susan Grimshaw", "Sadie Adler", "Karen Jones", "Abigail Roberts"], answer: 0 }
+        ]
+      },
+      {
+        id: "simon_pearson",
+        name: "Simon Pearson",
+        aliases: ["pearson", "simon"],
+        gender: "Male",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 43,
+        chapter: 1,
+        dossier: [
+          { q: "Which branch of the military did Pearson serve in before joining the gang?", options: ["The U.S. Navy", "The U.S. Cavalry", "The Confederate Army", "The British Royal Navy"], answer: 0 },
+          { q: "Which town's general store does Pearson own in the 1907 Epilogue?", options: ["Rhodes", "Valentine", "Strawberry", "Annesburg"], answer: 0 },
+          { q: "What item does Pearson request from Arthur during a camp poker game?", options: ["A naval compass", "A silver flask", "A carving knife", "A brass spyglass"], answer: 0 }
+        ]
+      },
+      {
+        id: "leopold_strauss",
+        name: "Leopold Strauss",
+        aliases: ["strauss", "leopold", "herr strauss"],
+        gender: "Male",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 53,
+        chapter: 1,
+        dossier: [
+          { q: "Which European country did Leopold Strauss emigrate from?", options: ["Austria", "Germany", "Switzerland", "Hungary"], answer: 0 },
+          { q: "What eventually happened to Strauss after Arthur kicked him out of camp?", options: ["Captured by Pinkertons and died in custody without talking", "Fled back to Vienna", "Opened a bank in Saint Denis", "Joined Colm O'Driscoll"], answer: 0 },
+          { q: "Which debtor gave Arthur tuberculosis while collecting for Strauss?", options: ["Thomas Downes", "Wrobel", "Chick Matthews", "Lilly Millet"], answer: 0 }
+        ]
+      },
+      {
+        id: "sean_macguire",
+        name: "Sean MacGuire",
+        aliases: ["sean", "macguire"],
+        gender: "Male",
+        role: "Van der Linde Gunslinger",
+        weapon: "Repeater",
+        age: 24,
+        chapter: 2,
+        dossier: [
+          { q: "Where was Sean being held captive before Arthur, Charles, and Javier rescued him?", options: ["Outside Blackwater (Upper Montana River)", "Sisika Penitentiary", "Strawberry Jail", "Hanging Dog Ranch"], answer: 0 },
+          { q: "What is the name of Sean's silver-dapple Thoroughbred horse?", options: ["Ennis", "Boaz", "Old Belle", "Gwen"], answer: 0 },
+          { q: "Which Irish county did Sean's Fenian father flee from?", options: ["County Donegal", "County Cork", "County Wicklow", "County Galway"], answer: 0 }
+        ]
+      },
+      {
+        id: "kieran_duffy",
+        name: "Kieran Duffy",
+        aliases: ["kieran", "duffy"],
+        gender: "Male",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 24,
+        chapter: 1,
+        dossier: [
+          { q: "What type of horse did Kieran claim as his own after saving Arthur at Six Point Cabin?", options: ["A Tennessee Walker (Branwen)", "A Morgan", "A Shire", "An Arabian"], answer: 0 },
+          { q: "What item does Kieran ask Arthur for to help care for the camp horses?", options: ["Burdock Root", "Wild Carrots", "Oatcakes", "Peppermint"], answer: 0 },
+          { q: "Which camp did Kieran belong to before being captured by Bill Williamson?", options: ["O'Driscoll Boys", "Lemoyne Raiders", "Laramie Gang", "Murfree Brood"], answer: 0 }
+        ]
+      },
+      {
+        id: "karen_jones",
+        name: "Karen Jones",
+        aliases: ["karen", "jones"],
+        gender: "Female",
+        role: "Van der Linde Gunslinger",
+        weapon: "Revolver",
+        age: 26,
+        chapter: 1,
+        dossier: [
+          { q: "Which bank robbery did Karen help plan and execute alongside Arthur, Bill, and Lenny?", options: ["Valentine Bank", "Rhodes Bank", "Saint Denis Bank", "Blackwater Bank"], answer: 0 },
+          { q: "What is the name of Karen's Nokota horse?", options: ["Old Belle", "Gwen", "Nell", "Taima"], answer: 0 },
+          { q: "What disguise did Karen use during the Valentine bank heist?", options: ["A grieving widow (or drunken harlot)", "A nun", "A Pinkerton agent", "A wealthy socialite"], answer: 0 }
+        ]
+      },
+      {
+        id: "mary_beth_gaskill",
+        name: "Mary-Beth Gaskill",
+        aliases: ["mary-beth", "mary beth", "gaskill"],
+        gender: "Female",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 21,
+        chapter: 1,
+        dossier: [
+          { q: "What pen name does Mary-Beth publish her romance novels under in 1907?", options: ["Leslie Dupont", "Evelyn Miller", "Clara Adler", "Beatrice Linton"], answer: 0 },
+          { q: "What writing item does Mary-Beth ask Arthur to find for her in Chapter 2?", options: ["A fountain pen", "An inkwell", "Leather stationery", "A typewriter ribbon"], answer: 0 },
+          { q: "Where can John Marston run into Mary-Beth during the Epilogue?", options: ["Valentine train station", "Saint Denis theater", "Blackwater saloon", "Rhodes parlor house"], answer: 0 }
+        ]
+      },
+      {
+        id: "tilly_jackson",
+        name: "Tilly Jackson",
+        aliases: ["tilly", "jackson"],
+        gender: "Female",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 20,
+        chapter: 1,
+        dossier: [
+          { q: "Which gang kidnapped Tilly when she was 12 before she escaped to Dutch?", options: ["The Foreman Brothers", "The O'Driscoll Boys", "The Skinner Brothers", "The Del Lobos"], answer: 0 },
+          { q: "What jewelry item does Tilly request from Arthur while playing dominoes in camp?", options: ["A necklace", "A pearl bracelet", "Gold earrings", "A ruby brooch"], answer: 0 },
+          { q: "Where does Tilly live with her lawyer husband Pierre in 1907?", options: ["Saint Denis", "Blackwater", "Rhodes", "Strawberry"], answer: 0 }
+        ]
+      },
+      {
+        id: "molly_oshea",
+        name: "Molly O'Shea",
+        aliases: ["molly", "o'shea"],
+        gender: "Female",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 25,
+        chapter: 1,
+        dossier: [
+          { q: "Which Irish city did Molly O'Shea come from before arriving in America?", options: ["Dublin", "Belfast", "Cork", "Limerick"], answer: 0 },
+          { q: "What personal item does Molly request Arthur find for her in Chapter 3?", options: ["A pocket mirror", "A silver hairbrush", "A silk shawl", "Perfume"], answer: 0 },
+          { q: "According to Agent Milton, did Molly actually rat out the gang?", options: ["No, she never said a word", "Yes, after Guarma", "Yes, before Blackwater", "Yes, in Rhodes"], answer: 0 }
+        ]
+      },
+      {
+        id: "reverend_swanson",
+        name: "Reverend Orville Swanson",
+        aliases: ["swanson", "reverend", "orville swanson"],
+        gender: "Male",
+        role: "Van der Linde Camp",
+        weapon: "Unarmed",
+        age: 46,
+        chapter: 1,
+        dossier: [
+          { q: "Where does Arthur rescue a heavily intoxicated Swanson in Chapter 2?", options: ["Flatneck Station", "Emerald Station", "Riggs Station", "Wallace Station"], answer: 0 },
+          { q: "What did Swanson hollow out inside his Bible to hide his morphine syringe?", options: ["The Book of Leviticus (or Exodus)", "The Book of Genesis", "Psalms", "Revelation"], answer: 0 },
+          { q: "What position does Swanson hold in New York City by 1907?", options: ["Minister of First Congregational Church", "Newspaper editor", "Mayor's advisor", "University professor"], answer: 0 }
+        ]
+      },
+      {
+        id: "josiah_trelawny",
+        name: "Josiah Trelawny",
+        aliases: ["trelawny", "josiah"],
+        gender: "Male",
+        role: "Van der Linde Con Artist",
+        weapon: "Unarmed",
+        age: 41,
+        chapter: 2,
+        dossier: [
+          { q: "What is the name of Trelawny's distinctive grey Appaloosa horse?", options: ["Gwydion", "Boaz", "The Count", "Silver Dollar"], answer: 0 },
+          { q: "Where can Arthur overhear Trelawny speaking with his secret wife and children?", options: ["An alley apartment in Saint Denis", "A house in Rhodes", "Blackwater Hotel", "Strawberry"], answer: 0 },
+          { q: "Which English region was Josiah Trelawny born in?", options: ["Cornwall", "Yorkshire", "Devon", "Kent"], answer: 0 }
+        ]
+      },
+      {
+        id: "andrew_milton",
+        name: "Agent Andrew Milton",
+        aliases: ["milton", "agent milton", "andrew milton"],
+        gender: "Male",
+        role: "Pinkerton Detective Agency",
+        weapon: "Revolver",
+        age: 45,
+        chapter: 2,
+        dossier: [
+          { q: "Where does Agent Milton first confront Arthur while Arthur is fishing with Jack?", options: ["Dakota River (near Horseshoe Overlook)", "Flat Iron Lake", "Kamassa River", "O'Creagh's Run"], answer: 0 },
+          { q: "Who shoots and kills Agent Milton in Van Horn?", options: ["Abigail Roberts", "Sadie Adler", "Arthur Morgan", "Dutch van der Linde"], answer: 0 },
+          { q: "Which industrialist hired Milton's Pinkerton unit to hunt the Van der Linde gang?", options: ["Leviticus Cornwall", "Angelo Bronte", "Cornelius Palmer", "Catherine Braithwaite"], answer: 0 }
+        ]
+      },
+      {
+        id: "edgar_ross",
+        name: "Agent Edgar Ross",
+        aliases: ["ross", "agent ross", "edgar ross"],
+        gender: "Male",
+        role: "Pinkerton Detective Agency",
+        weapon: "Revolver",
+        age: 38,
+        chapter: 2,
+        dossier: [
+          { q: "What agency does Edgar Ross direct in the 1907 Epilogue credits?", options: ["Bureau of Investigation", "Secret Service", "U.S. Marshals", "Bounty Hunters Guild"], answer: 0 },
+          { q: "What remark does Ross make to young Jack Marston by the Dakota River in Chapter 2?", options: ["Enjoy your fishing, kid, while you still can", "Stay away from outlaws", "Your father is a dead man", "Go back to your mother"], answer: 0 },
+          { q: "Who accompanies Edgar Ross to Mount Hagen in the Epilogue credits?", options: ["Archer Fordham", "Andrew Milton", "Leviticus Cornwall", "Sheriff Malloy"], answer: 0 }
+        ]
+      },
+      {
+        id: "colm_odriscoll",
+        name: "Colm O'Driscoll",
+        aliases: ["colm", "o'driscoll"],
+        gender: "Male",
+        role: "O'Driscoll Boys Leader",
+        weapon: "Revolver",
+        age: 46,
+        chapter: 1,
+        dossier: [
+          { q: "What was the name of the woman Dutch loved whom Colm O'Driscoll murdered?", options: ["Annabelle", "Bessie", "Eliza", "Martha"], answer: 0 },
+          { q: "In which city was Colm O'Driscoll publicly hanged?", options: ["Saint Denis", "Blackwater", "Valentine", "Rhodes"], answer: 0 },
+          { q: "Who did Dutch kill in retaliation before Colm murdered Annabelle?", options: ["Colm's brother", "Colm's son", "Colm's father", "Colm's lieutenant"], answer: 0 }
+        ]
+      },
+      {
+        id: "sadie_hub_leviticus_cornwall",
+        name: "Leviticus Cornwall",
+        aliases: ["cornwall", "leviticus"],
+        gender: "Male",
+        role: "Industrialist / Tycoon",
+        weapon: "Unarmed",
+        age: 58,
+        chapter: 1,
+        dossier: [
+          { q: "In which town does Dutch shoot and kill Leviticus Cornwall on the docks?", options: ["Annesburg", "Saint Denis", "Van Horn", "Blackwater"], answer: 0 },
+          { q: "Which oil field facility in New Hanover bears Cornwall's name?", options: ["Cornwall Kerosene & Tar", "Heartlands Oil", "Cumberland Refinery", "Emerald Petroleum"], answer: 0 },
+          { q: "Outside which saloon did Cornwall confront Dutch in Valentine?", options: ["Keane's Saloon", "Smithfields Saloon", "Bastille Saloon", "Doyle's Tavern"], answer: 0 }
+        ]
+      },
+      {
+        id: "angelo_bronte",
+        name: "Angelo Bronte",
+        aliases: ["bronte", "angelo"],
+        gender: "Male",
+        role: "Saint Denis Crime Boss",
+        weapon: "Unarmed",
+        age: 52,
+        chapter: 4,
+        dossier: [
+          { q: "What card game was Angelo Bronte playing with Jack Marston when Arthur arrived?", options: ["Briscola (Italian cards)", "Dominoes", "Five Finger Fillet", "Poker"], answer: 0 },
+          { q: "How did Dutch dispose of Angelo Bronte's body in the bayou?", options: ["Fed him to a bull alligator after drowning him", "Buried him in Lagras", "Left him on train tracks", "Burned his mansion"], answer: 0 },
+          { q: "Which mayor of Saint Denis hosted a party attended by Bronte and Dutch?", options: ["Henri Lemieux", "Nicholas Timmins", "Cornelius Palmer", "Gray"], answer: 0 }
+        ]
+      },
+      {
+        id: "catherine_braithwaite",
+        name: "Catherine Braithwaite",
+        aliases: ["catherine", "braithwaite", "mrs. braithwaite"],
+        gender: "Female",
+        role: "Braithwaite Matriarch",
+        weapon: "Unarmed",
+        age: 62,
+        chapter: 3,
+        dossier: [
+          { q: "Who did Catherine Braithwaite hand Jack Marston over to after kidnapping him?", options: ["Angelo Bronte", "Sheriff Leigh Gray", "Leviticus Cornwall", "Colm O'Driscoll"], answer: 0 },
+          { q: "What secret treasure of the Braithwaites was hidden inside a locked outhouse?", options: ["Gertrude Braithwaite", "Confederate gold bars", "A stolen heirloom", "Moonshine stills"], answer: 0 },
+          { q: "How did Catherine Braithwaite die after the gang burned down her manor?", options: ["Walked back into the burning mansion", "Shot by Dutch", "Executed by Hosea", "Hanged by Grays"], answer: 0 }
+        ]
+      },
+      {
+        id: "leigh_gray",
+        name: "Sheriff Leigh Gray",
+        aliases: ["leigh gray", "sheriff gray", "gray"],
+        gender: "Male",
+        role: "Rhodes Lawman / Gray Family",
+        weapon: "Revolver",
+        age: 47,
+        chapter: 3,
+        dossier: [
+          { q: "Which gang member did Sheriff Leigh Gray hold hostage at gunpoint during the Rhodes ambush?", options: ["Bill Williamson", "Micah Bell", "Sean MacGuire", "Arthur Morgan"], answer: 0 },
+          { q: "Which Gray relative was secretly in love with Penelope Braithwaite?", options: ["Beau Gray", "Tavish Gray", "Alistair Gray", "Douglas Gray"], answer: 0 },
+          { q: "What badge did Leigh Gray deputize Arthur with during Chapter 3?", options: ["Deputy Sheriff of Rhodes", "U.S. Marshal", "Pinkerton Agent", "Saint Denis Constable"], answer: 0 }
+        ]
+      },
+      {
+        id: "rains_fall",
+        name: "Rains Fall",
+        aliases: ["rains fall", "chief rains fall"],
+        gender: "Male",
+        role: "Wapiti Tribe Chief",
+        weapon: "Unarmed",
+        age: 61,
+        chapter: 4,
+        dossier: [
+          { q: "What medicinal herbs does Rains Fall gather with Arthur on the mountain trail?", options: ["Ginseng and English Mace", "Yarrow and Burdock", "Oleander and Sage", "Thyme and Oregano"], answer: 0 },
+          { q: "What sacred heirloom does Arthur recover from the Army camp for Rains Fall?", options: ["The Chanupa (sacred pipe)", "A war bonnet", "A ceremonial tomahawk", "A medicine pouch"], answer: 0 },
+          { q: "Where can John Marston meet Rains Fall in the 1907 Epilogue?", options: ["Annesburg train station", "Valentine", "Blackwater", "Strawberry"], answer: 0 }
+        ]
+      },
+      {
+        id: "eagle_flies",
+        name: "Eagle Flies",
+        aliases: ["eagle flies"],
+        gender: "Male",
+        role: "Wapiti Tribe Warrior",
+        weapon: "Bow & Rifle",
+        age: 22,
+        chapter: 4,
+        dossier: [
+          { q: "Which U.S. Army Colonel manipulated and fought against Eagle Flies?", options: ["Colonel Henry Favours", "Captain Lyndon Monroe", "General Harris", "Major Ross"], answer: 0 },
+          { q: "Where was Eagle Flies imprisoned before Arthur and Charles rescued him?", options: ["Fort Wallace", "Sisika Penitentiary", "Fort Mercer", "Fort Riggs"], answer: 0 },
+          { q: "How was Eagle Flies fatally wounded during the raid on Cornwall Kerosene & Tar?", options: ["Shot by Colonel Favours while saving Arthur", "Trampled by cavalry", "Killed by Pinkertons", "Hit by cannon fire"], answer: 0 }
+        ]
+      },
+      {
+        id: "lyndon_monroe",
+        name: "Captain Lyndon Monroe",
+        aliases: ["monroe", "captain monroe", "lyndon monroe"],
+        gender: "Male",
+        role: "U.S. Army Officer",
+        weapon: "Revolver",
+        age: 34,
+        chapter: 6,
+        dossier: [
+          { q: "What did Colonel Favours falsely accuse Captain Monroe of to have him arrested?", options: ["Treason", "Desertion", "Embezzlement", "Mutiny"], answer: 0 },
+          { q: "Where did Arthur escort Captain Monroe so he could board a train to escape?", options: ["Emerald Station", "Annesburg Station", "Wallace Station", "Riggs Station"], answer: 0 },
+          { q: "What supplies did Monroe try to secure for the Wapiti Reservation?", options: ["Vaccines / medicine", "Rifles", "Horses", "Winter coats"], answer: 0 }
+        ]
+      },
+      {
+        id: "henry_favours",
+        name: "Colonel Henry Favours",
+        aliases: ["favours", "colonel favours", "henry favours"],
+        gender: "Male",
+        role: "U.S. Army Commander",
+        weapon: "Revolver",
+        age: 54,
+        chapter: 6,
+        dossier: [
+          { q: "Which fort was Colonel Henry Favours stationed at?", options: ["Fort Wallace", "Fort Mercer", "Fort Brennand", "Fort Riggs"], answer: 0 },
+          { q: "Who shot and killed Colonel Favours right after he shot Eagle Flies?", options: ["Arthur Morgan", "Charles Smith", "Paytah", "Rains Fall"], answer: 0 },
+          { q: "What battle did Favours constantly boast about despite his own cowardice?", options: ["The Battle of the Little Bighorn / Civil War", "Battle of Scarlett Meadows", "Battle of Bolger Glade", "San Juan Hill"], answer: 0 }
+        ]
+      },
+      {
+        id: "mary_linton",
+        name: "Mary Linton",
+        aliases: ["mary", "mary gillis", "linton"],
+        gender: "Female",
+        role: "Arthur's Former Fiancée",
+        weapon: "Unarmed",
+        age: 32,
+        chapter: 2,
+        dossier: [
+          { q: "What was the name of Mary Linton's younger brother whom Arthur rescued from the Chelonians?", options: ["Jamie Gillis", "Thomas Gillis", "Isaac Gillis", "Arthur Gillis"], answer: 0 },
+          { q: "Which theater show did Arthur and Mary attend together in Saint Denis?", options: ["Théâtre Râleur", "Fontana Theatre", "Valentine Magic Lantern", "Blackwater Opera"], answer: 0 },
+          { q: "What item did Mary enclose in her final goodbye letter to Arthur?", options: ["Her engagement ring", "A lock of hair", "A photograph", "Train tickets"], answer: 0 }
+        ]
+      },
+      {
+        id: "thomas_downes",
+        name: "Thomas Downes",
+        aliases: ["downes", "thomas"],
+        gender: "Male",
+        role: "Farmer / Charity Worker",
+        weapon: "Unarmed",
+        age: 42,
+        chapter: 2,
+        dossier: [
+          { q: "Where was Thomas Downes collecting charity donations when Arthur first saw him?", options: ["Valentine", "Rhodes", "Strawberry", "Saint Denis"], answer: 0 },
+          { q: "Who intervened to stop Arthur from beating Thomas Downes further at his ranch?", options: ["Edith Downes", "Archie Downes", "Leopold Strauss", "Sheriff Malloy"], answer: 0 },
+          { q: "What was the name of Thomas Downes's son?", options: ["Archie Downes", "Jamie Downes", "Isaac Downes", "Lyle Downes"], answer: 0 }
+        ]
+      },
+      {
+        id: "edith_downes",
+        name: "Edith Downes",
+        aliases: ["edith", "mrs. downes"],
+        gender: "Female",
+        role: "Widow / Annesburg Worker",
+        weapon: "Unarmed",
+        age: 39,
+        chapter: 2,
+        dossier: [
+          { q: "In which industrial town did Arthur find Edith Downes working in Chapter 6?", options: ["Annesburg", "Van Horn", "Saint Denis", "Butcher Creek"], answer: 0 },
+          { q: "Where did Edith and her son Archie relocate after Arthur gave them money to start over?", options: ["California (by steamship)", "New York", "Canada", "Mexico"], answer: 0 },
+          { q: "What did Edith Downes tell Arthur when he tried to apologize in Annesburg?", options: ["I'm afraid you're too late for forgiveness", "God bless you", "Give me back my farm", "Leave my son alone"], answer: 0 }
+        ]
+      },
+      {
+        id: "sister_calderon",
+        name: "Sister Calderón",
+        aliases: ["calderon", "sister calderon", "nun"],
+        gender: "Female",
+        role: "Catholic Nun / Missionary",
+        weapon: "Unarmed",
+        age: 48,
+        chapter: 4,
+        dossier: [
+          { q: "At which train station does Arthur have his famous high-honor conversation with Sister Calderón?", options: ["Emerald Station", "Saint Denis Station", "Riggs Station", "Valentine Station"], answer: 0 },
+          { q: "Where was Sister Calderón boarding a train to travel to when she met Arthur?", options: ["Mexico", "Guarma", "New York", "Cuba"], answer: 0 },
+          { q: "Who introduced Arthur to Sister Calderón in Saint Denis?", options: ["Brother Dorkins", "Father Renaud", "Henri Lemieux", "Mary Linton"], answer: 0 }
+        ]
+      },
+      {
+        id: "brother_dorkins",
+        name: "Brother Dorkins",
+        aliases: ["dorkins", "brother dorkins"],
+        gender: "Male",
+        role: "Catholic Monk",
+        weapon: "Unarmed",
+        age: 44,
+        chapter: 4,
+        dossier: [
+          { q: "What did Brother Dorkins ask Arthur to buy freedom for at the Saint Denis fence?", options: ["Two enslaved people hidden behind a bookshelf", "Orphaned children", "Captured horses", "Stolen church silver"], answer: 0 },
+          { q: "What was stolen from Brother Dorkins outside the Saint Denis church?", options: ["His silver crucifix", "His donation box", "His Bible", "His mule"], answer: 0 },
+          { q: "Which monastery/church in Saint Denis did Brother Dorkins serve at?", options: ["Saint Denis Cathedral", "Lagras Chapel", "Caliga Hall Chapel", "Blackwater Church"], answer: 0 }
+        ]
+      },
+      {
+        id: "hamish_sinclair",
+        name: "Hamish Sinclair",
+        aliases: ["hamish", "sinclair", "the veteran"],
+        gender: "Male",
+        role: "Civil War Veteran / Hunter",
+        weapon: "Rifle",
+        age: 57,
+        chapter: 6,
+        dossier: [
+          { q: "What is the name of Hamish Sinclair's golden Dutch Warmblood horse?", options: ["Buell", "Boadicea", "Silver Dollar", "The Count"], answer: 0 },
+          { q: "Which lake did Hamish Sinclair live beside in a wooden cabin?", options: ["O'Creagh's Run", "Lake Isabella", "Owanjila", "Cairn Lake"], answer: 0 },
+          { q: "Which legendary animal mortally wounded Hamish during their final hunt?", options: ["A giant wild boar", "A grizzly bear", "A white cougar", "A bull alligator"], answer: 0 }
+        ]
+      },
+      {
+        id: "charlotte_balfour",
+        name: "Charlotte Balfour",
+        aliases: ["charlotte", "balfour"],
+        gender: "Female",
+        role: "Roanoke Ridge Widow",
+        weapon: "Rifle",
+        age: 29,
+        chapter: 6,
+        dossier: [
+          { q: "What was the name of Charlotte's deceased husband buried beside her cabin?", options: ["Cal Balfour", "Thomas Balfour", "Jake Balfour", "Henry Balfour"], answer: 0 },
+          { q: "What is the name of Charlotte's isolated cabin north of Annesburg?", options: ["Willard's Rest", "Martha's Swain", "Doverhill", "Manito Glade"], answer: 0 },
+          { q: "What survival skills did Arthur teach Charlotte at Willard's Rest?", options: ["Skinning rabbits and shooting bottles/wolves", "Fishing for sturgeon", "Taming wild horses", "Brewing tonics"], answer: 0 }
+        ]
+      },
+      {
+        id: "albert_mason",
+        name: "Albert Mason",
+        aliases: ["albert", "mason", "photographer"],
+        gender: "Male",
+        role: "Wildlife Photographer",
+        weapon: "Unarmed",
+        age: 35,
+        chapter: 2,
+        dossier: [
+          { q: "Which animal did Albert Mason photograph in the Heartlands while Arthur herded them?", options: ["Wild horses (Silver Dapple Pinto)", "Bison", "Pronghorn", "Bighorn sheep"], answer: 0 },
+          { q: "Where did Arthur save Albert Mason from falling off a cliff edge?", options: ["Horseshoe Overlook", "Mount Shann", "Brandywine Drop", "Twin Stack Pass"], answer: 0 },
+          { q: "Where are Albert Mason's photographs exhibited in Chapter 4?", options: ["Saint Denis art gallery", "Blackwater Hall", "Valentine Saloon", "Rhodes Parlor"], answer: 0 }
+        ]
+      },
+      {
+        id: "black_belle",
+        name: "Black Belle",
+        aliases: ["black belle", "belle"],
+        gender: "Female",
+        role: "Legendary Gunslinger",
+        weapon: "Dual Revolvers",
+        age: 52,
+        chapter: 2,
+        dossier: [
+          { q: "In which Lemoyne swamp area was Black Belle's shack fortified with dynamite?", options: ["Bluewater Marsh", "Lagras", "Lakay", "Bolger Glade"], answer: 0 },
+          { q: "Who commissioned Arthur to interview Black Belle and the other gunslingers?", options: ["Theodore Levin (for Jim 'Boy' Calloway)", "Josiah Trelawny", "Leopold Strauss", "Sheriff Malloy"], answer: 0 },
+          { q: "How many husbands did Black Belle claim to have outlived?", options: ["Six", "Three", "Four", "Two"], answer: 0 }
+        ]
+      },
+      {
+        id: "jim_boy_calloway",
+        name: "Jim 'Boy' Calloway",
+        aliases: ["calloway", "jim boy calloway"],
+        gender: "Male",
+        role: "Legendary Gunslinger",
+        weapon: "Revolver",
+        age: 63,
+        chapter: 2,
+        dossier: [
+          { q: "Where did Arthur first meet Jim 'Boy' Calloway passed out drunk?", options: ["Keane's Saloon in Valentine", "Bastille Saloon in Saint Denis", "Rhodes Saloon", "Van Horn Saloon"], answer: 0 },
+          { q: "Where did Arthur finally duel Jim 'Boy' Calloway?", options: ["Brandywine Drop", "Flat Iron Lake", "Mount Hagen", "Twin Stack Pass"], answer: 0 },
+          { q: "What motto is engraved on Calloway's unique Schofield Revolver?", options: ["Canis Canem Edit (Dog Eat Dog)", "Vengeance is Mine", "Lucky Number 7", "Quick or Dead"], answer: 0 }
+        ]
+      },
+      {
+        id: "hercule_fontaine",
+        name: "Hercule Fontaine",
+        aliases: ["hercule", "fontaine"],
+        gender: "Male",
+        role: "Guarma Rebel Leader",
+        weapon: "Rifle",
+        age: 37,
+        chapter: 5,
+        dossier: [
+          { q: "Which Caribbean island did Hercule lead a rebellion on?", options: ["Guarma", "Cuba", "Haiti", "Puerto Rico"], answer: 0 },
+          { q: "Who was the tyrannical sugar plantation overseer Hercule fought against?", options: ["Alberto Fussar", "Colonel Levi", "Angelo Bronte", "Cornwall"], answer: 0 },
+          { q: "How did Hercule help the Van der Linde gang leave Guarma?", options: ["Secured a schooner captain to sail them to Saint Denis", "Stole a warship", "Built a raft", "Bribed Pinkertons"], answer: 0 }
+        ]
+      },
+      {
+        id: "alberto_fussar",
+        name: "Alberto Fussar",
+        aliases: ["fussar", "alberto"],
+        gender: "Male",
+        role: "Guarma Dictator",
+        weapon: "Rifle",
+        age: 46,
+        chapter: 5,
+        dossier: [
+          { q: "How was Alberto Fussar killed during the final battle on Guarma?", options: ["Arthur shot a cannon at the tower Fussar was firing from", "Executed by Dutch", "Stabbed by Javier", "Drowned at sea"], answer: 0 },
+          { q: "Which Saint Denis crime boss had business ties with Alberto Fussar?", options: ["Angelo Bronte", "Henri Lemieux", "Cornelius Palmer", "Guido Martelli"], answer: 0 },
+          { q: "What crop was Alberto Fussar's Guarma plantation built around?", options: ["Sugar", "Tobacco", "Coffee", "Cotton"], answer: 0 }
+        ]
+      },
+      {
+        id: "sadie_hub_david_geddes",
+        name: "David Geddes",
+        aliases: ["geddes", "david geddes", "mr. geddes"],
+        gender: "Male",
+        role: "Pronghorn Ranch Owner",
+        weapon: "Revolver",
+        age: 49,
+        chapter: 7,
+        dossier: [
+          { q: "Which ranch in Big Valley did David Geddes own and hire John Marston to work on?", options: ["Pronghorn Ranch", "Hanging Dog Ranch", "Painted Sky", "MacFarlane's Ranch"], answer: 0 },
+          { q: "Which gang constantly harassed David Geddes's ranch hands?", options: ["The Laramie Gang", "The Skinner Brothers", "The Del Lobos", "The O'Driscolls"], answer: 0 },
+          { q: "How did David Geddes help John Marston secure a bank loan in Blackwater?", options: ["Vouched for him with banker Ansel Atherton", "Lent him $5,000 cash", "Sold him Beecher's Hope directly", "Co-signed with Uncle"], answer: 0 }
+        ]
+      },
+      {
+        id: "cleo_joe",
+        name: "Joe",
+        aliases: ["joe"],
+        gender: "Male",
+        role: "Micah's Associate",
+        weapon: "Revolver",
+        age: 38,
+        chapter: 6,
+        dossier: [
+          { q: "Alongside whom did Joe join the Van der Linde gang at Beaver Hollow?", options: ["Cleet", "Norman", "Skinny", "Kieran"], answer: 0 },
+          { q: "Where did John, Sadie, and Charles track down Joe in 1907?", options: ["A cabin near Mount Hagen", "Strawberry", "Thieves Landing", "Armadillo"], answer: 0 },
+          { q: "Who killed Joe during the climb up Mount Hagen in 'American Venom'?", options: ["John Marston", "Sadie Adler", "Charles Smith", "Uncle"], answer: 0 }
+        ]
+      },
+      {
+        id: "cleet",
+        name: "Cleet",
+        aliases: ["cleet"],
+        gender: "Male",
+        role: "Micah's Associate",
+        weapon: "Revolver",
+        age: 35,
+        chapter: 6,
+        dossier: [
+          { q: "Why did Cleet claim he left Micah Bell's gang before 1907?", options: ["Micah tried to murder a little girl", "Micah stole his cut", "Pinkertons caught him", "He got shot in Blackwater"], answer: 0 },
+          { q: "In which town did John and Sadie interrogate Cleet on a gallows?", options: ["Strawberry", "Valentine", "Blackwater", "Rhodes"], answer: 0 },
+          { q: "Who shoots Cleet if John chooses to spare him at the Strawberry gallows?", options: ["Sadie Adler", "Charles Smith", "Sheriff Hanley", "Uncle"], answer: 0 }
+        ]
+      },
+      {
+        id: "beau_gray",
+        name: "Beau Gray",
+        aliases: ["beau", "beau gray"],
+        gender: "Male",
+        role: "Gray Family Heir",
+        weapon: "Unarmed",
+        age: 23,
+        chapter: 3,
+        dossier: [
+          { q: "Who was Beau Gray secretly courting across enemy family lines?", options: ["Penelope Braithwaite", "Catherine Braithwaite", "Mary-Beth Gaskill", "Charlotte Balfour"], answer: 0 },
+          { q: "Which station did Beau and Penelope board a train from to escape to Boston?", options: ["Riggs Station", "Rhodes Station", "Emerald Station", "Saint Denis Station"], answer: 0 },
+          { q: "What suffragette rally did Beau ask Arthur to protect Penelope during?", options: ["Votes for Women march in Rhodes", "Saint Denis suffrage parade", "Blackwater town hall", "Valentine rally"], answer: 0 }
+        ]
+      },
+      {
+        id: "penelope_braithwaite",
+        name: "Penelope Braithwaite",
+        aliases: ["penelope", "penelope braithwaite"],
+        gender: "Female",
+        role: "Braithwaite Heir",
+        weapon: "Unarmed",
+        age: 22,
+        chapter: 3,
+        dossier: [
+          { q: "What heirloom bracelet did Penelope offer Arthur to help her and Beau escape?", options: ["A ruby-encrusted bracelet", "A diamond necklace", "A gold pocket watch", "A silver locket"], answer: 0 },
+          { q: "Where was Penelope hiding in a gazebo when Arthur delivered Beau's letter?", options: ["Braithwaite Manor gardens", "Caliga Hall", "Shady Belle", "Saint Denis Park"], answer: 0 },
+          { q: "Where did Penelope and Beau plan to start their new life together?", options: ["Boston", "New York", "Chicago", "San Francisco"], answer: 0 }
+        ]
+      },
+      {
+        id: "marko_dragic",
+        name: "Marko Dragic",
+        aliases: ["marko", "dragic", "professor dragic"],
+        gender: "Male",
+        role: "Inventor / Scientist",
+        weapon: "Unarmed",
+        age: 41,
+        chapter: 4,
+        dossier: [
+          { q: "Where did Arthur first meet Marko Dragic testing his remote-controlled boat?", options: ["Saint Denis pond", "Flat Iron Lake", "Owanjila", "Kamassa River"], answer: 0 },
+          { q: "What was the name of Marko Dragic's laboratory north of Annesburg?", options: ["Doverhill", "Willard's Rest", "Manito Glade", "meteor House"], answer: 0 },
+          { q: "Where can Arthur find Dragic's automaton robot after the professor's death?", options: ["Sitting on a snowy peak near Colter", "Inside Saint Denis gallery", "At Mount Shann", "In Van Horn"], answer: 0 }
+        ]
+      },
+      {
+        id: "sheriff_malloy",
+        name: "Sheriff Curtis Malloy",
+        aliases: ["malloy", "sheriff malloy", "curtis malloy"],
+        gender: "Male",
+        role: "Valentine Sheriff",
+        weapon: "Bolt-Action Rifle",
+        age: 44,
+        chapter: 2,
+        dossier: [
+          { q: "Which town does Sheriff Curtis Malloy keep order in?", options: ["Valentine", "Strawberry", "Rhodes", "Blackwater"], answer: 0 },
+          { q: "What dark secret can you overhear Sheriff Malloy arguing about upstairs in his office?", options: ["Strangling his mistress Moira", "Taking bribes from O'Driscolls", "Stealing bank gold", "Covering up a train robbery"], answer: 0 },
+          { q: "What weapon does Sheriff Malloy carry that players can loot early in Chapter 2?", options: ["Bolt-Action Rifle", "Lancaster Repeater", "Pump-Action Shotgun", "Schofield Revolver"], answer: 0 }
+        ]
+      },
+      {
+        id: "arturo_bullard",
+        name: "Arturo Bullard",
+        aliases: ["arturo", "bullard", "balloonist"],
+        gender: "Male",
+        role: "Hot Air Balloon Pilot",
+        weapon: "Unarmed",
+        age: 45,
+        chapter: 6,
+        dossier: [
+          { q: "Why did Arthur and Sadie hire Arturo Bullard's hot air balloon?", options: ["To scout Sisika Penitentiary for John Marston", "To fly over Guarma", "To escape Pinkertons in Saint Denis", "To map Mount Hagen"], answer: 0 },
+          { q: "What snack did Arturo offer Arthur inside the balloon basket?", options: ["A hard-boiled egg", "An apple", "Beef jerky", "Peppermint"], answer: 0 },
+          { q: "Who shot and killed Arturo Bullard during the balloon flight?", options: ["O'Driscoll Boys", "Pinkertons", "Sisika guards", "Lemoyne Raiders"], answer: 0 }
+        ]
+      },
+      {
+        id: "thomas_sheriff_freeman",
+        name: "Sheriff Sam Freeman",
+        aliases: ["sam freeman", "sheriff freeman", "freeman"],
+        gender: "Male",
+        role: "Tumbleweed Sheriff",
+        weapon: "Shotgun",
+        age: 51,
+        chapter: 7,
+        dossier: [
+          { q: "Which New Austin town is governed with an iron fist by Sheriff Sam Freeman?", options: ["Tumbleweed", "Armadillo", "Thieves Landing", "Blackwater"], answer: 0 },
+          { q: "Which gang does Sheriff Freeman regularly capture and execute in Tumbleweed?", options: ["The Del Lobo Gang", "The Skinner Brothers", "The Laramie Gang", "The O'Driscolls"], answer: 0 },
+          { q: "How does Sheriff Freeman deal with prisoners who disrespect his authority?", options: ["Executes them on the spot", "Sends them to Sisika", "Exiles them to Mexico", "Locks them in cages"], answer: 0 }
+        ]
+      }
+    ];
+
+    /**
+     * ==========================================================================
+     * 2. RDR2 MAP PINPOINT EVENTS (CALIBRATED TO 0..1000 X/Y FULL RDR2 MAP)
+     * ==========================================================================
+     */
+    const MAP_EVENTS = [
+      {
+        id: "meet_sadie",
+        category: "First Meeting",
+        prompt: "Where did Arthur, Dutch, and Micah first rescue Sadie Adler?",
+        hint: "A snow-buried homestead deep in the Grizzlies West near Colter.",
+        locationName: "Adler Ranch (Ambarino)",
+        x: 422, y: 58,
+        lore: "Arthur, Dutch, and Micah discovered Sadie hiding in the cellar of Adler Ranch after O'Driscolls killed her husband Jake."
+      },
+      {
+        id: "meet_black_belle",
+        category: "First Meeting",
+        prompt: "Where did Arthur first meet legendary gunslinger Black Belle?",
+        hint: "A dynamite-rigged shack in the swamps north of Saint Denis.",
+        locationName: "Bluewater Marsh (Lemoyne)",
+        x: 782, y: 368,
+        lore: "Arthur helped Black Belle fight off a wave of bounty hunters using her shack's perimeter dynamite traps."
+      },
+      {
+        id: "lenny_drinks",
+        category: "Story Event",
+        prompt: "Where did Arthur and Lenny get famously drunk together ('LENNYYYY!')?",
+        hint: "The main saloon in New Hanover's muddy livestock town.",
+        locationName: "Smithfield's Saloon, Valentine",
+        x: 505, y: 218,
+        lore: "Arthur took Lenny for 'a quiet drink' at Smithfield's Saloon in Valentine, ending with Arthur waking up outside town."
+      },
+      {
+        id: "cornwall_train",
+        category: "Story Event",
+        prompt: "Where did the gang ambush Leviticus Cornwall's train in Chapter 1?",
+        hint: "Railroad tracks winding through the snowy passes of Ambarino.",
+        locationName: "Whinyard Strait / Granite Pass",
+        x: 492, y: 112,
+        lore: "After blowing the tracks with Bill's dynamite, the gang robbed Cornwall's private train of bearer bonds."
+      },
+      {
+        id: "meet_brother_dorkins",
+        category: "First Meeting",
+        prompt: "Where did Arthur first meet Brother Dorkins collecting donations?",
+        hint: "Outside the grand cathedral in Lemoyne's industrial port city.",
+        locationName: "Saint Denis Cathedral",
+        x: 786, y: 428,
+        lore: "Arthur met Brother Dorkins outside the Saint Denis Cathedral and chased a street urchin to recover his crucifix."
+      },
+      {
+        id: "meet_hamish",
+        category: "First Meeting",
+        prompt: "Where did Arthur first meet Civil War veteran Hamish Sinclair?",
+        hint: "Beside a scenic mountain lake in Grizzlies East after his horse Buell bolted.",
+        locationName: "O'Creagh's Run (Ambarino)",
+        x: 726, y: 122,
+        lore: "Arthur recovered Hamish's prosthetic leg and runaway horse Buell beside O'Creagh's Run."
+      },
+      {
+        id: "meet_charlotte",
+        category: "First Meeting",
+        prompt: "Where did Arthur first meet widow Charlotte Balfour weeping at her husband's grave?",
+        hint: "An isolated cabin at the northeastern edge of Roanoke Ridge.",
+        locationName: "Willard's Rest (Roanoke Ridge)",
+        x: 842, y: 112,
+        lore: "Arthur taught Charlotte how to hunt and survive on her own at Willard's Rest north of Annesburg."
+      },
+      {
+        id: "meet_milton_fishing",
+        category: "First Meeting",
+        prompt: "Where did Agent Milton and Agent Ross first confront Arthur while he was fishing with Jack?",
+        hint: "Along the riverbanks just west of Horseshoe Overlook.",
+        locationName: "Dakota River (New Hanover)",
+        x: 472, y: 248,
+        lore: "Pinkertons Milton and Ross interrupted Arthur and Jack fishing along the Dakota River to offer Arthur a deal."
+      },
+      {
+        id: "rescue_sean",
+        category: "Story Event",
+        prompt: "Where did Arthur, Charles, and Javier rescue Sean MacGuire from bounty hunters?",
+        hint: "A canyon river camp just northwest of Blackwater.",
+        locationName: "Upper Montana River (West Elizabeth)",
+        x: 446, y: 392,
+        lore: "The trio ambushed bounty hunters moving Sean along the Upper Montana River near Blackwater."
+      },
+      {
+        id: "braithwaite_manor",
+        category: "Story Event",
+        prompt: "Where did the entire Van der Linde gang march together to burn down a plantation mansion?",
+        hint: "Southern Scarlett Meadows overlooking Flat Iron Lake.",
+        locationName: "Braithwaite Manor (Lemoyne)",
+        x: 625, y: 454,
+        lore: "In one of RDR2's most iconic missions, the gang stormed Braithwaite Manor to rescue Jack Marston."
+      },
+      {
+        id: "sisika_rescue",
+        category: "Story Event",
+        prompt: "Where did Arthur and Sadie row across to rescue John Marston from prison?",
+        hint: "An island penitentiary in the Lannahechee River northeast of Saint Denis.",
+        locationName: "Sisika Penitentiary",
+        x: 848, y: 356,
+        lore: "After scouting from Arturo Bullard's balloon, Arthur and Sadie broke John out of Sisika Penitentiary."
+      },
+      {
+        id: "meet_albert_mason",
+        category: "First Meeting",
+        prompt: "Where did Arthur first meet wildlife photographer Albert Mason?",
+        hint: "In the rolling hills of West Elizabeth near Strawberry.",
+        locationName: "Big Valley / Riggs Area",
+        x: 412, y: 318,
+        lore: "Arthur first met Albert Mason when a coyote stole Albert's camera bag in West Elizabeth."
+      },
+      {
+        id: "rescue_micah",
+        category: "Story Event",
+        prompt: "Where did Arthur break Micah Bell out of jail using a steam donkey or dynamite?",
+        hint: "A timber resort town tucked into Big Valley.",
+        locationName: "Strawberry (West Elizabeth)",
+        x: 344, y: 294,
+        lore: "Arthur busted Micah out of the Strawberry jail basement, triggering a massive shootout across town."
+      },
+      {
+        id: "six_point_cabin",
+        category: "Story Event",
+        prompt: "Where did Kieran Duffy save Arthur's life during a raid on an O'Driscoll hideout?",
+        hint: "A wooded cabin in the Cumberland Forest northeast of Valentine.",
+        locationName: "Six Point Cabin (New Hanover)",
+        x: 568, y: 176,
+        lore: "Kieran led Arthur, John, and Bill to Six Point Cabin and shot an O'Driscoll about to kill Arthur."
+      },
+      {
+        id: "cornwall_death",
+        category: "Story Event",
+        prompt: "Where did Dutch van der Linde shoot and kill Leviticus Cornwall on the docks?",
+        hint: "A coal-mining company town in Roanoke Ridge.",
+        locationName: "Annesburg (New Hanover)",
+        x: 844, y: 176,
+        lore: "Dutch ambushed Leviticus Cornwall stepping off his boat at the Annesburg docks."
+      },
+      {
+        id: "american_venom",
+        category: "Story Event",
+        prompt: "Where did John Marston, Sadie, and Charles confront Micah Bell in 1907?",
+        hint: "A snow-covered mountain peak in Grizzlies West.",
+        locationName: "Mount Hagen (Ambarino)",
+        x: 392, y: 98,
+        lore: "John Marston climbed the frozen slopes of Mount Hagen to settle the score with Micah Bell."
+      },
+      {
+        id: "beechers_hope",
+        category: "Story Event",
+        prompt: "Where did John Marston build his ranch house with Uncle and Charles in 1907?",
+        hint: "In the Great Plains just west of Blackwater.",
+        locationName: "Beecher's Hope (West Elizabeth)",
+        x: 432, y: 432,
+        lore: "John bought the land at Beecher's Hope in the Great Plains and built a home for Abigail and Jack."
+      },
+      {
+        id: "meet_marko_dragic",
+        category: "First Meeting",
+        prompt: "Where did Arthur first meet inventor Marko Dragic demonstrating a remote-controlled boat?",
+        hint: "A park pond in the western district of Saint Denis.",
+        locationName: "Saint Denis Park Pond",
+        x: 758, y: 424,
+        lore: "Arthur piloted Marko Dragic's miniature torpedo boat to impress investors in Saint Denis."
+      },
+      {
+        id: "shady_belle",
+        category: "Gang Camp",
+        prompt: "Where was the Van der Linde gang's dilapidated plantation camp in Chapter 4?",
+        hint: "Deep in Bayou Nwa southwest of Saint Denis.",
+        locationName: "Shady Belle (Lemoyne)",
+        x: 716, y: 458,
+        lore: "After clearing out Lemoyne Raiders, the gang used Shady Belle as their Chapter 4 headquarters."
+      },
+      {
+        id: "horseshoe_overlook",
+        category: "Gang Camp",
+        prompt: "Where did the gang set up their first permanent camp after coming down from the mountains?",
+        hint: "A cliffside clearing overlooking the Dakota River south of Valentine.",
+        locationName: "Horseshoe Overlook (New Hanover)",
+        x: 504, y: 244,
+        lore: "Horseshoe Overlook in the Heartlands served as the gang's peaceful Chapter 2 camp."
+      }
+    ];
+
+    /**
+     * ==========================================================================
+     * 3. DAILY SEEDING (LAUNCH EPOCH: NOV 14, 2026 = DAY #1) & PERSISTENCE
+     * ==========================================================================
+     */
+    const KEY_DAILY_STATE = "red_deadle_daily_v4";
+    const KEY_CUSTOM_MAP_URL = "red_deadle_custom_map_url_v4";
+    const MAX_CHAR_GUESSES = 6;
+    const MAP_TOTAL_ROUNDS = 5;
+    const MAP_MAX_ROUND_PTS = 1000;
+    const MAP_BULLSEYE_DIST = 24;
+
+    function getDayContext() {
+      const now = new Date();
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const epochMidnight = new Date(2026, 10, 14).getTime(); // Nov 14, 2026 = Day #1
+      const diffDays = Math.round((todayMidnight - epochMidnight) / 86400000);
+      const dayNum = Math.max(1, diffDays + 1);
+
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      return { dayNum, dateStr: `${yyyy}-${mm}-${dd}` };
+    }
+
+    function hashSeed(str, max) {
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return Math.abs(h) % max;
+    }
+
+    function selectFiveMapEvents(seedStr, randomMode = false) {
+      const pool = [...MAP_EVENTS];
+      const selected = [];
+      for (let i = 0; i < MAP_TOTAL_ROUNDS; i++) {
+        const idx = randomMode
+          ? Math.floor(Math.random() * pool.length)
+          : hashSeed(`${seedStr}-r${i}`, pool.length);
+        selected.push(pool.splice(idx, 1)[0]);
+      }
+      return selected;
+    }
+
+    const { dayNum, dateStr } = getDayContext();
+    const DAILY_TARGET_CHAR = CHARACTERS[hashSeed(`rd2-char-${dateStr}`, CHARACTERS.length)];
+    const DAILY_MAP_EVENTS = selectFiveMapEvents(`rd2-map-${dateStr}`, false);
+
+    const state = {
+      mode: "character", // 'character' | 'map' | 'dossier'
+      isPractice: false,
+      mapLoaded: false,
+      daily: {
+        dateStr,
+        dayNum,
+        character: { guesses: [], status: "playing" },
+        map: { roundIdx: 0, results: [], revealed: false, finished: false },
+        dossier: { answers: [null, null, null] }
+      },
+      practice: {
+        targetChar: null,
+        mapEvents: [],
+        character: { guesses: [], status: "playing" },
+        map: { roundIdx: 0, results: [], revealed: false, finished: false },
+        dossier: { answers: [null, null, null] }
+      }
+    };
+
+    function initPracticeState() {
+      state.practice.targetChar = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+      state.practice.mapEvents = selectFiveMapEvents("", true);
+      state.practice.character = { guesses: [], status: "playing" };
+      state.practice.map = { roundIdx: 0, results: [], revealed: false, finished: false };
+      state.practice.dossier = { answers: [null, null, null] };
+    }
+
+    function loadSavedDaily() {
+      try {
+        const raw = localStorage.getItem(KEY_DAILY_STATE);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.dateStr === dateStr && parsed.map && Array.isArray(parsed.map.results)) {
+            state.daily = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn("Storage read skipped:", e);
+      }
+    }
+
+    function saveDailyState() {
+      if (state.isPractice) return;
+      try {
+        localStorage.setItem(KEY_DAILY_STATE, JSON.stringify(state.daily));
+      } catch (e) {
+        console.warn("Storage write skipped:", e);
+      }
+    }
+
+    function getScope() {
+      return state.isPractice ? state.practice : state.daily;
+    }
+
+    function getActiveCharacter() {
+      return state.isPractice ? state.practice.targetChar : DAILY_TARGET_CHAR;
+    }
+
+    function getActiveMapList() {
+      return state.isPractice ? state.practice.mapEvents : DAILY_MAP_EVENTS;
+    }
+
+    function getCurrentRoundEvent() {
+      const scope = getScope();
+      const list = getActiveMapList();
+      return list[Math.min(scope.map.roundIdx, MAP_TOTAL_ROUNDS - 1)];
+    }
+
+    function isDossierUnlocked() {
+      if (state.isPractice) return true;
+      return state.daily.character.status !== "playing";
+    }
+
+    /**
+     * ==========================================================================
+     * 4. INDEXEDDB STORAGE FOR USER'S UPLOADED RDR2 MAP IMAGE
+     * ==========================================================================
+     */
+    const DB_NAME = "RedDeadleMapDB";
+    const STORE_NAME = "maps";
+
+    function saveMapBlobToIDB(dataUrl) {
+      try {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = e => {
+          e.target.result.createObjectStore(STORE_NAME);
+        };
+        req.onsuccess = e => {
+          const db = e.target.result;
+          const tx = db.transaction(STORE_NAME, "readwrite");
+          tx.objectStore(STORE_NAME).put(dataUrl, "rdr2_world_map");
+        };
+      } catch (err) {
+        console.warn("IndexedDB save skipped:", err);
+      }
+    }
+
+    function loadMapBlobFromIDB(callback) {
+      try {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = e => {
+          e.target.result.createObjectStore(STORE_NAME);
+        };
+        req.onsuccess = e => {
+          const db = e.target.result;
+          const tx = db.transaction(STORE_NAME, "readonly");
+          const getReq = tx.objectStore(STORE_NAME).get("rdr2_world_map");
+          getReq.onsuccess = () => callback(getReq.result || null);
+          getReq.onerror = () => callback(null);
+        };
+        req.onerror = () => callback(null);
+      } catch (err) {
+        callback(null);
+      }
+    }
+
+    function initMapImageSource() {
+      // 1. Check IndexedDB for user-uploaded map image first
+      loadMapBlobFromIDB(savedDataUrl => {
+        if (savedDataUrl) {
+          displayRealMapImage(savedDataUrl);
+          return;
+        }
+        // 2. Otherwise check if map.jpg or map.png is hosted alongside index.html on GitHub
+        const testJpg = new Image();
+        testJpg.onload = () => displayRealMapImage("map.jpg");
+        testJpg.onerror = () => {
+          const testPng = new Image();
+          testPng.onload = () => displayRealMapImage("map.png");
+          testPng.src = "map.png";
+        };
+        testJpg.src = "map.jpg";
+      });
+    }
+
+    function displayRealMapImage(src) {
+      const imgEl = document.getElementById("rdr2-map-img");
+      const stageEl = document.getElementById("map-stage");
+      const placeholderEl = document.getElementById("map-upload-placeholder");
+      const hintEl = document.getElementById("map-gesture-hint");
+      const btnTextEl = document.getElementById("map-upload-btn-text");
+
+      imgEl.src = src;
+      state.mapLoaded = true;
+      placeholderEl.classList.add("hidden");
+      stageEl.classList.remove("hidden");
+      hintEl.classList.remove("hidden");
+      btnTextEl.textContent = "Change Map";
+      resetMapTransform();
+      renderMapPanel();
+    }
+
+    function handleMapFileSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const dataUrl = e.target.result;
+        displayRealMapImage(dataUrl);
+        saveMapBlobToIDB(dataUrl);
+        showToast("RDR2 World Map loaded and saved!", "emerald");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /**
+     * ==========================================================================
+     * 5. MODE 1: CHARACTER DEDUCTION LOGIC
+     * ==========================================================================
+     */
+    let highlightedDropdownIdx = -1;
+
+    function handleCharacterInput() {
+      const scope = getScope();
+      if (scope.character.status !== "playing") return;
+
+      const query = document.getElementById("character-input").value.trim().toLowerCase();
+      const dropdown = document.getElementById("character-autocomplete");
+      highlightedDropdownIdx = -1;
+
+      if (!query) {
+        dropdown.classList.add("hidden");
+        dropdown.innerHTML = "";
+        return;
+      }
+
+      const guessedIds = new Set(scope.character.guesses);
+      const matches = CHARACTERS.filter(c => {
+        if (guessedIds.has(c.id)) return false;
+        if (c.name.toLowerCase().includes(query)) return true;
+        return c.aliases.some(a => a.includes(query));
+      }).slice(0, 8);
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = `<div class="px-4 py-3 text-xs text-[#f3e9d2]/60 italic">No matching unguessed character found.</div>`;
+        dropdown.classList.remove("hidden");
+        return;
+      }
+
+      dropdown.innerHTML = matches.map((c, idx) => `
+        <button
+          type="button"
+          data-idx="${idx}"
+          onclick="submitCharacterGuess('${c.id}')"
+          class="w-full text-left px-4 py-2.5 hover:bg-[#2b2119] flex items-center justify-between gap-2 transition">
+          <span class="font-semibold text-sm text-[#f3e9d2]">${c.name}</span>
+          <span class="text-[11px] text-[#c89d54]">${c.role} • Age ${c.age}</span>
+        </button>
+      `).join("");
+      dropdown.classList.remove("hidden");
+    }
+
+    function handleCharacterKeydown(e) {
+      const dropdown = document.getElementById("character-autocomplete");
+      const items = dropdown.querySelectorAll("button[data-idx]");
+
+      if (e.key === "ArrowDown" && items.length > 0) {
+        e.preventDefault();
+        highlightedDropdownIdx = (highlightedDropdownIdx + 1) % items.length;
+        updateDropdownHighlight(items);
+      } else if (e.key === "ArrowUp" && items.length > 0) {
+        e.preventDefault();
+        highlightedDropdownIdx = (highlightedDropdownIdx - 1 + items.length) % items.length;
+        updateDropdownHighlight(items);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (highlightedDropdownIdx >= 0 && items[highlightedDropdownIdx]) {
+          items[highlightedDropdownIdx].click();
+        } else {
+          submitTopCharacterMatch();
+        }
+      }
+    }
+
+    function updateDropdownHighlight(items) {
+      items.forEach((btn, i) => {
+        btn.classList.toggle("bg-[#2b2119]", i === highlightedDropdownIdx);
+      });
+    }
+
+    function submitTopCharacterMatch() {
+      const scope = getScope();
+      if (scope.character.status !== "playing") return;
+
+      const query = document.getElementById("character-input").value.trim().toLowerCase();
+      if (!query) return;
+
+      const guessedIds = new Set(scope.character.guesses);
+      const exact = CHARACTERS.find(c => !guessedIds.has(c.id) && (c.name.toLowerCase() === query || c.aliases.includes(query)));
+      if (exact) {
+        submitCharacterGuess(exact.id);
+        return;
+      }
+
+      const partial = CHARACTERS.find(c => !guessedIds.has(c.id) && (c.name.toLowerCase().includes(query) || c.aliases.some(a => a.includes(query))));
+      if (partial) {
+        submitCharacterGuess(partial.id);
+      } else {
+        showToast("Character not found or already guessed.", "red");
+      }
+    }
+
+    function submitCharacterGuess(charId) {
+      const scope = getScope();
+      const cState = scope.character;
+      if (cState.status !== "playing" || cState.guesses.includes(charId)) return;
+
+      const target = getActiveCharacter();
+      cState.guesses.push(charId);
+
+      document.getElementById("character-input").value = "";
+      document.getElementById("character-autocomplete").classList.add("hidden");
+
+      if (charId === target.id) {
+        cState.status = "won";
+        showToast(`Target identified in ${cState.guesses.length}/6! Dossier unlocked.`, "emerald");
+      } else if (cState.guesses.length >= MAX_CHAR_GUESSES) {
+        cState.status = "lost";
+        showToast(`Out of chambers! It was ${target.name}. Dossier unlocked.`, "red");
+      }
+
+      saveDailyState();
+      renderAll();
+    }
+
+    function evaluateCharacterRow(guess, target) {
+      // Age comparison (1899)
+      let ageStatus = "miss";
+      let ageArrow = "";
+      if (guess.age === target.age) {
+        ageStatus = "exact";
+      } else {
+        if (Math.abs(guess.age - target.age) <= 5) ageStatus = "partial";
+        ageArrow = guess.age < target.age ? " ↑" : " ↓";
+      }
+
+      // First Chapter comparison
+      let chStatus = "miss";
+      let chArrow = "";
+      if (guess.chapter === target.chapter) {
+        chStatus = "exact";
+      } else {
+        if (Math.abs(guess.chapter - target.chapter) === 1) chStatus = "partial";
+        chArrow = guess.chapter < target.chapter ? " ↑" : " ↓";
+      }
+
+      const formatCh = ch => (ch === 7 ? "Epilogue" : `Ch. ${ch}`);
+
+      return {
+        name: guess.name,
+        isTarget: guess.id === target.id,
+        cells: [
+          { label: guess.gender, status: guess.gender === target.gender ? "exact" : "miss" },
+          { label: guess.role, status: guess.role === target.role ? "exact" : "miss" },
+          { label: guess.weapon, status: guess.weapon === target.weapon ? "exact" : "miss" },
+          { label: `${guess.age}${ageArrow}`, status: ageStatus },
+          { label: `${formatCh(guess.chapter)}${chArrow}`, status: chStatus }
+        ]
+      };
+    }
+
+    /**
+     * ==========================================================================
+     * 6. MODE 2: ZOOMABLE & PANNABLE 5-ROUND MAP PINPOINT ENGINE
+     * ==========================================================================
+     */
+    let mapView = { scale: 1, x: 0, y: 0 };
+    let pendingPin = null; // { x: 0..1000, y: 0..680 }
+    let isPanning = false;
+    let panOrigin = { x: 0, y: 0 };
+    let hasPanned = false;
+    let pinchStartDist = null;
+    let pinchStartScale = 1;
+
+    function initMapGestures() {
+      const viewport = document.getElementById("map-viewport");
+
+      // Desktop Wheel Zoom
+      viewport.addEventListener("wheel", e => {
+        if (!state.mapLoaded) return;
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.2 : 1 / 1.2;
+        zoomAtClientPoint(factor, e.clientX, e.clientY);
+      }, { passive: false });
+
+      // Mouse Drag & Click
+      viewport.addEventListener("mousedown", e => {
+        if (!state.mapLoaded || e.button !== 0) return;
+        isPanning = true;
+        hasPanned = false;
+        panOrigin = { x: e.clientX - mapView.x, y: e.clientY - mapView.y };
+      });
+
+      window.addEventListener("mousemove", e => {
+        if (!isPanning) return;
+        const nx = e.clientX - panOrigin.x;
+        const ny = e.clientY - panOrigin.y;
+        if (Math.abs(nx - mapView.x) > 4 || Math.abs(ny - mapView.y) > 4) hasPanned = true;
+        mapView.x = nx;
+        mapView.y = ny;
+        applyMapTransform();
+      });
+
+      window.addEventListener("mouseup", e => {
+        if (!isPanning) return;
+        isPanning = false;
+        if (!hasPanned && viewport.contains(e.target)) {
+          dropPinAtClientPoint(e.clientX, e.clientY);
+        }
+      });
+
+      // Mobile Touch Pan, Pinch-to-Zoom, & Tap-to-Pin
+      viewport.addEventListener("touchstart", e => {
+        if (!state.mapLoaded) return;
+        if (e.touches.length === 1) {
+          isPanning = true;
+          hasPanned = false;
+          panOrigin = {
+            x: e.touches[0].clientX - mapView.x,
+            y: e.touches[0].clientY - mapView.y
+          };
+        } else if (e.touches.length === 2) {
+          isPanning = false;
+          pinchStartDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          pinchStartScale = mapView.scale;
+        }
+      }, { passive: false });
+
+      viewport.addEventListener("touchmove", e => {
+        if (!state.mapLoaded) return;
+        e.preventDefault();
+        if (e.touches.length === 1 && isPanning) {
+          const nx = e.touches[0].clientX - panOrigin.x;
+          const ny = e.touches[0].clientY - panOrigin.y;
+          if (Math.abs(nx - mapView.x) > 5 || Math.abs(ny - mapView.y) > 5) hasPanned = true;
+          mapView.x = nx;
+          mapView.y = ny;
+          applyMapTransform();
+        } else if (e.touches.length === 2 && pinchStartDist) {
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          const nextScale = Math.min(5, Math.max(1, pinchStartScale * (dist / pinchStartDist)));
+          zoomAtClientPoint(nextScale / mapView.scale, midX, midY);
+        }
+      }, { passive: false });
+
+      viewport.addEventListener("touchend", e => {
+        if (e.touches.length < 2) pinchStartDist = null;
+        if (e.touches.length === 0 && isPanning) {
+          isPanning = false;
+          if (!hasPanned && e.changedTouches.length === 1) {
+            dropPinAtClientPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+          }
+        }
+      });
+    }
+
+    function zoomMapBy(factor) {
+      if (!state.mapLoaded) return;
+      const rect = document.getElementById("map-viewport").getBoundingClientRect();
+      zoomAtClientPoint(factor, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    }
+
+    function zoomAtClientPoint(factor, clientX, clientY) {
+      const rect = document.getElementById("map-viewport").getBoundingClientRect();
+      const relX = clientX - rect.left;
+      const relY = clientY - rect.top;
+
+      const newScale = Math.min(5, Math.max(1, mapView.scale * factor));
+      const actualFactor = newScale / mapView.scale;
+
+      mapView.x = relX - (relX - mapView.x) * actualFactor;
+      mapView.y = relY - (relY - mapView.y) * actualFactor;
+      mapView.scale = newScale;
+      applyMapTransform();
+    }
+
+    function resetMapTransform() {
+      mapView = { scale: 1, x: 0, y: 0 };
+      applyMapTransform();
+    }
+
+    function applyMapTransform() {
+      const viewport = document.getElementById("map-viewport");
+      const stage = document.getElementById("map-stage");
+      const rect = viewport.getBoundingClientRect();
+
+      if (mapView.scale <= 1.01) {
+        mapView.scale = 1;
+        mapView.x = 0;
+        mapView.y = 0;
+      } else {
+        const minX = rect.width * (1 - mapView.scale);
+        const minY = rect.height * (1 - mapView.scale);
+        mapView.x = Math.min(0, Math.max(minX, mapView.x));
+        mapView.y = Math.min(0, Math.max(minY, mapView.y));
+      }
+
+      stage.style.transform = `translate(${mapView.x}px, ${mapView.y}px) scale(${mapView.scale})`;
+      document.getElementById("map-zoom-readout").textContent = `${mapView.scale.toFixed(1)}x`;
+    }
+
+    function dropPinAtClientPoint(clientX, clientY) {
+      const scope = getScope();
+      if (scope.map.revealed || scope.map.finished) return;
+
+      const stageRect = document.getElementById("map-stage").getBoundingClientRect();
+      const normX = Math.round(((clientX - stageRect.left) / stageRect.width) * 1000);
+      const normY = Math.round(((clientY - stageRect.top) / stageRect.height) * 680);
+
+      const clampedX = Math.max(8, Math.min(992, normX));
+      const clampedY = Math.max(8, Math.min(672, normY));
+      pendingPin = { x: clampedX, y: clampedY };
+
+      const marker = document.getElementById("map-pending-marker");
+      marker.setAttribute("transform", `translate(${clampedX}, ${clampedY})`);
+      marker.classList.remove("hidden");
+
+      const btn = document.getElementById("btn-lock-pin");
+      btn.disabled = false;
+      btn.textContent = "Lock In Guess";
+      document.getElementById("map-pin-status").textContent = "Pin placed — tap Lock In Guess";
+    }
+
+    function submitMapPinGuess() {
+      const scope = getScope();
+      const mState = scope.map;
+      if (mState.revealed || mState.finished || !pendingPin) return;
+
+      const target = getCurrentRoundEvent();
+      const dist = Math.hypot(pendingPin.x - target.x, pendingPin.y - target.y);
+      const miles = +(dist * 0.014).toFixed(2);
+      const isBullseye = dist <= MAP_BULLSEYE_DIST;
+      const score = isBullseye
+        ? MAP_MAX_ROUND_PTS
+        : Math.max(0, Math.round(MAP_MAX_ROUND_PTS * Math.exp(-dist / 165)));
+
+      mState.results.push({
+        eventId: target.id,
+        locationName: target.locationName,
+        guessX: pendingPin.x,
+        guessY: pendingPin.y,
+        targetX: target.x,
+        targetY: target.y,
+        miles,
+        score,
+        isBullseye
+      });
+
+      mState.revealed = true;
+      if (mState.results.length >= MAP_TOTAL_ROUNDS) {
+        mState.finished = true;
+      }
+
+      pendingPin = null;
+      document.getElementById("map-pending-marker").classList.add("hidden");
+      document.getElementById("btn-lock-pin").disabled = true;
+      document.getElementById("btn-lock-pin").textContent = "Locked In";
+
+      showToast(
+        isBullseye ? `Bullseye! +${score} / 1,000 pts` : `${miles} mi off • +${score} / 1,000 pts`,
+        score >= 750 ? "emerald" : score >= 400 ? "amber" : "red"
+      );
+
+      saveDailyState();
+      renderAll();
+    }
+
+    function nextMapRound() {
+      const scope = getScope();
+      const mState = scope.map;
+      if (!mState.revealed || mState.finished) return;
+
+      mState.roundIdx += 1;
+      mState.revealed = false;
+      pendingPin = null;
+      document.getElementById("map-pending-marker").classList.add("hidden");
+      document.getElementById("btn-lock-pin").disabled = true;
+      document.getElementById("btn-lock-pin").textContent = "Lock In Guess";
+      resetMapTransform();
+
+      saveDailyState();
+      renderAll();
+    }
+
+    /**
+     * ==========================================================================
+     * 7. MODE 3: LORE DOSSIER LOGIC
+     * ==========================================================================
+     */
+    function selectDossierOption(qIndex, optionIndex) {
+      if (!isDossierUnlocked()) return;
+      const scope = getScope();
+      if (scope.dossier.answers[qIndex] !== null) return;
+
+      scope.dossier.answers[qIndex] = optionIndex;
+      const target = getActiveCharacter();
+      const correct = optionIndex === target.dossier[qIndex].answer;
+
+      showToast(
+        correct ? "Ledger verified! Spot on." : "Wrong detail on that entry.",
+        correct ? "emerald" : "red"
+      );
+
+      saveDailyState();
+      renderAll();
+    }
+
+    /**
+     * ==========================================================================
+     * 8. UI RENDERING & MODALS
+     * ==========================================================================
+     */
+    function switchMode(newMode) {
+      state.mode = newMode;
+      document.getElementById("character-autocomplete").classList.add("hidden");
+      renderAll();
+    }
+
+    function togglePracticeMode() {
+      state.isPractice = !state.isPractice;
+      pendingPin = null;
+      document.getElementById("map-pending-marker").classList.add("hidden");
+      resetMapTransform();
+      showToast(
+        state.isPractice ? "Switched to Unlimited Practice Mode" : `Returned to RED-DEADLE Day #${dayNum}`,
+        "amber"
+      );
+      renderAll();
+    }
+
+    function resetPracticeRound() {
+      initPracticeState();
+      pendingPin = null;
+      document.getElementById("map-pending-marker").classList.add("hidden");
+      resetMapTransform();
+      showToast("Fresh random character, 5 map rounds & dossier rolled!", "emerald");
+      renderAll();
+    }
+
+    function renderAll() {
+      const scope = getScope();
+      const targetChar = getActiveCharacter();
+
+      // Header Badges
+      const dayBadge = document.getElementById("day-badge");
+      const practiceInd = document.getElementById("practice-indicator");
+      const practiceText = document.getElementById("practice-btn-text");
+      const newRollBtn = document.getElementById("btn-new-practice");
+
+      if (state.isPractice) {
+        dayBadge.textContent = "PRACTICE";
+        practiceInd.className = "w-2 h-2 rounded-full bg-amber-400";
+        practiceText.textContent = "Practice";
+        newRollBtn.classList.remove("hidden");
+      } else {
+        dayBadge.textContent = `DAY #${dayNum}`;
+        practiceInd.className = "w-2 h-2 rounded-full bg-emerald-400";
+        practiceText.textContent = "Daily";
+        newRollBtn.classList.add("hidden");
+      }
+
+      // Navigation Tabs
+      ["character", "map", "dossier"].forEach(m => {
+        const btn = document.getElementById(`tab-${m}`);
+        const active = state.mode === m;
+        btn.className = active
+          ? "py-2.5 px-2 sm:px-3 rounded-xl font-western text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-gradient-to-b from-[#8b261d] to-[#591610] text-[#f3e9d2] border border-[#c89d54]/60 shadow"
+          : "py-2.5 px-2 sm:px-3 rounded-xl font-western text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-[#f3e9d2]/75 hover:text-[#f3e9d2] hover:bg-white/5";
+      });
+
+      const cState = scope.character;
+      const mState = scope.map;
+      const unlocked = isDossierUnlocked();
+      const dScore = scope.dossier.answers.filter((a, i) => a === targetChar.dossier[i].answer).length;
+      const mScore = mState.results.reduce((s, r) => s + r.score, 0);
+
+      document.getElementById("badge-character").textContent =
+        cState.status === "won" ? `✓ ${cState.guesses.length}/6` : `${cState.guesses.length}/6`;
+      document.getElementById("badge-map").textContent =
+        mState.finished ? `${mScore}` : `R${mState.roundIdx + 1}/5`;
+      document.getElementById("dossier-lock-icon").textContent = unlocked ? "📜" : "🔒";
+      document.getElementById("badge-dossier").textContent = unlocked ? `${dScore}/3` : "Locked";
+
+      // Panel Visibility
+      document.getElementById("panel-character").classList.toggle("hidden", state.mode !== "character");
+      document.getElementById("panel-map").classList.toggle("hidden", state.mode !== "map");
+      if (state.mode === "map") document.getElementById("panel-map").classList.add("flex");
+      document.getElementById("panel-dossier").classList.toggle("hidden", state.mode !== "dossier");
+      if (state.mode === "dossier") document.getElementById("panel-dossier").classList.add("flex");
+
+      if (state.mode === "character") renderCharacterPanel();
+      if (state.mode === "map") renderMapPanel();
+      if (state.mode === "dossier") renderDossierPanel();
+    }
+
+    function renderCharacterPanel() {
+      const scope = getScope();
+      const cState = scope.character;
+      const target = getActiveCharacter();
+
+      // 6-Chamber Pips
+      const pipsEl = document.getElementById("character-pips");
+      pipsEl.innerHTML = "";
+      for (let i = 0; i < MAX_CHAR_GUESSES; i++) {
+        const pip = document.createElement("span");
+        const gId = cState.guesses[i];
+        if (gId) {
+          pip.className = gId === target.id
+            ? "w-3.5 h-3.5 rounded-full bg-emerald-500 border border-emerald-200"
+            : "w-3.5 h-3.5 rounded-full bg-[#8b261d] border border-red-300";
+        } else {
+          pip.className = "w-3.5 h-3.5 rounded-full bg-[#120e0b] border border-[#c89d54]/50";
+        }
+        pipsEl.appendChild(pip);
+      }
+
+      // Search Input State & Outcome Banner
+      const searchWrapper = document.getElementById("character-search-wrapper");
+      const outcomeEl = document.getElementById("character-outcome");
+
+      if (cState.status === "playing") {
+        searchWrapper.classList.remove("hidden");
+        outcomeEl.classList.add("hidden");
+      } else {
+        searchWrapper.classList.add("hidden");
+        outcomeEl.classList.remove("hidden");
+        const won = cState.status === "won";
+        outcomeEl.className = won
+          ? "rounded-xl p-4 border border-emerald-500/60 bg-emerald-950/45 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+          : "rounded-xl p-4 border border-red-500/60 bg-red-950/45 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+
+        outcomeEl.innerHTML = `
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider ${won ? "text-emerald-400" : "text-red-400"}">
+              ${won ? `Target Identified in ${cState.guesses.length}/6!` : "Out of Chambers (6/6)"}
+            </span>
+            <h3 class="font-western text-lg sm:text-xl font-bold text-[#f3e9d2] mt-0.5">${target.name}</h3>
+            <p class="text-xs text-[#f3e9d2]/75 mt-0.5">${target.role} • ${target.weapon} • Age ${target.age} in 1899</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="switchMode('map')" class="px-3.5 py-2 rounded-xl bg-[#b5892e] hover:bg-[#c89d54] text-[#120e0b] font-bold text-xs transition">2. Map →</button>
+            <button onclick="switchMode('dossier')" class="px-3.5 py-2 rounded-xl bg-[#8b261d] hover:bg-[#a32e23] text-[#f3e9d2] font-bold text-xs border border-[#c89d54]/50 transition">3. Dossier →</button>
+          </div>
+        `;
+      }
+
+      // Guesses Table
+      const tbody = document.getElementById("character-guesses-tbody");
+      if (cState.guesses.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-[#f3e9d2]/50 italic">
+              Fire your first guess above to begin narrowing down today's target.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const rowsHtml = [...cState.guesses].reverse().map(gId => {
+        const g = CHARACTERS.find(c => c.id === gId);
+        const ev = evaluateCharacterRow(g, target);
+        return `
+          <tr class="animate-pop">
+            <td class="py-2.5 px-2 pl-4 text-left font-bold text-[#f3e9d2] whitespace-nowrap">${ev.name}</td>
+            ${ev.cells.map((cell, idx) => `
+              <td class="p-1.5 ${idx === ev.cells.length - 1 ? "pr-4" : ""}">
+                <div class="py-2 px-2 rounded-lg border font-semibold text-xs ${
+                  cell.status === "exact" ? "tile-exact" : cell.status === "partial" ? "tile-partial" : "tile-miss"
+                }">
+                  ${cell.label}
+                </div>
+              </td>
+            `).join("")}
+          </tr>
+        `;
+      }).join("");
+
+      tbody.innerHTML = rowsHtml;
+    }
+
+    function renderMapPanel() {
+      const scope = getScope();
+      const mState = scope.map;
+      const target = getCurrentRoundEvent();
+      const totalPts = mState.results.reduce((sum, r) => sum + r.score, 0);
+
+      document.getElementById("map-round-pill").textContent = mState.finished
+        ? "All 5 Rounds Complete"
+        : `Round ${mState.roundIdx + 1} of ${MAP_TOTAL_ROUNDS}`;
+      document.getElementById("map-category-pill").textContent = target.category;
+      document.getElementById("map-question-text").textContent = target.prompt;
+      document.getElementById("map-hint-text").textContent = target.hint;
+      document.getElementById("map-score-badge").textContent = `${totalPts.toLocaleString()} / 5,000`;
+
+      // 5-Round Pips
+      const pipsEl = document.getElementById("map-round-pips");
+      pipsEl.innerHTML = "";
+      for (let i = 0; i < MAP_TOTAL_ROUNDS; i++) {
+        const pip = document.createElement("span");
+        const res = mState.results[i];
+        if (res) {
+          pip.className = res.score >= 750
+            ? "w-3.5 h-3.5 rounded-full bg-emerald-500 border border-emerald-200"
+            : res.score >= 400
+              ? "w-3.5 h-3.5 rounded-full bg-amber-500 border border-amber-200"
+              : "w-3.5 h-3.5 rounded-full bg-[#8b261d] border border-red-300";
+        } else if (i === mState.roundIdx && !mState.finished) {
+          pip.className = "w-3.5 h-3.5 rounded-full bg-[#c89d54]/40 border border-[#c89d54]";
+        } else {
+          pip.className = "w-3.5 h-3.5 rounded-full bg-[#120e0b] border border-[#c89d54]/40";
+        }
+        pipsEl.appendChild(pip);
+      }
+
+      // Render Revealed Pin & Target Pin on SVG Overlay
+      const revealedLayer = document.getElementById("map-revealed-layer");
+      revealedLayer.innerHTML = "";
+      const currentRes = mState.results[mState.roundIdx];
+
+      if (currentRes && state.mapLoaded) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", currentRes.guessX);
+        line.setAttribute("y1", currentRes.guessY);
+        line.setAttribute("x2", currentRes.targetX);
+        line.setAttribute("y2", currentRes.targetY);
+        line.setAttribute("stroke", currentRes.isBullseye ? "#10b981" : "#ef4444");
+        line.setAttribute("stroke-width", "3");
+        line.setAttribute("stroke-dasharray", "6,4");
+        revealedLayer.appendChild(line);
+
+        const userG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        userG.setAttribute("transform", `translate(${currentRes.guessX}, ${currentRes.guessY})`);
+        userG.innerHTML = `
+          <circle r="8" fill="#dc2626" stroke="#ffffff" stroke-width="2" />
+          <text y="3" font-family="Inter, sans-serif" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">YOU</text>
+        `;
+        revealedLayer.appendChild(userG);
+
+        const targetG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        targetG.setAttribute("transform", `translate(${currentRes.targetX}, ${currentRes.targetY})`);
+        const shortName = currentRes.locationName.split("(")[0].trim();
+        targetG.innerHTML = `
+          <circle r="${MAP_BULLSEYE_DIST}" fill="rgba(16, 185, 129, 0.25)" stroke="#10b981" stroke-width="2" />
+          <circle r="7.5" fill="#10b981" stroke="#ffffff" stroke-width="2" />
+          <rect x="-75" y="-30" width="150" height="18" rx="5" fill="#064e3b" stroke="#34d399" stroke-width="1.2" />
+          <text y="-18" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#ecfdf5" text-anchor="middle">★ ${shortName}</text>
+        `;
+        revealedLayer.appendChild(targetG);
+      }
+
+      // Result Banner
+      const bannerEl = document.getElementById("map-result-banner");
+      if (mState.revealed && currentRes) {
+        bannerEl.classList.remove("hidden");
+        const good = currentRes.score >= 700;
+        bannerEl.className = good
+          ? "rounded-2xl p-4 sm:p-5 border border-emerald-500/60 bg-emerald-950/45 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg"
+          : "rounded-2xl p-4 sm:p-5 border border-[#c89d54]/60 bg-[#251c15] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg";
+
+        const nextBtnHtml = mState.finished
+          ? `<div class="flex items-center gap-2">
+               <button onclick="switchMode('dossier')" class="px-4 py-2.5 rounded-xl bg-[#b5892e] hover:bg-[#c89d54] text-[#120e0b] font-bold text-xs transition">3. Dossier →</button>
+               <button onclick="openShareModal()" class="px-4 py-2.5 rounded-xl bg-[#8b261d] hover:bg-[#a32e23] text-[#f3e9d2] font-bold text-xs border border-[#c89d54]/50 transition">Share</button>
+             </div>`
+          : `<button onclick="nextMapRound()" class="px-5 py-2.5 rounded-xl bg-gradient-to-b from-[#8b261d] to-[#5e1711] hover:from-[#a32e23] hover:to-[#731c15] border border-[#c89d54]/60 font-western font-bold text-xs tracking-wider text-[#f3e9d2] shadow transition shrink-0">
+               Next Round (${mState.roundIdx + 2}/5) →
+             </button>`;
+
+        bannerEl.innerHTML = `
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider ${good ? "text-emerald-400" : "text-[#c89d54]"}">
+              Round ${mState.roundIdx + 1}/5: +${currentRes.score} / 1,000 pts (${currentRes.isBullseye ? "Bullseye!" : `${currentRes.miles} mi away`})
+            </span>
+            <h3 class="font-western text-lg sm:text-xl font-bold text-[#f3e9d2] mt-0.5">${target.locationName}</h3>
+            <p class="text-xs text-[#f3e9d2]/80 mt-1 leading-relaxed">${target.lore}</p>
+          </div>
+          ${nextBtnHtml}
+        `;
+      } else {
+        bannerEl.classList.add("hidden");
+      }
+
+      // History Strip
+      const stripEl = document.getElementById("map-rounds-strip");
+      if (mState.results.length === 0) {
+        stripEl.innerHTML = `<span class="text-[#f3e9d2]/55 italic">Round 1 of 5 — place your pin on the map above.</span>`;
+      } else {
+        stripEl.innerHTML = mState.results.map((r, i) => `
+          <span class="px-2.5 py-1 rounded-lg border text-xs font-medium ${
+            r.score >= 750
+              ? "bg-emerald-950/70 border-emerald-500/60 text-emerald-100"
+              : r.score >= 400
+                ? "bg-amber-950/70 border-amber-500/50 text-amber-100"
+                : "bg-red-950/60 border-red-500/50 text-red-100"
+          }">
+            <strong class="text-[#c89d54]">R${i + 1}:</strong> ${r.score}/1,000 pts
+          </span>
+        `).join("");
+      }
+    }
+
+    function renderDossierPanel() {
+      const unlocked = isDossierUnlocked();
+      const lockedView = document.getElementById("dossier-locked-view");
+      const unlockedView = document.getElementById("dossier-unlocked-view");
+
+      if (!unlocked) {
+        lockedView.classList.remove("hidden");
+        unlockedView.classList.add("hidden");
+        return;
+      }
+
+      lockedView.classList.add("hidden");
+      unlockedView.classList.remove("hidden");
+
+      const scope = getScope();
+      const target = getActiveCharacter();
+      const score = scope.dossier.answers.filter((a, i) => a === target.dossier[i].answer).length;
+
+      document.getElementById("dossier-character-name").textContent = target.name;
+      document.getElementById("dossier-score-readout").textContent = `${score} / 3`;
+
+      const listEl = document.getElementById("dossier-questions-list");
+      listEl.innerHTML = target.dossier.map((item, qIdx) => {
+        const chosen = scope.dossier.answers[qIdx];
+        const answered = chosen !== null;
+
+        return `
+          <div class="p-4 rounded-xl bg-[#120e0b] border border-[#c89d54]/30 flex flex-col gap-3">
+            <div class="flex items-start justify-between gap-2">
+              <p class="font-semibold text-sm sm:text-base text-[#f3e9d2]">
+                <span class="text-[#c89d54] font-western mr-1.5">Q${qIdx + 1}.</span>${item.q}
+              </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${item.options.map((opt, optIdx) => {
+                let btnClass = "bg-[#1d1611] hover:bg-[#2a2018] border-[#c89d54]/35 text-[#f3e9d2]";
+                if (answered) {
+                  if (optIdx === item.answer) {
+                    btnClass = "tile-exact font-bold";
+                  } else if (optIdx === chosen) {
+                    btnClass = "tile-miss";
+                  } else {
+                    btnClass = "bg-[#17110d] border-[#c89d54]/15 text-[#f3e9d2]/45";
+                  }
+                }
+                return `
+                  <button
+                    type="button"
+                    ${answered ? "disabled" : ""}
+                    onclick="selectDossierOption(${qIdx}, ${optIdx})"
+                    class="text-left px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm transition ${btnClass}">
+                    ${opt}
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    /**
+     * ==========================================================================
+     * 9. LEDGER ROSTER MODAL, SHARE CARD & TOASTS
+     * ==========================================================================
+     */
+    function openRosterModal() {
+      document.getElementById("roster-modal").classList.remove("hidden");
+      renderRosterList();
+    }
+
+    function closeRosterModal() {
+      document.getElementById("roster-modal").classList.add("hidden");
+    }
+
+    function renderRosterList() {
+      const q = document.getElementById("roster-filter-input").value.trim().toLowerCase();
+      const filtered = CHARACTERS.filter(c =>
+        !q ||
+        c.name.toLowerCase().includes(q) ||
+        c.role.toLowerCase().includes(q) ||
+        c.weapon.toLowerCase().includes(q)
+      );
+
+      document.getElementById("roster-list-container").innerHTML = filtered.map(c => `
+        <div class="p-3 rounded-xl bg-[#120e0b] border border-[#c89d54]/25 flex flex-col gap-1">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-sm text-[#f3e9d2]">${c.name}</span>
+            <span class="text-[11px] font-semibold text-[#c89d54]">Age ${c.age} • ${c.chapter === 7 ? "Epilogue" : `Ch. ${c.chapter}`}</span>
+          </div>
+          <div class="text-xs text-[#f3e9d2]/70">${c.gender} • ${c.role} • ${c.weapon}</div>
+        </div>
+      `).join("");
+    }
+
+    function buildShareText() {
+      const scope = getScope();
+      const target = getActiveCharacter();
+      const title = state.isPractice
+        ? "🤠 RED-DEADLE (Practice Ledger)"
+        : `🤠 RED-DEADLE Day #${dayNum} (${dateStr})`;
+
+      const cState = scope.character;
+      const cScore = cState.status === "won" ? `${cState.guesses.length}/6` : cState.status === "lost" ? "X/6" : `${cState.guesses.length}/6`;
+      const cGrid = cState.guesses.map(gId => {
+        const g = CHARACTERS.find(c => c.id === gId);
+        const ev = evaluateCharacterRow(g, target);
+        return ev.cells.map(cell => cell.status === "exact" ? "🟩" : cell.status === "partial" ? "🟨" : "⬛").join("");
+      }).join("\n");
+
+      const mState = scope.map;
+      const mPts = mState.results.reduce((s, r) => s + r.score, 0);
+      const mPips = Array.from({ length: MAP_TOTAL_ROUNDS }, (_, i) => {
+        const r = mState.results[i];
+        if (!r) return "⬜";
+        return r.score >= 750 ? "🟩" : r.score >= 400 ? "🟨" : "🟥";
+      }).join("");
+
+      const dEmojis = scope.dossier.answers.map((a, i) => {
+        if (a === null) return "⬜";
+        return a === target.dossier[i].answer ? "🟩" : "🟥";
+      }).join("");
+      const dPts = scope.dossier.answers.filter((a, i) => a === target.dossier[i].answer).length;
+
+      return [
+        title,
+        `🤠 Character: ${cScore}`,
+        cGrid || "⬜⬜⬜⬜⬜",
+        `📍 Map Pinpoint: ${mPts.toLocaleString()} / 5,000 pts`,
+        mPips,
+        `📜 Dossier: ${dPts}/3 ${dEmojis}`
+      ].join("\n");
+    }
+
+    function openShareModal() {
+      document.getElementById("share-preview-box").textContent = buildShareText();
+      document.getElementById("share-modal").classList.remove("hidden");
+    }
+
+    function closeShareModal() {
+      document.getElementById("share-modal").classList.add("hidden");
+    }
+
+    function copyShareSummary() {
+      const text = buildShareText();
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        showToast("Daily results copied to clipboard!", "emerald");
+      } catch (e) {
+        showToast("Select and copy the text box above.", "amber");
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg, tone = "amber") {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      const palette = tone === "emerald"
+        ? "bg-emerald-950 border-emerald-400 text-emerald-100"
+        : tone === "red"
+          ? "bg-red-950 border-red-400 text-red-100"
+          : "bg-[#251c15] border-[#c89d54] text-[#f3e9d2]";
+      el.className = `px-4 py-2.5 rounded-xl border shadow-xl text-xs sm:text-sm font-semibold text-center animate-pop ${palette}`;
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transition = "opacity 0.25s ease";
+        setTimeout(() => el.remove(), 260);
+      }, 2500);
+    }
+
+    // Close autocomplete when tapping outside
+    document.addEventListener("click", e => {
+      const wrapper = document.getElementById("character-search-wrapper");
+      if (wrapper && !wrapper.contains(e.target)) {
+        document.getElementById("character-autocomplete").classList.add("hidden");
+      }
+    });
+
+    // Boot Application
+    window.addEventListener("DOMContentLoaded", () => {
+      initPracticeState();
+      loadSavedDaily();
+      initMapGestures();
+      initMapImageSource();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
+```
