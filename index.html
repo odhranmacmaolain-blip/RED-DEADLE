@@ -168,11 +168,6 @@
       user-select: none;
     }
 
-    .map-viewport.calibrating {
-      border-color: #f5c663;
-      box-shadow: 0 0 0 3px rgba(228, 186, 108, 0.35);
-    }
-
     .map-stage {
       position: absolute;
       inset: 0;
@@ -203,13 +198,6 @@
       pointer-events: none;
       z-index: 25;
       filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9));
-    }
-
-    .calib-anchor-marker {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      z-index: 30;
     }
 
     ::-webkit-scrollbar {
@@ -320,90 +308,85 @@
   <main class="max-w-6xl mx-auto px-3 sm:px-4 py-5 space-y-5">
 
     <!-- =================================================================== -->
-    <!-- TAB 1: CHARACTER DEDUCTION                                          -->
+    <!-- TAB 1: OUTLAW GUESS (CHARACTER DEDUCTION)                           -->
     <!-- =================================================================== -->
     <section id="section-character" class="space-y-4">
-      <div class="leather-panel rounded-xl p-4 sm:p-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#c89d54]/20">
+      <div class="leather-panel rounded-xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#c89d54]/20">
           <div>
-            <div class="flex items-center gap-2">
-              <h2 class="font-western text-base sm:text-xl font-bold text-[#e4ba6c]">Identify Today&apos;s Outlaw</h2>
-              <span id="spoilerSafetyTag" class="px-2 py-0.5 text-[10px] rounded bg-[#236b3e]/30 border border-[#48b872]/50 text-[#a5f0c0]">
-                Pre-Ch. 5 Safe
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded bg-[#8f1d1d] text-[#f3e9d2] text-xs font-western font-bold border border-[#c89d54]/50">
+                OUTLAW DEDUCTION
+              </span>
+              <span id="spoilerSafetyTag" class="px-2 py-0.5 rounded bg-[#241c15] text-[#e4ba6c] text-xs border border-[#c89d54]/30">
+                Pre-Chapter 5 Safe (Days 1–50)
               </span>
             </div>
-            <p class="text-xs sm:text-sm text-[#bfb299] mt-0.5">
-              6 tries max. <span class="text-[#69d690] font-semibold">Green</span> = Exact, <span class="text-[#f0b454] font-semibold">Amber</span> = Close (&plusmn;5 yrs / &plusmn;1 Intro Ch. / Shared Group).
+            <h2 class="font-western text-base sm:text-xl font-bold text-[#f3e9d2] mt-2">
+              Identify Today&apos;s Mystery Outlaw in 6 Guesses
+            </h2>
+            <p class="text-xs text-[#bfb299] mt-0.5">
+              1 Try: <strong class="text-[#e4ba6c]">5,000 pts</strong> &bull; 2–4 Tries: <strong class="text-[#e4ba6c]">4,000 pts</strong> &bull; 5 Tries: <strong class="text-[#e4ba6c]">3,000 pts</strong> &bull; 6 Tries: <strong class="text-[#e4ba6c]">1,500 pts</strong>
             </p>
           </div>
-
-          <!-- 6 Visual Guess Pips -->
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1.5" id="guessPipsContainer" title="Remaining Attempts"></div>
-            <span class="px-2.5 py-1 rounded bg-[#241c15] border border-[#c89d54]/30 text-xs text-[#f3e9d2]">
-              Bounty: <strong id="charScoreDisplay" class="text-[#e4ba6c]">0</strong>
-            </span>
+          <div class="px-3 py-1.5 rounded-lg bg-[#241c15] border border-[#c89d54]/30 text-right self-start sm:self-center shrink-0">
+            <div class="text-[10px] uppercase text-[#bfb299]">Guesses Used</div>
+            <div class="font-western text-sm font-bold text-[#e4ba6c]"><span id="charGuessCount">0</span> / 6</div>
           </div>
         </div>
 
-        <!-- Search Box -->
-        <div id="charSearchContainer" class="relative mt-4">
+        <!-- Search & Guess Input -->
+        <div id="charInputWrapper" class="relative max-w-xl mx-auto">
           <div class="flex gap-2">
             <div class="relative flex-1">
               <input
-                type="text"
                 id="charSearchInput"
+                type="text"
                 autocomplete="off"
-                placeholder="Search RDR2 character (e.g., Arthur Morgan, Sadie, Hosea, Dutch)..."
-                class="w-full px-3.5 py-3 rounded-lg bg-[#120e0b] border border-[#c89d54]/50 text-sm text-[#f3e9d2] placeholder-[#7d705c] focus:outline-none focus:border-[#e4ba6c]"
+                placeholder="Type an RDR2 character name (e.g., Arthur Morgan, Sadie Adler)..."
+                class="w-full px-3.5 py-2.5 rounded-lg bg-[#120e0b] border border-[#c89d54]/50 text-sm text-[#f3e9d2] placeholder-[#7d6f5b] focus:outline-none focus:border-[#e4ba6c]"
               />
-              <div id="charDropdown" class="hidden absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-lg bg-[#1c1510] border border-[#c89d54]/60 shadow-2xl z-30"></div>
+              <div id="charAutocompleteList" class="hidden absolute left-0 right-0 top-full mt-1 max-h-60 overflow-y-auto rounded-lg bg-[#1b140f] border border-[#c89d54]/60 shadow-2xl z-30 divide-y divide-[#c89d54]/15"></div>
             </div>
-            <button id="charSubmitBtn" type="button" class="western-btn-primary px-4 sm:px-5 py-3 rounded-lg font-western font-bold text-xs sm:text-sm whitespace-nowrap">
+            <button id="submitCharGuessBtn" type="button" disabled class="western-btn-primary px-4 sm:px-5 py-2.5 rounded-lg font-western font-bold text-xs sm:text-sm shrink-0">
               Guess
             </button>
           </div>
         </div>
 
-        <!-- Round Complete Banner -->
-        <div id="charResultBanner" class="hidden mt-4 p-4 rounded-xl bg-[#140f0c] border border-[#c89d54]/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <div id="charResultTitle" class="font-western text-base sm:text-lg font-bold text-[#e4ba6c]"></div>
-            <p id="charResultSub" class="text-xs sm:text-sm text-[#bfb299] mt-0.5"></p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="switchTab('map')" class="western-btn-gold px-3.5 py-2 rounded-lg text-xs font-western">
-              Next: Story Pinpoint &rarr;
+        <!-- End-of-Round Banner -->
+        <div id="charResultBanner" class="hidden p-4 rounded-xl bg-[#140f0c] border border-[#c89d54]/60 text-center space-y-2">
+          <h3 id="charResultTitle" class="font-western text-lg sm:text-xl font-bold text-[#e4ba6c]"></h3>
+          <p id="charResultSubtitle" class="text-xs sm:text-sm text-[#f3e9d2]"></p>
+          <div class="flex flex-wrap justify-center gap-2 pt-2">
+            <button type="button" onclick="switchTab('map')" class="western-btn-gold px-4 py-2 rounded-lg font-western text-xs font-bold">
+              Play Story Pinpoint (5 Rds) &rarr;
             </button>
-            <button type="button" onclick="switchTab('dossier')" class="western-btn px-3.5 py-2 rounded-lg text-xs font-western">
+            <button type="button" onclick="switchTab('dossier')" class="western-btn px-4 py-2 rounded-lg font-western text-xs font-bold text-[#e4ba6c]">
               Open Lore Dossier &rarr;
             </button>
           </div>
         </div>
-      </div>
 
-      <!-- Deduction Grid -->
-      <div class="leather-panel rounded-xl p-3 sm:p-4 overflow-x-auto">
-        <div class="min-w-[640px]">
-          <div class="grid grid-cols-6 gap-2 pb-2 mb-2 border-b border-[#c89d54]/25 text-[11px] font-western font-bold uppercase tracking-wider text-[#c89d54] text-center">
-            <div>Character</div>
-            <div>Age (1899)</div>
-            <div>Gender</div>
-            <div>Faction / Group</div>
-            <div>Signature Weapon</div>
-            <div>Intro Chapter</div>
-          </div>
-          <div id="charGuessRows" class="space-y-2">
-            <div class="text-center py-8 text-sm text-[#8a7c66] italic">
-              No outlaws guessed yet. Type a character name above to begin tracking today&apos;s target.
+        <!-- Guess Column Headers & Rows -->
+        <div class="overflow-x-auto pb-1">
+          <div class="min-w-[640px] space-y-2">
+            <div class="grid grid-cols-6 gap-2 text-center text-[10px] sm:text-xs font-western uppercase text-[#c89d54] px-1">
+              <div>Outlaw</div>
+              <div>1899 Age</div>
+              <div>Gender</div>
+              <div>Faction</div>
+              <div>Weapon</div>
+              <div>Intro Chapter</div>
             </div>
+            <div id="charGuessesContainer" class="space-y-2"></div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- =================================================================== -->
-    <!-- TAB 2: STORY PINPOINT MAP CHALLENGE + 4-TAP CALIBRATOR              -->
+    <!-- TAB 2: STORY PINPOINT MAP CHALLENGE                                 -->
     <!-- =================================================================== -->
     <section id="section-map" class="hidden space-y-4">
       <div class="leather-panel rounded-xl p-4 sm:p-5">
@@ -434,17 +417,12 @@
           </div>
         </div>
 
-        <!-- Map Toolbar (PROMINENT 4-TAP CALIBRATE BUTTON RIGHT HERE) -->
+        <!-- Map Toolbar -->
         <div class="flex flex-wrap items-center justify-between gap-2 my-3">
           <div class="flex flex-wrap items-center gap-1.5">
             <button id="zoomInBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs font-bold" title="Zoom In">+</button>
             <button id="zoomOutBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs font-bold" title="Zoom Out">&minus;</button>
             <button id="zoomResetBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs" title="Reset Zoom">Reset</button>
-
-            <!-- HIGH-VISIBILITY 4-TAP CALIBRATE BUTTON -->
-            <button id="startCalibrateBtn" type="button" class="western-btn-gold px-3 py-1.5 rounded-lg text-xs font-western shadow-md">
-              &#127919; 4-Tap Calibrate
-            </button>
 
             <label class="western-btn px-2.5 py-1.5 rounded-lg text-xs cursor-pointer inline-flex items-center gap-1" title="Upload custom map image saved in browser">
               <span>&#128506; Select Map Image</span>
@@ -462,67 +440,6 @@
           </div>
         </div>
 
-        <!-- =============================================================== -->
-        <!-- INTERACTIVE 4-TAP ANCHOR CALIBRATOR PANEL                       -->
-        <!-- =============================================================== -->
-        <div id="calibratorPanel" class="hidden mb-3 p-3.5 sm:p-4 rounded-xl bg-[#18120d] border-2 border-[#e4ba6c] shadow-2xl space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#c89d54]/30 pb-2.5">
-            <div>
-              <div class="font-western text-xs sm:text-sm font-bold text-[#e4ba6c]">
-                &#127919; 4-Tap Anchor Map Calibrator
-              </div>
-              <p class="text-[11px] text-[#bfb299]">
-                Zoom in on each town and tap its exact center on the map below. No guessing required!
-              </p>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button id="calibUndoBtn" type="button" disabled class="western-btn px-2.5 py-1 rounded text-xs">
-                Undo Tap
-              </button>
-              <button id="calibResetBtn" type="button" class="western-btn px-2.5 py-1 rounded text-xs text-[#f29b9b]">
-                Reset Calibration
-              </button>
-              <button id="calibCancelBtn" type="button" class="western-btn px-2.5 py-1 rounded text-xs">
-                Close
-              </button>
-            </div>
-          </div>
-
-          <!-- Step-by-Step Anchor Prompt -->
-          <div id="calibInstructionBox" class="p-3 rounded-lg bg-[#241b14] border border-[#c89d54]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <span id="calibStepBadge" class="px-2 py-0.5 rounded bg-[#8f1d1d] text-[#f3e9d2] text-[11px] font-western font-bold">
-                STEP 1 OF 4
-              </span>
-              <span id="calibPromptTitle" class="font-western text-sm font-bold text-[#f3e9d2] ml-2">
-                Tap COLTER
-              </span>
-              <p id="calibPromptDesc" class="text-xs text-[#bfb299] mt-1">
-                Snowy valley settlement in northwest Ambarino (Grizzlies West).
-              </p>
-            </div>
-            <div class="flex items-center gap-1.5 text-xs font-western">
-              <span id="anchorPip0" class="px-2 py-1 rounded bg-[#140f0c] border border-[#c89d54]/30 text-[#7d705c]">1. Colter</span>
-              <span id="anchorPip1" class="px-2 py-1 rounded bg-[#140f0c] border border-[#c89d54]/30 text-[#7d705c]">2. Saint Denis</span>
-              <span id="anchorPip2" class="px-2 py-1 rounded bg-[#140f0c] border border-[#c89d54]/30 text-[#7d705c]">3. Tumbleweed</span>
-              <span id="anchorPip3" class="px-2 py-1 rounded bg-[#140f0c] border border-[#c89d54]/30 text-[#7d705c]">4. Strawberry</span>
-            </div>
-          </div>
-
-          <!-- Completed Calibration Output & Copy Button -->
-          <div id="calibCompleteBox" class="hidden p-3 rounded-lg bg-[#16291d] border border-[#48b872] space-y-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <div class="text-xs sm:text-sm font-semibold text-[#a5f0c0]">
-                &#10004; Calibration Applied &amp; Saved! All 210+ story pins are now aligned to your map.
-              </div>
-              <button id="copyCalibSnippetBtn" type="button" class="western-btn-gold px-3.5 py-1.5 rounded-lg text-xs font-western">
-                &#128203; Copy Calibration Data
-              </button>
-            </div>
-            <pre id="calibSnippetPreview" class="text-[11px] bg-[#0f1712] text-[#d6f5e1] p-2 rounded border border-[#48b872]/30 overflow-x-auto"></pre>
-          </div>
-        </div>
-
         <!-- Map Load Error Notice (if map.jpg missing and none uploaded yet) -->
         <div id="mapMissingNotice" class="hidden mb-3 p-3 rounded-lg bg-[#3b1515] border border-[#d64545] text-xs text-[#f8d7da]">
           Could not find <code class="font-bold">map.jpg</code> or <code class="font-bold">map.png</code> in this folder. Click <strong>Select Map Image</strong> in the toolbar above to load your RDR2 map image (it will stay saved in your browser).
@@ -533,9 +450,6 @@
           <div id="mapStage" class="map-stage">
             <img id="rdr2MapImg" src="map.jpg" alt="Red Dead Redemption 2 Map" />
             <svg id="mapLineOverlay" class="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-
-            <!-- Calibration Anchor Markers (1..4) -->
-            <div id="calibMarkersLayer" class="absolute inset-0 pointer-events-none z-30"></div>
 
             <!-- User Guess Pin -->
             <div id="userMapPin" class="map-pin hidden">
@@ -697,548 +611,840 @@
 
   <script>
     // =========================================================================
-    // 1. DAILY EPOCH ANCHORED TO NOVEMBER 14, 2026 (DAY #1)
+    // 1. DAILY EPOCH & DETERMINISTIC PRNG (NOV 14, 2026 = DAY #1)
     // =========================================================================
-    function getDailyPuzzleInfo() {
-      const anchorUtc = Date.UTC(2026, 10, 14); // Nov 14, 2026
+    function getDailyInfo() {
+      const epochUtc = Date.UTC(2026, 10, 14); // November 14, 2026 = Day #1
       const now = new Date();
-      const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-      const diffDays = Math.floor((todayUtc - anchorUtc) / 86400000);
+      const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+      const diffDays = Math.floor((todayUtc - epochUtc) / 86400000);
       const dayNumber = Math.max(1, diffDays + 1);
-      const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const dateKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
       return { dayNumber, dateKey };
     }
 
-    const DAILY_INFO = getDailyPuzzleInfo();
+    const DAILY_INFO = getDailyInfo();
 
     function mulberry32(seed) {
+      let a = seed >>> 0;
       return function () {
-        let t = (seed += 0x6d2b79f5);
-        t = Math.imul(t ^ (t >>> 15), t | 1);
-        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        a |= 0;
+        a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       };
     }
 
+    function formatChapterLabel(ch) {
+      if (ch <= 6) return `Chapter ${ch}`;
+      if (ch === 7) return 'Epilogue 1';
+      return 'Epilogue 2';
+    }
+
     // =========================================================================
-    // 2. 56 RDR2 CHARACTERS (INTRO CHAPTER ONLY - ZERO DEATH/FATE SPOILERS)
+    // 2. 56-CHARACTER ROSTER (INTRO CHAPTER ONLY — ZERO DEATH SPOILERS)
     // =========================================================================
     const CHARACTERS = [
       {
-        id: 'arthur_morgan', name: 'Arthur Morgan', aliases: ['Arthur', 'Tacitus Kilgore', 'Arthur Callahan'],
-        age: 36, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Cattleman Revolver', chapter: 1,
+        name: 'Arthur Morgan',
+        age: 36,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Cattleman Revolver',
+        chapter: 1,
         dossier: [
-          { q: 'What is the name of the horse Arthur rides at the start of Chapter 1 in Colter?', options: ['Boadicea', 'Old Boy', 'Baylock', 'The Count'], answer: 0 },
-          { q: 'Who taught Arthur Morgan how to read and write when he was a teenager?', options: ['Hosea & Dutch', 'Uncle', 'Swanson', 'Strauss'], answer: 0 },
-          { q: 'What personal item does Arthur constantly fill with sketches and notes?', options: ['Leather Journal', 'Silver Pocket Watch', 'Brass Compass', 'Harmonica'], answer: 0 }
+          { q: 'What was the name of Arthur Morgan’s biological son?', options: ['Isaac', 'Jack', 'Thomas', 'Sean'], answer: 0 },
+          { q: 'Who raised and mentored Arthur alongside Dutch van der Linde?', options: ['Hosea Matthews', 'Uncle', 'Colm O’Driscoll', 'Landon Ricketts'], answer: 0 },
+          { q: 'What animal represents Arthur’s high-honor visions?', options: ['A Buck', 'A Coyote', 'A Grizzly Bear', 'A Wolf'], answer: 0 }
         ]
       },
       {
-        id: 'dutch_van_der_linde', name: 'Dutch van der Linde', aliases: ['Dutch', 'Aiden O’Malley'],
-        age: 44, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Schofield Revolver', chapter: 1,
+        name: 'Dutch van der Linde',
+        age: 44,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Schofield Revolvers',
+        chapter: 1,
         dossier: [
-          { q: 'Who is the philosopher whose books Dutch frequently reads and quotes?', options: ['Evelyn Miller', 'Marko Dragic', 'Josiah Trelawny', 'Rains Fall'], answer: 0 },
-          { q: 'What breed and coat is Dutch’s prized horse?', options: ['Albino Arabian', 'Black Arabian', 'Silver Dapple Pinto', 'Turkoman'], answer: 0 },
-          { q: 'Which rival gang leader has a bitter, decades-long blood feud with Dutch?', options: ['Colm O’Driscoll', 'Leviticus Cornwall', 'Angelo Bronte', 'Andrew Milton'], answer: 0 }
+          { q: 'Who is Dutch’s favorite philosophical author whose books appear at camp?', options: ['Evelyn Miller', 'J.B. Calloway', 'Otis Miller', 'Theodore Levin'], answer: 0 },
+          { q: 'What is the name of Dutch’s albino Arabian horse?', options: ['The Count', 'Old Boy', 'Baylock', 'Silver Dollar'], answer: 0 },
+          { q: 'Which city’s ferry job went disastrously wrong just before Chapter 1?', options: ['Blackwater', 'Saint Denis', 'Valentine', 'Armadillo'], answer: 0 }
         ]
       },
       {
-        id: 'john_marston', name: 'John Marston', aliases: ['John', 'Jim Milton', 'Rip Van Winkle'],
-        age: 26, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Cattleman Revolver', chapter: 1,
+        name: 'John Marston',
+        age: 26,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Cattleman Revolver',
+        chapter: 1,
         dossier: [
-          { q: 'How did John Marston get the scars on his face before Chapter 1?', options: ['Attacked by wolves in the mountains', 'A duel in Blackwater', 'A bar fight in Valentine', 'An O’Driscoll ambush'], answer: 0 },
-          { q: 'What is the name of John Marston’s young son?', options: ['Jack', 'Isaac', 'Lancelot', 'Jamie'], answer: 0 },
-          { q: 'What basic skill is John notoriously unable to perform?', options: ['Swimming', 'Riding a horse', 'Skinning game', 'Playing poker'], answer: 0 }
+          { q: 'What alias did John Marston use while working at Pronghorn Ranch?', options: ['Jim Milton', 'Rip Van Winkle', 'Arthur Callahan', 'Tacitus Kilgore'], answer: 0 },
+          { q: 'Which animal gave John the iconic scars across his face?', options: ['Wolves', 'A Grizzly Bear', 'A Cougar', 'A Panther'], answer: 0 },
+          { q: 'What is the name of the ranch John builds in West Elizabeth?', options: ['Beecher’s Hope', 'Downes Ranch', 'MacFarlane’s Ranch', 'Adler Ranch'], answer: 0 }
         ]
       },
       {
-        id: 'hosea_matthews', name: 'Hosea Matthews', aliases: ['Hosea', 'Fenton', 'Melvin'],
-        age: 55, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Semi-Auto Shotgun', chapter: 1,
+        name: 'Hosea Matthews',
+        age: 55,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Dual Cattleman Revolvers',
+        chapter: 1,
         dossier: [
-          { q: 'What alias does Hosea use when posing as a mute moonshine server in Rhodes?', options: ['Fenton', 'Tacitus Kilgore', 'Rip Van Winkle', 'Arthur Callahan'], answer: 0 },
-          { q: 'What was the name of Hosea’s beloved late wife?', options: ['Bessie', 'Annabelle', 'Eliza', 'Martha'], answer: 0 },
-          { q: 'Which legendary predator does Hosea take Arthur to track in East Grizzlies?', options: ['Bharati Grizzly Bear', 'Tatanka Bison', 'Giaguaro Panther', 'Ghost Bison'], answer: 0 }
+          { q: 'What was the name of Hosea Matthews’s late wife?', options: ['Bessie', 'Annabelle', 'Martha', 'Mary'], answer: 0 },
+          { q: 'What fake persona did Hosea use while serving moonshine in Rhodes?', options: ['Fenton', 'Tacitus', 'Melvin', 'Leviticus'], answer: 0 },
+          { q: 'Which legendary animal did Hosea and Arthur hunt together in Grizzlies East?', options: ['Bharati Grizzly Bear', 'Giaguaro Panther', 'Tatanka Bison', 'Ghost Bison'], answer: 0 }
         ]
       },
       {
-        id: 'sadie_adler', name: 'Sadie Adler', aliases: ['Sadie', 'Mrs. Adler'],
-        age: 25, gender: 'Female', faction: 'Van der Linde Gang', weapon: 'Carbine Repeater', chapter: 1,
+        name: 'Sadie Adler',
+        age: 25,
+        gender: 'Female',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'bounty hunter'],
+        weapon: 'Carbine Repeater',
+        chapter: 1,
         dossier: [
-          { q: 'What was the name of Sadie Adler’s husband killed at their ranch?', options: ['Jake', 'Caleb', 'Amos', 'Thomas'], answer: 0 },
-          { q: 'Which gang occupied the Adler homestead during the blizzard in Chapter 1?', options: ['O’Driscoll Boys', 'Lemoyne Raiders', 'Murfree Brood', 'Laramie Gang'], answer: 0 },
-          { q: 'Where does Sadie first accompany Arthur into town to buy supplies and new clothes?', options: ['Rhodes', 'Valentine', 'Strawberry', 'Saint Denis'], answer: 0 }
+          { q: 'What was Sadie’s late husband’s first name?', options: ['Jake', 'Kieran', 'Sean', 'Thomas'], answer: 0 },
+          { q: 'What profession did Sadie pursue after leaving the gang?', options: ['Bounty Hunter', 'Rancher', 'Saloon Owner', 'Telegraph Operator'], answer: 0 },
+          { q: 'Which gang murdered Sadie’s husband at their Ambarino ranch?', options: ['O’Driscoll Boys', 'Lemoyne Raiders', 'Murfree Brood', 'Laramie Gang'], answer: 0 }
         ]
       },
       {
-        id: 'charles_smith', name: 'Charles Smith', aliases: ['Charles'],
-        age: 27, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Bow & Sawed-Off Shotgun', chapter: 1,
+        name: 'Micah Bell',
+        age: 39,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Double-Action Revolvers',
+        chapter: 1,
         dossier: [
-          { q: 'What is Charles Smith’s parental heritage?', options: ['African American & Native American', 'Irish & Scottish', 'Mexican & Spanish', 'German & Dutch'], answer: 0 },
-          { q: 'What weapon does Charles craft and teach Arthur to hunt silently with?', options: ['Bow and Arrows', 'Rolling Block Rifle', 'Throwing Knives', 'Varmint Rifle'], answer: 0 },
-          { q: 'Which Native American tribe does Charles form a close bond with in Ambarino?', options: ['Wapiti', 'Comanche', 'Lakota', 'Cherokee'], answer: 0 }
+          { q: 'What inscription is etched onto Micah’s custom Double-Action Revolvers?', options: ['Vengeance is hereby mine', 'Death awaits all', 'No mercy for fools', 'Born to hang'], answer: 0 },
+          { q: 'In which town was Micah jailed before Arthur broke him out?', options: ['Strawberry', 'Valentine', 'Rhodes', 'Annesburg'], answer: 0 },
+          { q: 'What is the name of Micah’s Missouri Fox Trotter horse?', options: ['Baylock', 'The Count', 'Boadicea', 'Taima'], answer: 0 }
         ]
       },
       {
-        id: 'abigail_roberts', name: 'Abigail Roberts', aliases: ['Abigail', 'Abigail Marston'],
-        age: 22, gender: 'Female', faction: 'Van der Linde Gang', weapon: 'Unarmed / Knife', chapter: 1,
+        name: 'Charles Smith',
+        age: 27,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Sawed-Off Shotgun & Bow',
+        chapter: 1,
         dossier: [
-          { q: 'Who introduced Abigail to the Van der Linde gang around 1894?', options: ['Uncle', 'Hosea Matthews', 'Susan Grimshaw', 'Bill Williamson'], answer: 0 },
-          { q: 'What is Abigail’s greatest wish for John and Jack?', options: ['To leave outlaw life behind for a peaceful home', 'To rob the Saint Denis bank', 'To sail to Tahiti', 'To buy a saloon'], answer: 0 },
-          { q: 'Who does Abigail ask to take Jack fishing near Horseshoe Overlook?', options: ['Arthur Morgan', 'Micah Bell', 'Sean MacGuire', 'Leopold Strauss'], answer: 0 }
+          { q: 'Which two backgrounds make up Charles Smith’s heritage?', options: ['African-American and Native American', 'Irish and Scottish', 'Mexican and Spanish', 'German and Dutch'], answer: 0 },
+          { q: 'In which city did Charles compete in bare-knuckle prize fights in 1907?', options: ['Saint Denis', 'Blackwater', 'Valentine', 'Van Horn'], answer: 0 },
+          { q: 'What is the name of Charles’s Appaloosa horse?', options: ['Taima', 'Brown Jack', 'Old Belle', 'Ennis'], answer: 0 }
         ]
       },
       {
-        id: 'jack_marston', name: 'Jack Marston', aliases: ['Jack', 'Lancelot'],
-        age: 4, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Unarmed', chapter: 1,
+        name: 'Abigail Roberts',
+        age: 22,
+        gender: 'Female',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Unarmed / Knife',
+        chapter: 1,
         dossier: [
-          { q: 'What pastime does young Jack Marston enjoy most in camp?', options: ['Reading penny dreadful books', 'Playing five finger fillet', 'Quick-draw practice', 'Playing the banjo'], answer: 0 },
-          { q: 'Who kidnaps Jack Marston from Clemens Point in Chapter 3?', options: ['The Braithwaites', 'The Grays', 'The O’Driscolls', 'The Pinkertons'], answer: 0 },
-          { q: 'What Italian meal does Angelo Bronte feed Jack in Saint Denis?', options: ['Spaghetti', 'Gelato', 'Cannoli', 'Lasagna'], answer: 0 }
+          { q: 'Who introduced Abigail to the Van der Linde gang in 1894?', options: ['Uncle', 'Hosea Matthews', 'John Marston', 'Susan Grimshaw'], answer: 0 },
+          { q: 'What skill did Abigail ask Hosea to teach her in camp?', options: ['How to read', 'How to shoot a rifle', 'How to play poker', 'How to skin a deer'], answer: 0 },
+          { q: 'What is the name of Abigail and John’s son?', options: ['Jack Marston', 'Isaac Morgan', 'Jamie Gillis', 'Archie Downes'], answer: 0 }
         ]
       },
       {
-        id: 'uncle', name: 'Uncle', aliases: ['The One-Shot Kid'],
-        age: 50, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Schofield Revolver', chapter: 1,
+        name: 'Jack Marston',
+        age: 4,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Toy Wooden Sword',
+        chapter: 1,
         dossier: [
-          { q: 'What chronic medical ailment does Uncle constantly blame for avoiding hard work?', options: ['Terminal lumbago', 'Gout', 'Consumption', 'Rheumatism'], answer: 0 },
-          { q: 'Which three women accompany Uncle on his first wagon trip into Valentine?', options: ['Karen, Mary-Beth, and Tilly', 'Sadie, Abigail, and Molly', 'Susan, Karen, and Sadie', 'Tilly, Molly, and Mary-Beth'], answer: 0 },
-          { q: 'What musical instrument does Uncle often play around the campfire?', options: ['Banjo', 'Harmonica', 'Concertina', 'Fiddle'], answer: 0 }
+          { q: 'Who kidnapped young Jack from Clemens Point in Chapter 3?', options: ['The Braithwaite family', 'Colm O’Driscoll', 'Agent Milton', 'Leviticus Cornwall'], answer: 0 },
+          { q: 'What luxury food did Angelo Bronte feed Jack in Saint Denis?', options: ['Spaghetti', 'Lobster', 'Caviar', 'Roast Duck'], answer: 0 },
+          { q: 'What is the name of the stray dog Jack adopts at camp?', options: ['Cain', 'Rufus', 'Copper', 'Bandit'], answer: 0 }
         ]
       },
       {
-        id: 'javier_escuella', name: 'Javier Escuella', aliases: ['Javier'],
-        age: 26, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Double-Action Revolver', chapter: 1,
+        name: 'Lenny Summers',
+        age: 19,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Rolling Block Rifle',
+        chapter: 1,
         dossier: [
-          { q: 'Which Mexican state does Javier Escuella originally hail from?', options: ['Nuevo Paraíso', 'Chihuahua', 'Sonora', 'Jalisco'], answer: 0 },
-          { q: 'What instrument does Javier frequently play around the gang’s campfire?', options: ['Guitar', 'Banjo', 'Harmonica', 'Trumpet'], answer: 0 },
-          { q: 'Who accompanies Javier into the snowy mountains to rescue John Marston in Chapter 1?', options: ['Arthur Morgan', 'Charles Smith', 'Micah Bell', 'Bill Williamson'], answer: 0 }
+          { q: 'In which town did Lenny and Arthur share an unforgettable night of drinking?', options: ['Valentine', 'Rhodes', 'Saint Denis', 'Strawberry'], answer: 0 },
+          { q: 'What did Lenny’s father teach him before Lenny went on the run?', options: ['How to read and write', 'How to forge bank notes', 'How to tame wild horses', 'How to brew moonshine'], answer: 0 },
+          { q: 'Which gang’s hideout at Shady Belle did Lenny and Arthur clear out in Chapter 3?', options: ['Lemoyne Raiders', 'O’Driscoll Boys', 'Murfree Brood', 'Night Folk'], answer: 0 }
         ]
       },
       {
-        id: 'bill_williamson', name: 'Bill Williamson', aliases: ['Bill', 'Marion Williamson'],
-        age: 33, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Bolt-Action Rifle', chapter: 1,
+        name: 'Javier Escuella',
+        age: 26,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Double-Action Revolver',
+        chapter: 1,
         dossier: [
-          { q: 'What is Bill Williamson’s real birth name?', options: ['Marion Williamson', 'William Marion', 'Robert Williamson', 'Thomas Williamson'], answer: 0 },
-          { q: 'What branch of service was Bill dishonorably discharged from in 1892?', options: ['U.S. Cavalry', 'U.S. Navy', 'Pinkerton Agency', 'Texas Rangers'], answer: 0 },
-          { q: 'Which major bank heist does Bill plan and lead with Karen, Lenny, and Arthur?', options: ['Valentine Bank', 'Rhodes Bank', 'Saint Denis Bank', 'Blackwater Bank'], answer: 0 }
+          { q: 'Which Mexican state does Javier Escuella hail from?', options: ['Nuevo Paraíso', 'Chihuahua', 'Sonora', 'Jalisco'], answer: 0 },
+          { q: 'Which musical instrument does Javier frequently play around the campfires?', options: ['Acoustic Guitar', 'Harmonica', 'Banjo', 'Concertina'], answer: 0 },
+          { q: 'What is the name of Javier’s American Paint horse?', options: ['Boaz', 'Baylock', 'Nell II', 'Ennis'], answer: 0 }
         ]
       },
       {
-        id: 'micah_bell', name: 'Micah Bell', aliases: ['Micah'],
-        age: 39, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Dual Double-Action Revolvers', chapter: 1,
+        name: 'Bill Williamson',
+        age: 33,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Bolt Action Rifle',
+        chapter: 1,
         dossier: [
-          { q: 'What phrase is engraved along the barrels of Micah Bell’s twin revolvers?', options: ['Vengeance Is Hereby Mine', 'Dog Eat Dog', 'Swift Justice', 'No Mercy'], answer: 0 },
-          { q: 'In which town is Micah jailed before Arthur breaks him out in Chapter 2?', options: ['Strawberry', 'Valentine', 'Rhodes', 'Annesburg'], answer: 0 },
-          { q: 'What is the name of Micah Bell’s dark bay Missouri Fox Trotter horse?', options: ['Baylock', 'Old Boy', 'Silver Dollar', 'Branwen'], answer: 0 }
+          { q: 'What is Bill Williamson’s real birth name?', options: ['Marion Williamson', 'William MacGuire', 'Arthur Williamson', 'Thomas Bell'], answer: 0 },
+          { q: 'What is the name of Bill’s massive Ardennes war horse?', options: ['Brown Jack', 'Old Boy', 'Silver Dollar', 'Taima'], answer: 0 },
+          { q: 'In which branch of the military did Bill serve before being dishonorably discharged?', options: ['U.S. Cavalry', 'U.S. Navy', 'Confederate Army', 'Texas Rangers'], answer: 0 }
         ]
       },
       {
-        id: 'lenny_summers', name: 'Lenny Summers', aliases: ['Lenny', 'Ynnel'],
-        age: 19, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Cattleman Revolver', chapter: 1,
+        name: 'Sean MacGuire',
+        age: 24,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Double-Barreled Shotgun',
+        chapter: 2,
         dossier: [
-          { q: 'What does Arthur yell repeatedly while drunk with Lenny in Valentine?', options: ['LENNY!', 'GAVIN!', 'DUTCH!', 'HOSEA!'], answer: 0 },
-          { q: 'Which rival gang captures Lenny in Strawberry before Arthur rescues him?', options: ['O’Driscoll Boys', 'Lemoyne Raiders', 'Bounty Hunters', 'Gray Deputies'], answer: 0 },
-          { q: 'What skill did Lenny’s father teach him that sets him apart from most gang members?', options: ['Reading and education', 'Safecracking', 'Horse taming', 'Blacksmithing'], answer: 0 }
+          { q: 'Near which town did Arthur, Charles, and Javier rescue Sean from bounty hunters?', options: ['Blackwater', 'Annesburg', 'Van Horn', 'Tumbleweed'], answer: 0 },
+          { q: 'Which fellow gang member was Sean briefly romantically involved with at camp?', options: ['Karen Jones', 'Mary-Beth Gaskill', 'Tilly Jackson', 'Molly O’Shea'], answer: 0 },
+          { q: 'What is the name of Sean’s Silver Tail Buckskin American Standardbred horse?', options: ['Ennis', 'Boaz', 'Branwen', 'Old Belle'], answer: 0 }
         ]
       },
       {
-        id: 'sean_macguire', name: 'Sean MacGuire', aliases: ['Sean'],
-        age: 23, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Cattleman Revolver', chapter: 2,
+        name: 'Uncle',
+        age: 50,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Schofield Revolver',
+        chapter: 1,
         dossier: [
-          { q: 'Which Irish county does Sean MacGuire proudly claim as his birthplace?', options: ['Donegal', 'Cork', 'Dublin', 'Galway'], answer: 0 },
-          { q: 'Where do Arthur, Charles, Javier, and Trelawny rescue Sean from bounty hunters?', options: ['Upper Montana River near Blackwater', 'Fort Wallace', 'Sisika Penitentiary', 'Strawberry Jail'], answer: 0 },
-          { q: 'Which gang member shares a fiery romance with Sean MacGuire?', options: ['Karen Jones', 'Mary-Beth Gaskill', 'Tilly Jackson', 'Sadie Adler'], answer: 0 }
+          { q: 'What terminal medical condition does Uncle constantly complain about?', options: ['Lumbago', 'Consumption', 'Cholera', 'Gout'], answer: 0 },
+          { q: 'What nickname did Uncle claim he was known by in his youth?', options: ['The One-Shot Kid', 'The Blackwater Butcher', 'King of the Plains', 'Red Harlow'], answer: 0 },
+          { q: 'What is the name of Uncle’s Appaloosa horse?', options: ['Nell II', 'Brown Jack', 'Boadicea', 'Gwydion'], answer: 0 }
         ]
       },
       {
-        id: 'karen_jones', name: 'Karen Jones', aliases: ['Karen'],
-        age: 26, gender: 'Female', faction: 'Van der Linde Gang', weapon: 'Cattleman Revolver', chapter: 1,
+        name: 'Pearson',
+        age: 41,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Butcher Cleaver',
+        chapter: 1,
         dossier: [
-          { q: 'What role does Karen play during the Valentine Bank robbery?', options: ['Creates a loud distraction inside the bank', 'Drives the getaway wagon', 'Plants dynamite', 'Snipes from the roof'], answer: 0 },
-          { q: 'Which other female gang members share a close friendship with Karen in camp?', options: ['Mary-Beth and Tilly', 'Sadie and Molly', 'Abigail and Susan', 'Bonnie and Lillian'], answer: 0 },
-          { q: 'What habit consumes Karen more heavily as the gang’s fortunes decline?', options: ['Heavy drinking', 'Gambling', 'Opium', 'Shoplifting'], answer: 0 }
+          { q: 'What was Simon Pearson’s role in the U.S. Navy?', options: ['Ship’s Cook / Blubber Steward', 'Cannon Gunner', 'Navigator', 'Shipwright'], answer: 0 },
+          { q: 'In which town did Pearson open a general store by 1907?', options: ['Rhodes', 'Valentine', 'Strawberry', 'Armadillo'], answer: 0 },
+          { q: 'What animal’s skin does Pearson ask Arthur to bring him for a special scout jacket?', options: ['Rabbit', 'Cougar', 'Beaver', 'Badger'], answer: 0 }
         ]
       },
       {
-        id: 'mary_beth_gaskill', name: 'Mary-Beth Gaskill', aliases: ['Mary-Beth'],
-        age: 21, gender: 'Female', faction: 'Van der Linde Gang', weapon: 'Unarmed', chapter: 1,
+        name: 'Susan Grimshaw',
+        age: 46,
+        gender: 'Female',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Double-Barreled Shotgun',
+        chapter: 1,
         dossier: [
-          { q: 'What literary ambition does Mary-Beth secretly pursue in her notebook?', options: ['Writing romance novels', 'Writing political manifestos', 'Composing poetry', 'Writing dime westerns'], answer: 0 },
-          { q: 'Which wealthy company’s train tip does Mary-Beth uncover in Scarlett Meadows?', options: ['Cornwall payroll train', 'Braithwaite gold train', 'Gray silver train', 'Bronte express'], answer: 0 },
-          { q: 'Which gang member frequently sits with Mary-Beth for heartfelt talks about his inner turmoil?', options: ['Arthur Morgan', 'Micah Bell', 'Bill Williamson', 'Leopold Strauss'], answer: 0 }
+          { q: 'Which gang member did Susan Grimshaw rescue from the Foreman Brothers in Chapter 4?', options: ['Tilly Jackson', 'Mary-Beth Gaskill', 'Karen Jones', 'Molly O’Shea'], answer: 0 },
+          { q: 'What was Susan Grimshaw’s primary duty at the gang’s camps?', options: ['Camp Arbiter & Chore Supervisor', 'Wagon Fence', 'Lookout Scout', 'Camp Doctor'], answer: 0 },
+          { q: 'Who was Susan Grimshaw’s former romantic partner years before 1899?', options: ['Dutch van der Linde', 'Hosea Matthews', 'Uncle', 'Colm O’Driscoll'], answer: 0 }
         ]
       },
       {
-        id: 'tilly_jackson', name: 'Tilly Jackson', aliases: ['Tilly'],
-        age: 20, gender: 'Female', faction: 'Van der Linde Gang', weapon: 'Knife / Revolver', chapter: 1,
+        name: 'Karen Jones',
+        age: 27,
+        gender: 'Female',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Cattleman Revolver',
+        chapter: 1,
         dossier: [
-          { q: 'Which gang kidnapped Tilly as a child before she escaped and joined Dutch?', options: ['Foreman Brothers', 'O’Driscoll Boys', 'Lemoyne Raiders', 'Night Folk'], answer: 0 },
-          { q: 'What tabletop game does Tilly frequently challenge Arthur to play at camp?', options: ['Dominoes', 'Five Finger Fillet', 'Poker', 'Blackjack'], answer: 0 },
-          { q: 'Near which town is Tilly abducted by Anthony Foreman before Arthur and Susan rescue her?', options: ['Rhodes', 'Valentine', 'Saint Denis', 'Van Horn'], answer: 0 }
+          { q: 'Which bank did Karen help Arthur, Bill, and Lenny rob in Chapter 3?', options: ['Valentine Bank', 'Saint Denis Bank', 'Rhodes Bank', 'Blackwater Bank'], answer: 0 },
+          { q: 'What disguise did Karen use during the Valentine bank robbery?', options: ['A grieving widow / drunken harlot', 'A Pinkerton detective', 'A nun', 'A telegraph clerk'], answer: 0 },
+          { q: 'What is the name of Karen’s Nokota horse?', options: ['Old Belle', 'Taima', 'Branwen', 'Ennis'], answer: 0 }
         ]
       },
       {
-        id: 'susan_grimshaw', name: 'Susan Grimshaw', aliases: ['Miss Grimshaw', 'Susan'],
-        age: 45, gender: 'Female', faction: 'Van der Linde Gang', weapon: 'Double-Barreled Shotgun', chapter: 1,
+        name: 'Mary-Beth Gaskill',
+        age: 21,
+        gender: 'Female',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Knife',
+        chapter: 1,
         dossier: [
-          { q: 'What is Susan Grimshaw’s primary responsibility in every camp?', options: ['Enforcing discipline and camp chores', 'Cooking stew', 'Managing loans', 'Tending horses'], answer: 0 },
-          { q: 'Who accompanies Susan Grimshaw to rescue Tilly Jackson from the Foreman Brothers?', options: ['Arthur Morgan', 'Charles Smith', 'Sadie Adler', 'John Marston'], answer: 0 },
-          { q: 'What past relationship did Susan Grimshaw once have with Dutch van der Linde?', options: ['They were romantically involved years earlier', 'They were cousins', 'They were business partners', 'She was his schoolteacher'], answer: 0 }
+          { q: 'What career did Mary-Beth achieve by 1907?', options: ['Romance Novelist', 'Stage Actress', 'Newspaper Editor', 'Schoolteacher'], answer: 0 },
+          { q: 'What pen name did Mary-Beth publish her novels under?', options: ['Leslie Dupont', 'Evelyn Miller', 'Catherine Braithwaite', 'Penélope Gray'], answer: 0 },
+          { q: 'In which town did John Marston run into Mary-Beth at a train station in 1907?', options: ['Valentine', 'Saint Denis', 'Rhodes', 'Annesburg'], answer: 0 }
         ]
       },
       {
-        id: 'simon_pearson', name: 'Simon Pearson', aliases: ['Pearson', 'Mr. Pearson'],
-        age: 44, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Butcher Knife', chapter: 1,
+        name: 'Tilly Jackson',
+        age: 20,
+        gender: 'Female',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Knife',
+        chapter: 1,
         dossier: [
-          { q: 'What military branch does Pearson constantly brag about serving in?', options: ['U.S. Navy', 'U.S. Cavalry', 'Rough Riders', 'Union Artillery'], answer: 0 },
-          { q: 'What musical instrument does Pearson play around the campfire?', options: ['Concertina', 'Banjo', 'Guitar', 'Fiddle'], answer: 0 },
-          { q: 'What materials does Arthur bring to Pearson to upgrade the camp’s satchels and decor?', options: ['Perfect animal pelts', 'Gold bars', 'Stolen jewelry', 'Exotic feathers'], answer: 0 }
+          { q: 'Which gang kidnapped Tilly as a child before Dutch rescued her?', options: ['Foreman Brothers', 'O’Driscoll Boys', 'Lemoyne Raiders', 'Laramie Gang'], answer: 0 },
+          { q: 'Which board game can Arthur play with Tilly at camp?', options: ['Dominoes', 'Five Finger Fillet', 'Poker', 'Chess'], answer: 0 },
+          { q: 'In which city did Tilly settle down and start a family by 1907?', options: ['Saint Denis', 'Blackwater', 'Strawberry', 'Rhodes'], answer: 0 }
         ]
       },
       {
-        id: 'leopold_strauss', name: 'Leopold Strauss', aliases: ['Strauss', 'Herr Strauss'],
-        age: 53, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Unarmed', chapter: 1,
+        name: 'Molly O’Shea',
+        age: 28,
+        gender: 'Female',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Unarmed',
+        chapter: 1,
         dossier: [
-          { q: 'Which European empire did Leopold Strauss immigrate from?', options: ['Austro-Hungarian Empire', 'German Empire', 'Russian Empire', 'Ottoman Empire'], answer: 0 },
-          { q: 'Which desperate debtor does Strauss send Arthur to collect from near Valentine?', options: ['Thomas Downes', 'Lilly Millet', 'Winton Holmes', 'Algie Davison'], answer: 0 },
-          { q: 'What role does Leopold Strauss manage inside the Van der Linde camp?', options: ['Loan sharking & camp ledger', 'Cooking stew', 'Weapon smithing', 'Horse breaking'], answer: 0 }
+          { q: 'Which city in Ireland did Molly O’Shea emigrate from?', options: ['Dublin', 'Cork', 'Belfast', 'Galway'], answer: 0 },
+          { q: 'Which item does Molly ask Arthur to bring her as a camp request?', options: ['A pocket mirror', 'A silver locket', 'A harmonica', 'A fountain pen'], answer: 0 },
+          { q: 'Who was Molly O’Shea romantically involved with in the gang?', options: ['Dutch van der Linde', 'Hosea Matthews', 'Josiah Trelawny', 'Leopold Strauss'], answer: 0 }
         ]
       },
       {
-        id: 'orville_swanson', name: 'Reverend Swanson', aliases: ['Swanson', 'Orville Swanson'],
-        age: 46, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Unarmed', chapter: 1,
+        name: 'Leopold Strauss',
+        age: 53,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Unarmed',
+        chapter: 1,
         dossier: [
-          { q: 'What substances does Reverend Swanson struggle with addiction to in early chapters?', options: ['Morphine and alcohol', 'Opium and tobacco', 'Laudanum only', 'Cocaine gum'], answer: 0 },
-          { q: 'Where does Arthur rescue a heavily intoxicated Swanson from an oncoming train?', options: ['Bard’s Crossing', 'Bacchus Bridge', 'Flatneck Station', 'Riggs Station'], answer: 0 },
-          { q: 'What hollowed-out item does Swanson hide his syringe and morphine inside?', options: ['A Bible', 'A hymn book', 'A wooden cross', 'A flask'], answer: 0 }
+          { q: 'Which European empire was Leopold Strauss born in?', options: ['Austrian Empire (Vienna)', 'Prussia', 'Russian Empire', 'Kingdom of Italy'], answer: 0 },
+          { q: 'What was Strauss’s primary money-making operation for the gang?', options: ['Loan sharking', 'Stagecoach holdups', 'Moonshine running', 'Horse rustling'], answer: 0 },
+          { q: 'Which debtor’s farm did Strauss send Arthur to in Chapter 2, forever changing Arthur’s fate?', options: ['Thomas Downes', 'Wróbel', 'Chick Matthews', 'Lilly Millet'], answer: 0 }
         ]
       },
       {
-        id: 'molly_oshea', name: 'Molly O’Shea', aliases: ['Molly'],
-        age: 26, gender: 'Female', faction: 'Van der Linde Gang', weapon: 'Unarmed', chapter: 1,
+        name: 'Reverend Swanson',
+        age: 39,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde'],
+        weapon: 'Unarmed',
+        chapter: 1,
         dossier: [
-          { q: 'Which Irish city did Molly O’Shea come from before immigrating to America?', options: ['Dublin', 'Belfast', 'Cork', 'Limerick'], answer: 0 },
-          { q: 'Why does Molly refuse to perform camp chores alongside the other women?', options: ['She considers herself above labor as Dutch’s lover', 'She has a broken arm', 'She is always out scouting', 'She runs the ledger'], answer: 0 },
-          { q: 'How does Molly’s relationship with Dutch change between Chapters 2 and 4?', options: ['Dutch grows cold and distant toward her', 'They get married in Saint Denis', 'They buy a house together', 'She leaves for Ireland'], answer: 0 }
+          { q: 'Where did Arthur rescue a drunken Reverend Swanson from an oncoming train?', options: ['Bard’s Crossing', 'Bacchus Bridge', 'Flatneck Station', 'Riggs Station'], answer: 0 },
+          { q: 'What item did Reverend Swanson hide his morphine inside at camp?', options: ['A hollowed-out Bible', 'A whiskey flask', 'A medicine tin', 'A saddlebag'], answer: 0 },
+          { q: 'Which city did Swanson move to after turning his life around in 1899?', options: ['New York City', 'Chicago', 'Boston', 'San Francisco'], answer: 0 }
         ]
       },
       {
-        id: 'josiah_trelawny', name: 'Josiah Trelawny', aliases: ['Trelawny'],
-        age: 42, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Derringer / Revolver', chapter: 2,
+        name: 'Josiah Trelawny',
+        age: 37,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'outlaw'],
+        weapon: 'Unarmed / Cane',
+        chapter: 2,
         dossier: [
-          { q: 'What is Josiah Trelawny’s signature attire?', options: ['Top hat and tailored vest', 'Bearskin coat', 'Sheriff’s badge', 'Poncho and sombrero'], answer: 0 },
-          { q: 'Which high-stakes riverboat robbery does Trelawny orchestrate in Saint Denis?', options: ['The Grand Korrigan ferry', 'The Serena steamboat', 'The Duchess riverboat', 'The Lannahechee Belle'], answer: 0 },
-          { q: 'What secret double life does Arthur discover Trelawny maintains in Saint Denis?', options: ['A wife and two young sons', 'A secret Pinkerton badge', 'An illegal distillery', 'A theater troupe'], answer: 0 }
+          { q: 'Which English county was Josiah Trelawny born in?', options: ['Cornwall', 'Yorkshire', 'Devon', 'Kent'], answer: 0 },
+          { q: 'Aboard which luxury riverboat did Trelawny help Arthur and Javier rob high-stakes poker players?', options: ['Grand Korrigan', 'Serendipity', 'Emma Mae', 'River Queen'], answer: 0 },
+          { q: 'Where in Saint Denis can Arthur overhear Trelawny talking to his secret wife and children?', options: ['An apartment alley near the theater', 'The Mayor’s mansion', 'Saint Denis Docks', 'Doyle’s Tavern'], answer: 0 }
         ]
       },
       {
-        id: 'kieran_duffy', name: 'Kieran Duffy', aliases: ['Kieran'],
-        age: 24, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Cattleman Revolver', chapter: 1,
+        name: 'Kieran Duffy',
+        age: 26,
+        gender: 'Male',
+        faction: 'Van der Linde Gang',
+        tags: ['van der linde', 'o’driscoll'],
+        weapon: 'Double-Barreled Shotgun',
+        chapter: 1,
         dossier: [
           { q: 'Which rival gang did Kieran Duffy belong to before being captured at Ewing Basin?', options: ['O’Driscoll Boys', 'Lemoyne Raiders', 'Laramie Gang', 'Del Lobo Gang'], answer: 0 },
-          { q: 'How does Kieran earn the gang’s trust during the raid at Six Point Cabin?', options: ['He shoots an O’Driscoll to save Arthur’s life', 'He cracks a safe', 'He brings gold bars', 'He captures Colm O’Driscoll'], answer: 0 },
-          { q: 'What chore does Kieran happily dedicate himself to once untied in camp?', options: ['Caring for the gang’s horses', 'Cooking stew', 'Guarding the perimeter', 'Tailoring clothes'], answer: 0 }
+          { q: 'At which cabin did Kieran save Arthur’s life by shooting an O’Driscoll attacker?', options: ['Six Point Cabin', 'Hanging Dog Ranch', 'Lucky’s Cabin', 'Vetters Echo'], answer: 0 },
+          { q: 'What was Kieran’s favorite chore around the Van der Linde camp?', options: ['Caring for the horses', 'Cooking stew', 'Chopping firewood', 'Guard duty'], answer: 0 }
         ]
       },
       {
-        id: 'davey_callander', name: 'Davey Callander', aliases: ['Davey'],
-        age: 31, gender: 'Male', faction: 'Van der Linde Gang', weapon: 'Revolver', chapter: 1,
+        name: 'Sadie’s Husband (Jake Adler)',
+        age: 28,
+        gender: 'Male',
+        faction: 'Civilian / Rancher',
+        tags: ['civilian'],
+        weapon: 'Rifle',
+        chapter: 1,
         dossier: [
-          { q: 'Who was Davey Callander’s brother who also rode with the Van der Linde gang?', options: ['Mac Callander', 'Sean MacGuire', 'Jenny Kirk', 'Jake Adler'], answer: 0 },
-          { q: 'Where did Davey Callander succumb to wounds sustained during the Blackwater ferry job?', options: ['Colter', 'Horseshoe Overlook', 'Strawberry', 'Clemens Point'], answer: 0 },
-          { q: 'Which gang members attended to Davey’s body in the cabin at Colter?', options: ['Hosea & Abigail', 'Micah & Bill', 'Lenny & Sean', 'Trelawny & Strauss'], answer: 0 }
+          { q: 'In which mountain region was Jake and Sadie Adler’s ranch located?', options: ['Ambarino (Grizzlies West)', 'New Austin', 'Lemoyne', 'Roanoke Ridge'], answer: 0 },
+          { q: 'Which gang attacked Jake Adler’s homestead during the May 1899 blizzard?', options: ['O’Driscoll Boys', 'Murfree Brood', 'Skinner Brothers', 'Lemoyne Raiders'], answer: 0 },
+          { q: 'What was inscribed on the harmonica Sadie kept in memory of Jake?', options: ['To My Dearest Sadie', 'Forever Yours, Jake', 'Ambarino 1896', 'Love Never Dies'], answer: 0 }
         ]
       },
       {
-        id: 'jenny_kirk', name: 'Jenny Kirk', aliases: ['Jenny'],
-        age: 20, gender: 'Female', faction: 'Van der Linde Gang', weapon: 'Unarmed', chapter: 1,
+        name: 'Colm O’Driscoll',
+        age: 48,
+        gender: 'Male',
+        faction: 'O’Driscoll Boys',
+        tags: ['o’driscoll', 'outlaw'],
+        weapon: 'Cattleman Revolver',
+        chapter: 1,
         dossier: [
-          { q: 'Where is Jenny Kirk buried during the gang’s escape into the Grizzlies?', options: ['North of Colter in the snow', 'Near Horseshoe Overlook', 'Outside Blackwater', 'By Donner Falls'], answer: 0 },
-          { q: 'Which young gang member had a close bond with Jenny Kirk before Blackwater?', options: ['Lenny Summers', 'Kieran Duffy', 'Jack Marston', 'Jamie Gillis'], answer: 0 },
-          { q: 'Which event claimed Jenny Kirk’s life just prior to Chapter 1?', options: ['The Blackwater Massacre', 'The Valentine shootout', 'The Colter blizzard', 'The Rhodes ambush'], answer: 0 }
+          { q: 'Which woman did Dutch kill in retaliation after Colm murdered Dutch’s lover Annabelle?', options: ['Colm’s brother (Dutch killed Colm’s brother)', 'Colm’s wife', 'Colm’s sister', 'Colm’s daughter'], answer: 0 },
+          { q: 'At which pass did Colm ambush and capture Arthur during a fake peace parley?', options: ['Twin Stack Pass', 'Cumberland Forest', 'Mount Hagen', 'Spider Gorge'], answer: 0 },
+          { q: 'In which city was Colm O’Driscoll finally hanged?', options: ['Saint Denis', 'Valentine', 'Blackwater', 'Rhodes'], answer: 0 }
         ]
       },
       {
-        id: 'colm_odriscoll', name: 'Colm O’Driscoll', aliases: ['Colm'],
-        age: 46, gender: 'Male', faction: 'O’Driscoll Boys', weapon: 'Sawed-Off Shotgun', chapter: 1,
+        name: 'Agent Andrew Milton',
+        age: 45,
+        gender: 'Male',
+        faction: 'Pinkerton Detective Agency',
+        tags: ['pinkerton', 'law'],
+        weapon: 'Double-Action Revolver',
+        chapter: 2,
         dossier: [
-          { q: 'What sparked the unforgivable blood feud between Dutch van der Linde and Colm O’Driscoll?', options: ['Dutch killed Colm’s brother, and Colm killed Dutch’s lover Annabelle', 'Colm stole the Blackwater gold', 'Dutch burned Colm’s ranch', 'Colm turned Dutch in to Pinkertons'], answer: 0 },
-          { q: 'Where does Colm O’Driscoll set a trap to capture Arthur during a supposed parley?', options: ['In the hills near Twin Stack Pass', 'Inside Valentine Saloon', 'At Shady Belle', 'At Fort Mercer'], answer: 0 },
-          { q: 'Where is Colm O’Driscoll ultimately brought to justice?', options: ['Saint Denis gallows', 'Valentine jail', 'Sisika Penitentiary', 'Fort Wallace'], answer: 0 }
+          { q: 'Which wealthy industrialist hired Agent Milton and the Pinkertons to hunt the gang?', options: ['Leviticus Cornwall', 'Angelo Bronte', 'Alistair MacFarlane', 'Mayor Lemieux'], answer: 0 },
+          { q: 'Alongside which junior detective did Milton confront Arthur while fishing with Jack?', options: ['Edgar Ross', 'Archer Fordham', 'Sheriff Malloy', 'Leigh Gray'], answer: 0 },
+          { q: 'At which swamp hideout did Milton attack the gang with a Gatling gun wagon?', options: ['Lakay', 'Shady Belle', 'Clemens Point', 'Lagras'], answer: 0 }
         ]
       },
       {
-        id: 'andrew_milton', name: 'Agent Andrew Milton', aliases: ['Milton', 'Agent Milton'],
-        age: 47, gender: 'Male', faction: 'Pinkerton Agency', weapon: 'Mauser Pistol', chapter: 2,
+        name: 'Agent Edgar Ross',
+        age: 38,
+        gender: 'Male',
+        faction: 'Pinkerton Detective Agency',
+        tags: ['pinkerton', 'law'],
+        weapon: 'Mauser Pistol',
+        chapter: 2,
         dossier: [
-          { q: 'Who is Andrew Milton’s subordinate partner throughout the hunt for Dutch?', options: ['Agent Edgar Ross', 'Sheriff Leigh Gray', 'Sheriff Curtis Malloy', 'Captain Lyndon Monroe'], answer: 0 },
-          { q: 'What were Arthur and Jack doing when Agent Milton first confronted them in Chapter 2?', options: ['Fishing by the Dakota River', 'Hunting deer', 'Buying candy in Valentine', 'Riding to Emerald Ranch'], answer: 0 },
-          { q: 'Who funded the Pinkerton Detective Agency’s pursuit of the Van der Linde gang?', options: ['Leviticus Cornwall', 'Angelo Bronte', 'Catherine Braithwaite', 'Mayor Lemieux'], answer: 0 }
+          { q: 'Which federal agency did Edgar Ross later lead by 1911?', options: ['Bureau of Investigation', 'U.S. Marshals Service', 'Secret Service', 'Texas Rangers'], answer: 0 },
+          { q: 'Who was Edgar Ross’s senior Pinkerton partner throughout 1899?', options: ['Andrew Milton', 'Archer Fordham', 'Sheriff Freeman', 'Leigh Gray'], answer: 0 },
+          { q: 'Which mountain peak did Ross and Fordham climb in the Epilogue credits while tracking John?', options: ['Mount Hagen', 'Mount Shann', 'Twin Stack Pass', 'Caliban’s Seat'], answer: 0 }
         ]
       },
       {
-        id: 'edgar_ross', name: 'Agent Edgar Ross', aliases: ['Ross', 'Agent Ross'],
-        age: 38, gender: 'Male', faction: 'Pinkerton Agency', weapon: 'Semi-Automatic Pistol', chapter: 2,
+        name: 'Leviticus Cornwall',
+        age: 58,
+        gender: 'Male',
+        faction: 'Cornwall Kerosene & Tar',
+        tags: ['civilian', 'industrialist'],
+        weapon: 'Unarmed',
+        chapter: 1,
         dossier: [
-          { q: 'What sarcastic remark does Edgar Ross make to young Jack Marston by the Dakota River?', options: ['"Enjoy your fishing, kid, while you still can."', '"Stay out of trouble, boy."', '"Tell your father hello."', '"Nice catch, son."'], answer: 0 },
-          { q: 'Which federal agency does Edgar Ross later rise to lead after his Pinkerton years?', options: ['Bureau of Investigation', 'U.S. Marshals', 'Secret Service', 'Texas Rangers'], answer: 0 },
-          { q: 'Which camp does Edgar Ross visit alongside Milton to issue a 3-day ultimatum?', options: ['Clemens Point', 'Horseshoe Overlook', 'Colter', 'Beaver Hollow'], answer: 0 }
+          { q: 'Whose private payroll train did the Van der Linde gang rob in Chapter 1?', options: ['Leviticus Cornwall', 'Angelo Bronte', 'Catherine Braithwaite', 'Tavish Gray'], answer: 0 },
+          { q: 'In which mining town did Dutch confront and shoot Leviticus Cornwall on the docks?', options: ['Annesburg', 'Van Horn', 'Saint Denis', 'Blackwater'], answer: 0 },
+          { q: 'What is the name of Cornwall’s oil refinery in the Heartlands?', options: ['Cornwall Kerosene & Tar', 'Heartlands Oil Works', 'New Hanover Refinery', 'Cumberland Tar Co.'], answer: 0 }
         ]
       },
       {
-        id: 'leviticus_cornwall', name: 'Leviticus Cornwall', aliases: ['Cornwall'],
-        age: 58, gender: 'Male', faction: 'Cornwall Kerosene & Tar', weapon: 'Unarmed', chapter: 1,
+        name: 'Mary Linton',
+        age: 34,
+        gender: 'Female',
+        faction: 'Civilian',
+        tags: ['civilian'],
+        weapon: 'Unarmed',
+        chapter: 2,
         dossier: [
-          { q: 'What first provokes Leviticus Cornwall’s wrath against the Van der Linde gang in Chapter 1?', options: ['Robbing his private train in the Grizzlies', 'Burning his oil refinery', 'Kidnapping his son', 'Stealing his prize horses'], answer: 0 },
-          { q: 'Where does Leviticus Cornwall confront Dutch outside the saloon in Chapter 2?', options: ['Valentine', 'Rhodes', 'Saint Denis', 'Annesburg'], answer: 0 },
-          { q: 'Where does Dutch finally confront and shoot Leviticus Cornwall on the docks?', options: ['Annesburg', 'Saint Denis', 'Van Horn', 'Blackwater'], answer: 0 }
+          { q: 'What was Mary Linton’s maiden name before she married Barry Linton?', options: ['Gillis', 'Downes', 'Adler', 'Braithwaite'], answer: 0 },
+          { q: 'Which religious group did Arthur rescue Mary’s younger brother Jamie from?', options: ['The Chelonians', 'The Murfree Brood', 'The Laramie Gang', 'The Skinner Brothers'], answer: 0 },
+          { q: 'Which theater in Saint Denis did Arthur and Mary attend together?', options: ['Théâtre Râleur', 'Fontana Theatre', 'Grand Opera House', 'Bastille Saloon'], answer: 0 }
         ]
       },
       {
-        id: 'angelo_bronte', name: 'Angelo Bronte', aliases: ['Bronte'],
-        age: 52, gender: 'Male', faction: 'Saint Denis Mafia', weapon: 'Mauser Pistol', chapter: 4,
+        name: 'Thomas Downes',
+        age: 42,
+        gender: 'Male',
+        faction: 'Civilian / Farmer',
+        tags: ['civilian'],
+        weapon: 'Garden Rake',
+        chapter: 2,
         dossier: [
-          { q: 'What favor does Angelo Bronte ask Arthur and John to perform in exchange for Jack Marston?', options: ['Clear out grave robbers in the Saint Denis cemetery', 'Rob the Lemoyne National Bank', 'Assassinate Mayor Lemieux', 'Burn Braithwaite Manor'], answer: 0 },
-          { q: 'Which robbery tip from Angelo Bronte turns out to be a police ambush?', options: ['The Saint Denis trolley station', 'The Grand Korrigan ferry', 'The Cornwall oil plant', 'The Rhodes bank'], answer: 0 },
-          { q: 'How does Dutch execute Angelo Bronte in the swamps of Lagras?', options: ['Drowns him and feeds him to an alligator', 'Hangs him from a cypress tree', 'Shoots him in a duel', 'Leaves him tied to train tracks'], answer: 0 }
+          { q: 'Where was Thomas Downes collecting charity donations when Arthur first saw him?', options: ['Valentine', 'Rhodes', 'Strawberry', 'Saint Denis'], answer: 0 },
+          { q: 'What illness was Thomas Downes suffering from when Arthur collected his debt?', options: ['Tuberculosis', 'Cholera', 'Pneumonia', 'Yellow Fever'], answer: 0 },
+          { q: 'What were the names of Thomas Downes’s wife and son?', options: ['Edith and Archie', 'Abigail and Jack', 'Bonnie and Amos', 'Charlotte and Cal'], answer: 0 }
         ]
       },
       {
-        id: 'catherine_braithwaite', name: 'Catherine Braithwaite', aliases: ['Mrs. Braithwaite'],
-        age: 64, gender: 'Female', faction: 'Braithwaite Family', weapon: 'Double-Barreled Shotgun', chapter: 3,
+        name: 'Angelo Bronte',
+        age: 52,
+        gender: 'Male',
+        faction: 'Saint Denis Mafia',
+        tags: ['mafia', 'outlaw'],
+        weapon: 'Mauser Pistol',
+        chapter: 4,
         dossier: [
-          { q: 'What illicit spirit is the Braithwaite family famous for distilling in Lemoyne?', options: ['Moonshine', 'Absinthe', 'Kentucky Bourbon', 'Rum'], answer: 0 },
-          { q: 'Who did Catherine Braithwaite hand Jack Marston over to after kidnapping him?', options: ['Angelo Bronte', 'Sheriff Leigh Gray', 'Leviticus Cornwall', 'Colm O’Driscoll'], answer: 0 },
-          { q: 'What happens to Braithwaite Manor when the Van der Linde gang storms it for Jack?', options: ['It is burned to the ground', 'It is converted into a saloon', 'It is seized by Pinkertons', 'It is sold to the Grays'], answer: 0 }
+          { q: 'Which major city did crime lord Angelo Bronte effectively control in 1899?', options: ['Saint Denis', 'Blackwater', 'Rhodes', 'Annesburg'], answer: 0 },
+          { q: 'Where did Bronte send Dutch, Arthur, and Lenny into a heavily armed police ambush?', options: ['Saint Denis Trolley Station', 'Saint Denis Bank', 'Saint Denis Docks', 'Mayor’s Mansion'], answer: 0 },
+          { q: 'How did Dutch dispose of Angelo Bronte’s body in the swamps of Lagras?', options: ['Fed him to a giant alligator', 'Buried him in the bayou', 'Left him in a sunken boat', 'Tied him to train tracks'], answer: 0 }
         ]
       },
       {
-        id: 'leigh_gray', name: 'Sheriff Leigh Gray', aliases: ['Sheriff Gray'],
-        age: 56, gender: 'Male', faction: 'Gray Family & Law', weapon: 'Schofield Revolver', chapter: 3,
+        name: 'Catherine Braithwaite',
+        age: 63,
+        gender: 'Female',
+        faction: 'Braithwaite Family',
+        tags: ['braithwaite'],
+        weapon: 'Unarmed',
+        chapter: 3,
         dossier: [
-          { q: 'What honorary title does Sheriff Leigh Gray bestow upon Arthur Morgan in Rhodes?', options: ['Deputy Sheriff', 'Chief Marshal', 'Town Constable', 'Pinkerton Liaison'], answer: 0 },
-          { q: 'Which gang member is fatally ambushed during the Gray family’s trap in Rhodes?', options: ['Sean MacGuire', 'Kieran Duffy', 'Lenny Summers', 'Hosea Matthews'], answer: 0 },
-          { q: 'Which family has been locked in a bitter blood feud with the Grays for generations?', options: ['The Braithwaites', 'The Aberdeens', 'The O’Driscolls', 'The Cornwalls'], answer: 0 }
+          { q: 'Which rival Lemoyne family were the Braithwaites locked in a blood feud with?', options: ['The Gray family', 'The Bronte family', 'The Foreman family', 'The Cornwall family'], answer: 0 },
+          { q: 'What illegal business did the Braithwaite family secretly run in Lemoyne?', options: ['Moonshine distilling', 'Cattle rustling', 'Gold counterfeiting', 'Train robbery'], answer: 0 },
+          { q: 'Who did Catherine Braithwaite hand young Jack Marston over to in Saint Denis?', options: ['Angelo Bronte', 'Agent Milton', 'Leigh Gray', 'Colm O’Driscoll'], answer: 0 }
         ]
       },
       {
-        id: 'beau_gray', name: 'Beau Gray', aliases: ['Beau'],
-        age: 23, gender: 'Male', faction: 'Gray Family', weapon: 'Unarmed', chapter: 3,
+        name: 'Sheriff Leigh Gray',
+        age: 51,
+        gender: 'Male',
+        faction: 'Gray Family / Law',
+        tags: ['gray', 'law'],
+        weapon: 'Schofield Revolver',
+        chapter: 3,
         dossier: [
-          { q: 'Who is Beau Gray secretly in love with despite their families’ deadly feud?', options: ['Penélope Braithwaite', 'Mary Linton', 'Charlotte Balfour', 'Sadie Adler'], answer: 0 },
-          { q: 'What political cause does Beau Gray support alongside Penélope in Rhodes?', options: ['Women’s suffrage', 'Abolition of railroads', 'Prohibition', 'Labor unions'], answer: 0 },
-          { q: 'How do Beau Gray and Penélope Braithwaite finally escape Lemoyne?', options: ['Arthur escorts them onto a train at Riggs Station', 'They sail to Guarma', 'They ride to Valentine', 'They hide in Shady Belle'], answer: 0 }
+          { q: 'Of which Lemoyne town was Leigh Gray the Sheriff in Chapter 3?', options: ['Rhodes', 'Saint Denis', 'Valentine', 'Strawberry'], answer: 0 },
+          { q: 'What honorary title did Leigh Gray give Arthur and Bill during Chapter 3?', options: ['Deputies', 'Pinkerton Consultants', 'State Marshals', 'Bounty Commissioners'], answer: 0 },
+          { q: 'Which Braithwaite moonshine operation did Leigh Gray hire Arthur to help destroy?', options: ['The Scarlett Meadows still', 'The Lagras distillery', 'The Shady Belle cellar', 'The Bolger Glade barn'], answer: 0 }
         ]
       },
       {
-        id: 'penelope_braithwaite', name: 'Penélope Braithwaite', aliases: ['Penelope'],
-        age: 22, gender: 'Female', faction: 'Braithwaite Family', weapon: 'Unarmed', chapter: 3,
+        name: 'Beau Gray',
+        age: 22,
+        gender: 'Male',
+        faction: 'Gray Family',
+        tags: ['gray'],
+        weapon: 'Cattleman Revolver',
+        chapter: 3,
         dossier: [
-          { q: 'What family heirloom bracelet does Penélope give Arthur for helping her and Beau?', options: ['A sapphire bracelet', 'A gold pocket watch', 'A diamond ring', 'An emerald necklace'], answer: 0 },
-          { q: 'Where does Arthur first find Penélope hidden in a gazebo on her family’s estate?', options: ['Braithwaite Manor', 'Caliga Hall', 'Emerald Ranch', 'Beecher’s Hope'], answer: 0 },
-          { q: 'Which gang member first learned of Penélope and Beau’s secret romance?', options: ['Mary-Beth Gaskill', 'Karen Jones', 'Tilly Jackson', 'Abigail Roberts'], answer: 0 }
+          { q: 'Which member of the rival Braithwaite family was Beau Gray secretly in love with?', options: ['Penélope Braithwaite', 'Catherine Braithwaite', 'Mary-Beth Gaskill', 'Bonnie MacFarlane'], answer: 0 },
+          { q: 'At which train station did Arthur help Beau and Penélope elope in Chapter 6?', options: ['Riggs Station', 'Emerald Station', 'Flatneck Station', 'Wallace Station'], answer: 0 },
+          { q: 'What kind of rally did Arthur protect for Beau and Penélope in Rhodes?', options: ['Women’s suffrage march', 'Temperance union rally', 'Railroad workers strike', 'Abolitionist meeting'], answer: 0 }
         ]
       },
       {
-        id: 'mary_linton', name: 'Mary Linton', aliases: ['Mary Gillis'],
-        age: 34, gender: 'Female', faction: 'Civilian', weapon: 'Unarmed', chapter: 2,
+        name: 'Penélope Braithwaite',
+        age: 21,
+        gender: 'Female',
+        faction: 'Braithwaite Family',
+        tags: ['braithwaite'],
+        weapon: 'Unarmed',
+        chapter: 3,
         dossier: [
-          { q: 'What was Mary Linton’s maiden name before she married Barry Linton?', options: ['Gillis', 'Adler', 'Gaskill', 'Balfour'], answer: 0 },
-          { q: 'Who is Mary’s younger brother whom Arthur rescues from the Chelonian cult?', options: ['Jamie Gillis', 'Beau Gray', 'Jack Marston', 'Tommy'], answer: 0 },
-          { q: 'What activity do Arthur and Mary share during their reunion in Saint Denis?', options: ['Attending a live theater show', 'Fishing on Flat Iron Lake', 'Riding in a hot air balloon', 'Playing poker'], answer: 0 }
+          { q: 'Where on the Braithwaite estate did Penélope secretly meet Arthur to send letters to Beau?', options: ['A white lakeside gazebo', 'The horse stables', 'The tobacco barns', 'The front veranda'], answer: 0 },
+          { q: 'Which city did Penélope and Beau plan to start a new life in after boarding the train?', options: ['Boston', 'New York', 'Chicago', 'San Francisco'], answer: 0 },
+          { q: 'What piece of family jewelry did Penélope give Arthur for helping them escape?', options: ['A Braithwaite emerald brooch', 'A gold pocket watch', 'A diamond ring', 'A silver necklace'], answer: 0 }
         ]
       },
       {
-        id: 'thomas_downes', name: 'Thomas Downes', aliases: ['Downes'],
-        age: 41, gender: 'Male', faction: 'Civilian', weapon: 'Garden Rake', chapter: 2,
+        name: 'Rains Fall',
+        age: 62,
+        gender: 'Male',
+        faction: 'Wapiti Tribe',
+        tags: ['wapiti'],
+        weapon: 'Bow',
+        chapter: 4,
         dossier: [
-          { q: 'Where does Arthur first see Thomas Downes collecting charity donations?', options: ['Valentine', 'Rhodes', 'Strawberry', 'Saint Denis'], answer: 0 },
-          { q: 'Who breaks up the brutal saloon fistfight between Arthur and Tommy in Valentine?', options: ['Thomas Downes', 'Sheriff Malloy', 'Javier Escuella', 'Charles Smith'], answer: 0 },
-          { q: 'What are the names of Thomas Downes’s wife and son?', options: ['Edith and Archie', 'Martha and Luke', 'Clara and Peter', 'Sarah and Caleb'], answer: 0 }
+          { q: 'What is the name of Rains Fall’s impetuous son?', options: ['Eagle Flies', 'Paytah', 'Charles Smith', 'Running Dog'], answer: 0 },
+          { q: 'Which country did Rains Fall lead the surviving Wapiti people to for safety?', options: ['Canada', 'Mexico', 'Alaska', 'California'], answer: 0 },
+          { q: 'Which medicinal herb did Rains Fall gather for Arthur in Ambarino?', options: ['English Mace & Ginseng', 'Yarrow', 'Indian Tobacco', 'Burdock Root'], answer: 0 }
         ]
       },
       {
-        id: 'albert_mason', name: 'Albert Mason', aliases: ['Mason'],
-        age: 37, gender: 'Male', faction: 'Civilian', weapon: 'Camera Tripod', chapter: 2,
+        name: 'Eagle Flies',
+        age: 23,
+        gender: 'Male',
+        faction: 'Wapiti Tribe',
+        tags: ['wapiti'],
+        weapon: 'Springfield Rifle & Bow',
+        chapter: 4,
         dossier: [
-          { q: 'Which animals steal Albert Mason’s camera bag during his first encounter with Arthur?', options: ['Coyotes', 'Raccoons', 'Wolves', 'Foxes'], answer: 0 },
-          { q: 'Which iconic galloping herd does Arthur help Albert Mason herd for a photograph near Emerald Ranch?', options: ['Wild horses', 'Bison', 'Pronghorn', 'Elk'], answer: 0 },
-          { q: 'Where are Albert Mason’s wildlife photographs later displayed in an art gallery?', options: ['Saint Denis', 'Valentine', 'Blackwater', 'Rhodes'], answer: 0 }
+          { q: 'Which U.S. Army fort was Eagle Flies imprisoned inside before Arthur and Charles rescued him?', options: ['Fort Wallace', 'Fort Mercer', 'Fort Riggs', 'Fort Brennand'], answer: 0 },
+          { q: 'Which industrialist’s oil works did Eagle Flies attack alongside Dutch?', options: ['Leviticus Cornwall', 'Angelo Bronte', 'Henry Favours', 'Geddes'], answer: 0 },
+          { q: 'Who was Eagle Flies’s peaceful father and chief of the Wapiti tribe?', options: ['Rains Fall', 'Paytah', 'Hamish Sinclair', 'Evelyn Miller'], answer: 0 }
         ]
       },
       {
-        id: 'hamish_sinclair', name: 'Hamish Sinclair', aliases: ['Hamish'],
-        age: 57, gender: 'Male', faction: 'Civilian', weapon: 'Rolling Block Rifle', chapter: 6,
+        name: 'Colonel Henry Favours',
+        age: 56,
+        gender: 'Male',
+        faction: 'U.S. Army',
+        tags: ['army', 'law'],
+        weapon: 'Schofield Revolver',
+        chapter: 6,
         dossier: [
-          { q: 'What is the name of Hamish Sinclair’s large golden-cream Dutch Warmblood horse?', options: ['Buell', 'Boadicea', 'Silver Dollar', 'Old Boy'], answer: 0 },
-          { q: 'Which scenic lake in Grizzlies East is Hamish Sinclair’s cabin located beside?', options: ['O’Creagh’s Run', 'Lake Isabella', 'Cairn Lake', 'Elysian Pool'], answer: 0 },
-          { q: 'What is the name of the giant legendary pike Arthur and Hamish fish for together?', options: ['The Tyrant', 'Old Harry', 'The Leviathan', 'Ironjaw'], answer: 0 }
+          { q: 'Which mountain fort did Colonel Henry Favours command in 1899?', options: ['Fort Wallace', 'Fort Mercer', 'Fort Riggs', 'Sisika Penitentiary'], answer: 0 },
+          { q: 'Which Native American tribe did Colonel Favours provoke into war to cover up his own disgrace?', options: ['Wapiti Tribe', 'Skinner Brothers', 'Comanche', 'Apache'], answer: 0 },
+          { q: 'Which Battle of the Civil War was Colonel Favours disgraced at for arriving late?', options: ['Cold Harbor', 'Gettysburg', 'Bolger Glade', 'Antietam'], answer: 0 }
         ]
       },
       {
-        id: 'charlotte_balfour', name: 'Charlotte Balfour', aliases: ['Charlotte'],
-        age: 29, gender: 'Female', faction: 'Civilian', weapon: 'Carbine Repeater', chapter: 6,
+        name: 'Captain Lyndon Monroe',
+        age: 34,
+        gender: 'Male',
+        faction: 'U.S. Army',
+        tags: ['army', 'law'],
+        weapon: 'Schofield Revolver',
+        chapter: 6,
         dossier: [
-          { q: 'In which secluded northeastern corner of Roanoke Ridge is Charlotte Balfour’s cabin located?', options: ['Willard’s Rest', 'Annesburg', 'Butcher Creek', 'Van Horn'], answer: 0 },
-          { q: 'What vital frontier survival skills does Arthur teach Charlotte Balfour?', options: ['Hunting, skinning game, and shooting a rifle', 'Fishing and canoeing', 'Horse breeding', 'Gold panning'], answer: 0 },
-          { q: 'What was the name of Charlotte’s late husband buried near their cabin?', options: ['Cal', 'Jake', 'Thomas', 'Henry'], answer: 0 }
+          { q: 'Which sympathetic U.S. Army officer secretly tried to help the Wapiti tribe get vaccines?', options: ['Captain Lyndon Monroe', 'Colonel Henry Favours', 'Agent Archer Fordham', 'Sheriff Malloy'], answer: 0 },
+          { q: 'Who framed Captain Monroe for treason at Emerald Station?', options: ['Colonel Henry Favours', 'Agent Milton', 'Micah Bell', 'Leviticus Cornwall'], answer: 0 },
+          { q: 'Where did Arthur escort Captain Monroe so he could escape the Army’s execution order?', options: ['Emerald Station', 'Valentine Station', 'Riggs Station', 'Saint Denis Docks'], answer: 0 }
         ]
       },
       {
-        id: 'rains_fall', name: 'Rains Fall', aliases: ['Chief Rains Fall'],
-        age: 62, gender: 'Male', faction: 'Wapiti Tribe', weapon: 'Bow & Arrow', chapter: 4,
+        name: 'Hamish Sinclair',
+        age: 57,
+        gender: 'Male',
+        faction: 'Civilian / Veteran',
+        tags: ['civilian'],
+        weapon: 'Rolling Block Rifle',
+        chapter: 6,
         dossier: [
-          { q: 'Who is Rains Fall’s hot-headed son who wants to wage war against the U.S. Army?', options: ['Eagle Flies', 'Paytah', 'Charles Smith', 'Running Wolf'], answer: 0 },
-          { q: 'Which U.S. Army Colonel relentlessly harasses Rains Fall’s Wapiti reservation?', options: ['Colonel Henry Favours', 'Captain Lyndon Monroe', 'Colonel Bullard', 'General Harris'], answer: 0 },
-          { q: 'What sacred ceremonial item does Arthur retrieve for Rains Fall from an army camp?', options: ['His chanupa (sacred pipe)', 'A peace treaty', 'An eagle feather headdress', 'A medicine pouch'], answer: 0 }
+          { q: 'Beside which picturesque Grizzlies East lake did Hamish Sinclair live?', options: ['O’Creagh’s Run', 'Lake Isabella', 'Cairn Lake', 'Elysian Pool'], answer: 0 },
+          { q: 'What is the name of Hamish Sinclair’s prized Dutch Warmblood horse?', options: ['Buell', 'The Count', 'Baylock', 'Old Boy'], answer: 0 },
+          { q: 'What was the nickname of the giant northern pike Hamish and Arthur fished for?', options: ['The Tyrant', 'The Leviathan', 'Old Ironsides', 'King of the Run'], answer: 0 }
         ]
       },
       {
-        id: 'eagle_flies', name: 'Eagle Flies', aliases: ['Eagle'],
-        age: 24, gender: 'Male', faction: 'Wapiti Tribe', weapon: 'Bow & Repeater', chapter: 4,
+        name: 'Charlotte Balfour',
+        age: 31,
+        gender: 'Female',
+        faction: 'Civilian',
+        tags: ['civilian'],
+        weapon: 'Carbine Repeater',
+        chapter: 6,
         dossier: [
-          { q: 'Where is Eagle Flies imprisoned by Colonel Favours before Arthur and Charles rescue him?', options: ['Fort Wallace', 'Sisika Penitentiary', 'Valentine Jail', 'Fort Mercer'], answer: 0 },
-          { q: 'Which gang member manipulates Eagle Flies’s anger to provoke an attack on the U.S. Army?', options: ['Dutch van der Linde', 'Hosea Matthews', 'Charles Smith', 'Sadie Adler'], answer: 0 },
-          { q: 'Where does Eagle Flies launch a fateful raid on oil fields alongside Dutch and Arthur?', options: ['Cornwall Kerosene & Tar', 'Annesburg Mine', 'Bacchus Bridge', 'Emerald Ranch'], answer: 0 }
+          { q: 'What is the name of Charlotte Balfour’s remote cabin in northern Roanoke Ridge?', options: ['Willard’s Rest', 'Doverhill', 'Annesburg Lodge', 'Manito Glade'], answer: 0 },
+          { q: 'What was Charlotte’s late husband’s first name?', options: ['Cal', 'Jake', 'Thomas', 'Barry'], answer: 0 },
+          { q: 'Which city did Charlotte and her husband move from before attempting to live off the land?', options: ['Chicago', 'New York', 'Boston', 'Saint Denis'], answer: 0 }
         ]
       },
       {
-        id: 'lyndon_monroe', name: 'Captain Lyndon Monroe', aliases: ['Captain Monroe'],
-        age: 35, gender: 'Male', faction: 'U.S. Army', weapon: 'Schofield Revolver', chapter: 6,
+        name: 'Sister Calderón',
+        age: 49,
+        gender: 'Female',
+        faction: 'Catholic Church',
+        tags: ['civilian'],
+        weapon: 'Unarmed',
+        chapter: 4,
         dossier: [
-          { q: 'Why does Captain Monroe secretly cooperate with Arthur Morgan and Rains Fall?', options: ['To protect the Wapiti tribe from Colonel Favours’s corruption', 'To steal army payroll gold', 'To arrest Dutch van der Linde', 'To desert to Mexico'], answer: 0 },
-          { q: 'What medical supplies does Arthur help Captain Monroe recover from corrupt soldiers?', options: ['Wapiti vaccines and medicine', 'Morphine crates', 'Surgical tools', 'Snake oil'], answer: 0 },
-          { q: 'Where does Arthur escort Captain Monroe to board a train safely away from treason charges?', options: ['Emerald Station', 'Saint Denis', 'Riggs Station', 'Annesburg'], answer: 0 }
+          { q: 'At which train station did Arthur have his famous high-honor conversation with Sister Calderón?', options: ['Emerald Station', 'Saint Denis Station', 'Riggs Station', 'Valentine Station'], answer: 0 },
+          { q: 'Which country was Sister Calderón traveling to in order to help the poor?', options: ['Mexico', 'Canada', 'Cuba', 'Ireland'], answer: 0 },
+          { q: 'Which Saint Denis monk worked alongside Sister Calderón to free captives from the fence?', options: ['Brother Dorkins', 'Reverend Swanson', 'Father Murphy', 'Brother Andrew'], answer: 0 }
         ]
       },
       {
-        id: 'henry_favours', name: 'Colonel Henry Favours', aliases: ['Colonel Favours'],
-        age: 54, gender: 'Male', faction: 'U.S. Army', weapon: 'Cattleman Revolver', chapter: 6,
+        name: 'Albert Mason',
+        age: 35,
+        gender: 'Male',
+        faction: 'Civilian / Photographer',
+        tags: ['civilian'],
+        weapon: 'Camera',
+        chapter: 2,
         dossier: [
-          { q: 'Which military outpost does Colonel Henry Favours command in Cumberland Forest?', options: ['Fort Wallace', 'Fort Riggs', 'Fort Mercer', 'Fort Brennand'], answer: 0 },
-          { q: 'Why does Colonel Favours seize the Wapiti tribe’s horses and withhold their vaccines?', options: ['To provoke an uprising and salvage his military reputation', 'To sell horses in Valentine', 'On orders from Angelo Bronte', 'To pay Pinkerton bounties'], answer: 0 },
-          { q: 'What accusation does Colonel Favours level against Captain Lyndon Monroe?', options: ['Treason', 'Desertion', 'Embezzlement', 'Cowardice'], answer: 0 }
+          { q: 'What was Albert Mason’s profession across his five stranger encounters?', options: ['Wildlife Photographer', 'Paleontologist', 'Inventor', 'Newspaper Reporter'], answer: 0 },
+          { q: 'Which animal stole Albert Mason’s camera bag during his first meeting with Arthur?', options: ['A Coyote', 'A Fox', 'A Raccoon', 'A Wolf'], answer: 0 },
+          { q: 'Where did Albert Mason display his framed wildlife photographs later in Saint Denis?', options: ['Charles Châtenay’s art gallery', 'Mayor Lemieux’s mansion', 'The Saint Denis Bank', 'Doyle’s Tavern'], answer: 0 }
         ]
       },
       {
-        id: 'brother_dorkins', name: 'Brother Dorkins', aliases: ['Dorkins'],
-        age: 48, gender: 'Male', faction: 'Saint Denis Church', weapon: 'Unarmed', chapter: 4,
+        name: 'Black Belle',
+        age: 48,
+        gender: 'Female',
+        faction: 'Gunslinger',
+        tags: ['gunslinger', 'outlaw'],
+        weapon: 'Schofield Revolver & Dynamite',
+        chapter: 2,
         dossier: [
-          { q: 'What secret operation does Arthur help Brother Dorkins uncover behind a Saint Denis fence?', options: ['Captured people being held in a hidden basement', 'Counterfeit money presses', 'Smuggled dynamite', 'Stolen church silver'], answer: 0 },
-          { q: 'Which nun works closely with Brother Dorkins aiding the poor of Saint Denis?', options: ['Sister Calderón', 'Mother Superior', 'Sister Margaret', 'Sister Beatrice'], answer: 0 },
-          { q: 'What item does a street urchin steal from Brother Dorkins in the Saint Denis market?', options: ['A silver crucifix', 'A gold chalice', 'Charity collection box', 'A prayer book'], answer: 0 }
+          { q: 'In which marshy region did Arthur defend Black Belle’s shack from bounty hunters?', options: ['Bluewater Marsh', 'Cumberland Forest', 'Big Valley', 'Hennigan’s Stead'], answer: 0 },
+          { q: 'Which author hired Arthur to interview and photograph Black Belle?', options: ['Theodore Levin', 'Evelyn Miller', 'Mary-Beth Gaskill', 'Francis Sinclair'], answer: 0 },
+          { q: 'How did Black Belle wipe out the approaching bounty hunters outside her cabin?', options: ['Pre-planted dynamite traps', 'A Maxim machine gun', 'Fire bottles', 'Poison arrows'], answer: 0 }
         ]
       },
       {
-        id: 'sister_calderon', name: 'Sister Calderón', aliases: ['Sister Calderon'],
-        age: 43, gender: 'Female', faction: 'Saint Denis Church', weapon: 'Unarmed', chapter: 4,
+        name: 'Jim "Boy" Calloway',
+        age: 56,
+        gender: 'Male',
+        faction: 'Gunslinger',
+        tags: ['gunslinger', 'outlaw'],
+        weapon: 'Custom Schofield Revolver',
+        chapter: 2,
         dossier: [
-          { q: 'Where does Sister Calderón share a profound conversation with Arthur before departing for Mexico?', options: ['Emerald Station', 'Saint Denis Depot', 'Valentine Station', 'Riggs Station'], answer: 0 },
-          { q: 'What donations does Arthur collect for Sister Calderón’s charitable work in Saint Denis?', options: ['Food or money for the poor', 'Rifles and ammunition', 'Medicine from Fort Wallace', 'Horses'], answer: 0 },
-          { q: 'What advice does Sister Calderón give Arthur when he confesses he is afraid?', options: ['"Take a gamble that love exists, and do a loving act."', '"Turn yourself in to the law."', '"Flee to California immediately."', '"Forget the past completely."'], answer: 0 }
+          { q: 'In which town’s smaller saloon did Arthur first meet a drunken Jim "Boy" Calloway?', options: ['Valentine', 'Rhodes', 'Van Horn', 'Armadillo'], answer: 0 },
+          { q: 'At which waterfall did Jim "Boy" Calloway finally challenge Arthur to a duel?', options: ['Brandywine Drop', 'Cumberland Falls', 'Manteca Falls', 'Granite Pass'], answer: 0 },
+          { q: 'What is engraved along the barrel of Jim "Boy" Calloway’s revolver?', options: ['Canis Canem Edit', 'Vengeance is Mine', 'Sic Semper Tyrannis', 'Memento Mori'], answer: 0 }
         ]
       },
       {
-        id: 'marko_dragic', name: 'Marko Dragic', aliases: ['Dragic'],
-        age: 43, gender: 'Male', faction: 'Civilian', weapon: 'Electric Lantern', chapter: 4,
+        name: 'Marko Dragic',
+        age: 43,
+        gender: 'Male',
+        faction: 'Civilian / Inventor',
+        tags: ['civilian'],
+        weapon: 'Electric Lantern',
+        chapter: 4,
         dossier: [
-          { q: 'What invention does Marko Dragic demonstrate for investors in a Saint Denis pond?', options: ['A remote-controlled torpedo boat', 'A flying machine', 'An electric horseless carriage', 'A steam-powered cannon'], answer: 0 },
-          { q: 'Where is Marko Dragic’s secluded lightning-rod laboratory located?', options: ['Doverhill in northern Roanoke Ridge', 'Mount Hagen', 'Cotorra Springs', 'Bolger Glade'], answer: 0 },
-          { q: 'What extraordinary creation does Marko Dragic bring to life during a thunderstorm?', options: ['A sentient clockwork automaton (robot)', 'A teleporter', 'An electric train', 'A weather machine'], answer: 0 }
+          { q: 'What did Marko Dragic demonstrate in a Saint Denis park pond?', options: ['A remote-controlled toy boat', 'A steam-powered automobile', 'A hot air balloon', 'An electric chair'], answer: 0 },
+          { q: 'Where was Marko Dragic’s remote lightning-rod laboratory located?', options: ['Doverhill', 'Willard’s Rest', 'Van Horn', 'Twin Stack Pass'], answer: 0 },
+          { q: 'What creation did Marko Dragic bring to life during a thunderstorm?', options: ['A sentient automaton robot', 'A mechanical horse', 'A flying machine', 'A telegraph computer'], answer: 0 }
         ]
       },
       {
-        id: 'algernon_wasp', name: 'Algernon Wasp', aliases: ['Algernon'],
-        age: 39, gender: 'Male', faction: 'Civilian', weapon: 'Algernon’s Revolver', chapter: 4,
+        name: 'Charles Châtenay',
+        age: 34,
+        gender: 'Male',
+        faction: 'Civilian / Artist',
+        tags: ['civilian'],
+        weapon: 'Unarmed',
+        chapter: 4,
         dossier: [
-          { q: 'What items does Algernon Wasp commission Arthur to gather across the Bayou?', options: ['Rare orchids and exotic bird plumes', 'Legendary fish', 'Dinosaur bones', 'Cigarette cards'], answer: 0 },
-          { q: 'What custom revolver does Algernon Wasp reward Arthur with upon completing his requests?', options: ['Algernon’s Revolver', 'Otis Miller’s Revolver', 'Calloway’s Revolver', 'Granger’s Revolver'], answer: 0 },
-          { q: 'Where is Algernon Wasp’s conservatory boutique located?', options: ['North Saint Denis', 'Rhodes', 'Blackwater', 'Strawberry'], answer: 0 }
+          { q: 'Which country did flamboyant painter Charles Châtenay come from?', options: ['France', 'Italy', 'Spain', 'Belgium'], answer: 0 },
+          { q: 'How did Charles Châtenay disguise himself to board a ship out of Saint Denis?', options: ['Dressed as a woman', 'Dressed as a priest', 'Dressed as a policeman', 'Hidden in a wine barrel'], answer: 0 },
+          { q: 'Which South Pacific island did Charles Châtenay travel to after leaving Saint Denis?', options: ['Tahiti', 'Guarma', 'Fiji', 'Hawaii'], answer: 0 }
         ]
       },
       {
-        id: 'black_belle', name: 'Black Belle', aliases: ['Belle'],
-        age: 51, gender: 'Female', faction: 'Civilian', weapon: 'Schofield Revolver & Dynamite', chapter: 2,
+        name: 'Hercule Fontaine',
+        age: 39,
+        gender: 'Male',
+        faction: 'Guarma Rebels',
+        tags: ['guarma', 'outlaw'],
+        weapon: 'Bolt Action Rifle',
+        chapter: 5,
         dossier: [
-          { q: 'Which famous gunslinger biography project leads Arthur to track down Black Belle?', options: ['Jim "Boy" Calloway’s biography by Theodore Levin', 'Evelyn Miller’s memoirs', 'Landis’s Outlaw History', 'Pinkerton Most Wanted'], answer: 0 },
-          { q: 'How does Black Belle fend off waves of bounty hunters attacking her swamp shack?', options: ['Rigged dynamite traps and sharpshooting', 'A Gatling gun on the roof', 'Alligators in the moat', 'Throwing knives'], answer: 0 },
-          { q: 'Unlike the other three legendary gunslingers, what happens when Arthur meets Black Belle?', options: ['She survives, poses for a photo, and rides away', 'She challenges Arthur to a duel', 'She is arrested by Pinkertons', 'She joins the Van der Linde gang'], answer: 0 }
+          { q: 'On which Caribbean island did Hercule Fontaine lead a rebellion against Alberto Fussar?', options: ['Guarma', 'Cuba', 'Haiti', 'Jamaica'], answer: 0 },
+          { q: 'How did Hercule help the shipwrecked Van der Linde gang return to America?', options: ['Secured them passage on a schooner', 'Built them a raft', 'Bribed Pinkerton agents', 'Stole a U.S. Navy steamer'], answer: 0 },
+          { q: 'Which fortress on Guarma did Arthur and Hercule defend with cannons against a warship?', options: ['Cinco Torres', 'El Presidio', 'Fort Mercer', 'Fort Wallace'], answer: 0 }
         ]
       },
       {
-        id: 'jim_boy_calloway', name: 'Jim "Boy" Calloway', aliases: ['Calloway', 'Jim Calloway'],
-        age: 59, gender: 'Male', faction: 'Civilian', weapon: 'Calloway’s Revolver', chapter: 2,
+        name: 'Alberto Fussar',
+        age: 47,
+        gender: 'Male',
+        faction: 'Guarma Sugar Baron',
+        tags: ['guarma'],
+        weapon: 'Mauser Pistol',
+        chapter: 5,
         dossier: [
-          { q: 'Where does Arthur first meet Jim "Boy" Calloway passed out drunk on a bar?', options: ['Keane’s Saloon in Valentine', 'Doyle’s Tavern in Saint Denis', 'Rhodes Parlour House', 'Van Horn Saloon'], answer: 0 },
-          { q: 'What is engraved on Jim "Boy" Calloway’s prized Schofield Revolver?', options: ['"Canis Canem Edit" (Dog Eat Dog)', '"Sic Parvis Magna"', '"Vengeance is Mine"', '"The Fastest Hand"'], answer: 0 },
-          { q: 'Where does Calloway’s final duel take place after Arthur tracks down his old rivals?', options: ['Brandywine Drop', 'Horseshoe Overlook', 'Flatneck Station', 'Barrow Lagoon'], answer: 0 }
+          { q: 'What industry did Alberto Fussar tyrannically rule on the island of Guarma?', options: ['Sugar plantations', 'Coal mining', 'Oil refining', 'Whaling'], answer: 0 },
+          { q: 'At which Saint Denis event did Arthur briefly see Alberto Fussar before Chapter 5?', options: ['Mayor Lemieux’s garden party', 'The Saint Denis Bank', 'Doyle’s Tavern', 'Théâtre Râleur'], answer: 0 },
+          { q: 'Which mercenary colonel served as Alberto Fussar’s right-hand enforcer on Guarma?', options: ['Colonel Levi Simon', 'Colonel Henry Favours', 'Agent Milton', 'Flaco Hernández'], answer: 0 }
         ]
       },
       {
-        id: 'seamus', name: 'Seamus', aliases: ['Emerald Ranch Fence'],
-        age: 40, gender: 'Male', faction: 'Civilian', weapon: 'Double-Barreled Shotgun', chapter: 2,
+        name: 'David Geddes',
+        age: 49,
+        gender: 'Male',
+        faction: 'Civilian / Rancher',
+        tags: ['civilian'],
+        weapon: 'Double-Barreled Shotgun',
+        chapter: 7,
         dossier: [
-          { q: 'Which gang member introduces Arthur to Seamus at Emerald Ranch?', options: ['Hosea Matthews', 'Josiah Trelawny', 'Leopold Strauss', 'Bill Williamson'], answer: 0 },
-          { q: 'What unique service does Seamus offer inside his barn at Emerald Ranch?', options: ['Buying stolen stagecoaches and wagons', 'Selling legendary pelts', 'Crafting explosive arrows', 'Forging bounties'], answer: 0 },
-          { q: 'Who is the strict owner of Emerald Ranch who refuses to speak with Seamus?', options: ['Eugene Wegner', 'Thomas Downes', 'Jeremiah Compson', 'Bray Aberdeen'], answer: 0 }
+          { q: 'What is the name of the ranch owned by David Geddes in Big Valley?', options: ['Pronghorn Ranch', 'Hanging Dog Ranch', 'Beecher’s Hope', 'Emerald Ranch'], answer: 0 },
+          { q: 'Which outlaw gang repeatedly harassed David Geddes’s ranch in 1907?', options: ['The Laramie Gang', 'The Skinner Brothers', 'The O’Driscoll Boys', 'The Del Lobo Gang'], answer: 0 },
+          { q: 'What alias did John Marston give David Geddes when asking for work?', options: ['Jim Milton', 'Tacitus Kilgore', 'Rip Van Winkle', 'Arthur Callahan'], answer: 0 }
         ]
       },
       {
-        id: 'hercule_fontaine', name: 'Hercule Fontaine', aliases: ['Hercule'],
-        age: 36, gender: 'Male', faction: 'Guarma Rebels', weapon: 'Bolt-Action Rifle', chapter: 5,
+        name: 'Tom Dickens',
+        age: 44,
+        gender: 'Male',
+        faction: 'Civilian / Ranch Hand',
+        tags: ['civilian'],
+        weapon: 'Carbine Repeater',
+        chapter: 7,
         dossier: [
-          { q: 'Against which tyrannical sugar baron does Hercule Fontaine lead his rebellion?', options: ['Alberto Fussar', 'Angelo Bronte', 'Leviticus Cornwall', 'Colonel Favours'], answer: 0 },
-          { q: 'Which captured gang member do Arthur and Hercule rescue from soldiers on Guarma?', options: ['Javier Escuella', 'Bill Williamson', 'Micah Bell', 'Dutch van der Linde'], answer: 0 },
-          { q: 'How does Hercule help the gang escape the island of Guarma?', options: ['Secures a schooner ship to take them back to the mainland', 'Builds a hot air balloon', 'Hijacks a warship', 'Guides them through underwater caves'], answer: 0 }
+          { q: 'What was Tom Dickens’s job at Pronghorn Ranch in 1907?', options: ['Ranch Foreman', 'Blacksmith', 'Sheriff', 'Veterinarian'], answer: 0 },
+          { q: 'Who initially distrusted "Jim Milton" when he arrived at Pronghorn Ranch?', options: ['Tom Dickens', 'Duncan Geddes', 'Abe', 'Mr. Wayne'], answer: 0 },
+          { q: 'Which skill did John demonstrate at Pronghorn Ranch to earn Tom Dickens’s respect?', options: ['Breaking wild horses & fighting off Laramies', 'Playing the piano', 'Cooking stew', 'Drafting blueprints'], answer: 0 }
         ]
       },
       {
-        id: 'alberto_fussar', name: 'Alberto Fussar', aliases: ['Fussar'],
-        age: 49, gender: 'Male', faction: 'Guarma Regime', weapon: 'Carcano Rifle', chapter: 5,
+        name: 'Sheriff Sam Freeman',
+        age: 54,
+        gender: 'Male',
+        faction: 'New Austin Law',
+        tags: ['law'],
+        weapon: 'Schofield Revolver',
+        chapter: 7,
         dossier: [
-          { q: 'What industry does Alberto Fussar brutally control on the island of Guarma?', options: ['Sugar plantations', 'Silver mines', 'Oil refineries', 'Tobacco farms'], answer: 0 },
-          { q: 'Which industrialist was Alberto Fussar hosting on Guarma when the gang arrived?', options: ['Leviticus Cornwall', 'Angelo Bronte', 'Mayor Lemieux', 'Andrew Milton'], answer: 0 },
-          { q: 'How is Alberto Fussar defeated during the final battle on Guarma?', options: ['Arthur blasts his sniper tower with a cannon', 'Dutch beats him in a fistfight', 'Hercule shoots him in a duel', 'He drowns in the harbor'], answer: 0 }
+          { q: 'Of which New Austin desert town was Sam Freeman the Sheriff in 1907?', options: ['Tumbleweed', 'Armadillo', 'Blackwater', 'Valentine'], answer: 0 },
+          { q: 'Which gang frequently attacked Sheriff Freeman’s jurisdiction in New Austin?', options: ['Del Lobo Gang', 'Laramie Gang', 'Skinner Brothers', 'Lemoyne Raiders'], answer: 0 },
+          { q: 'Which legendary gunslinger’s gravesite can be found near Tumbleweed?', options: ['Otis Miller', 'Jim Boy Calloway', 'Black Belle', 'Landon Ricketts'], answer: 0 }
         ]
       },
       {
-        id: 'sheriff_malloy', name: 'Sheriff Curtis Malloy', aliases: ['Sheriff Malloy'],
-        age: 44, gender: 'Male', faction: 'New Hanover Law', weapon: 'Bolt-Action Rifle', chapter: 2,
+        name: 'Herbert Moon',
+        age: 52,
+        gender: 'Male',
+        faction: 'Civilian / Shopkeeper',
+        tags: ['civilian'],
+        weapon: 'Cattleman Revolver',
+        chapter: 7,
         dossier: [
-          { q: 'Which bustling livestock town does Sheriff Curtis Malloy police?', options: ['Valentine', 'Rhodes', 'Strawberry', 'Annesburg'], answer: 0 },
-          { q: 'What rare firearm does Sheriff Curtis Malloy carry on duty?', options: ['Bolt-Action Rifle', 'Carcano Rifle', 'Rare Rolling Block', 'Evans Repeater'], answer: 0 },
-          { q: 'What secret affair can players overhear Sheriff Malloy having upstairs in his office?', options: ['An affair with Moira Calthorpe', 'A secret deal with Colm O’Driscoll', 'A plot with Leviticus Cornwall', 'A bribe from Seamus'], answer: 0 }
+          { q: 'Which plague-stricken New Austin town did Herbert Moon run the general store in?', options: ['Armadillo', 'Tumbleweed', 'Thieves’ Landing', 'Plainview'], answer: 0 },
+          { q: 'What outbreak was devastating Armadillo when John Marston arrived in 1907?', options: ['Cholera', 'Tuberculosis', 'Smallpox', 'Typhoid'], answer: 0 },
+          { q: 'Whose portrait hangs mysteriously behind Herbert Moon’s counter in Armadillo?', options: ['The Strange Man', 'Dutch van der Linde', 'Leviticus Cornwall', 'Angelo Bronte'], answer: 0 }
         ]
       },
       {
-        id: 'bonnie_macfarlane', name: 'Bonnie MacFarlane', aliases: ['Bonnie'],
-        age: 18, gender: 'Female', faction: 'MacFarlane’s Ranch', weapon: 'Repeater Carbine', chapter: 2,
+        name: 'Bonnie MacFarlane',
+        age: 23,
+        gender: 'Female',
+        faction: 'Civilian / Rancher',
+        tags: ['civilian'],
+        weapon: 'Carbine Repeater',
+        chapter: 7,
         dossier: [
-          { q: 'Where can players find a washed-up suitor carrying an unsent love letter to Bonnie MacFarlane in 1899?', options: ['Flat Iron Lake shoreline', 'Cotorra Springs', 'Roanoke Ridge', 'Lake Isabella'], answer: 0 },
-          { q: 'Which New Austin ranch does Bonnie MacFarlane help her father Drew manage?', options: ['MacFarlane’s Ranch', 'Pronghorn Ranch', 'Beecher’s Hope', 'Emerald Ranch'], answer: 0 },
-          { q: 'Who does Bonnie MacFarlane famously rescue and nurse back to health years later in 1911?', options: ['John Marston', 'Arthur Morgan', 'Sadie Adler', 'Charles Smith'], answer: 0 }
+          { q: 'What is the name of Bonnie’s family ranch in Hennigan’s Stead?', options: ['MacFarlane’s Ranch', 'Pronghorn Ranch', 'Beecher’s Hope', 'Ridgewood Farm'], answer: 0 },
+          { q: 'What was Bonnie MacFarlane’s father’s first name?', options: ['Drew', 'David', 'Thomas', 'Jake'], answer: 0 },
+          { q: 'In RDR2, where can Arthur find a washed-up suitor carrying a love letter addressed to Bonnie?', options: ['Flat Iron Lake shore', 'O’Creagh’s Run', 'San Luis River', 'Lake Isabella'], answer: 0 }
         ]
       },
       {
-        id: 'jeremiah_compson', name: 'Jeremiah Compson', aliases: ['Compson'],
-        age: 63, gender: 'Male', faction: 'Civilian', weapon: 'Vintage Pistol', chapter: 3,
+        name: 'Seamus',
+        age: 45,
+        gender: 'Male',
+        faction: 'Outlaw Associate / Fence',
+        tags: ['outlaw', 'fence'],
+        weapon: 'Unarmed',
+        chapter: 2,
         dossier: [
-          { q: 'Where does Arthur first encounter Jeremiah Compson sitting destitute on a bench?', options: ['Rhodes', 'Saint Denis', 'Valentine', 'Van Horn'], answer: 0 },
-          { q: 'What disturbing truth does Arthur discover inside Compson’s foreclosed home at Compson’s Stead?', options: ['Ledgers proving he was a brutal slave catcher', 'Plans to assassinate Dutch', 'Stolen Braithwaite gold', 'Pinkerton warrants'], answer: 0 },
-          { q: 'What items does Jeremiah Compson ask Arthur to retrieve from his old house?', options: ['His ledger, pocket watch, and pistol', 'His wedding ring and Bible', 'Gold bars and deeds', 'Family portraits'], answer: 0 }
+          { q: 'At which New Hanover ranch does Seamus operate his wagon fence inside a barn?', options: ['Emerald Ranch', 'Downes Ranch', 'Pronghorn Ranch', 'Adler Ranch'], answer: 0 },
+          { q: 'Who introduced Arthur to Seamus in Chapter 2?', options: ['Hosea Matthews', 'Josiah Trelawny', 'Leopold Strauss', 'Bill Williamson'], answer: 0 },
+          { q: 'Whose stagecoach did Arthur and Hosea steal to prove themselves to Seamus?', options: ['Bob Crawford', 'Leviticus Cornwall', 'Sheriff Malloy', 'Cornwall Kerosene'], answer: 0 }
         ]
       }
     ];
 
     // =========================================================================
-    // 3. 210 STORY & STRANGER EVENT PINPOINTS (NO TOWN/LANDMARK NAMES IN PROMPTS)
+    // 3. BAKED-IN AFFINE MAP CALIBRATION & STORY PINPOINT EVENTS
     // =========================================================================
-    const BASE_ANCHORS = [
-      { key: 'colter', name: 'Colter', desc: 'Snowy valley settlement in northwest Ambarino (Grizzlies West).', x: 45.8, y: 22.8 },
-      { key: 'saint_denis', name: 'Saint Denis', desc: 'Major industrial port city on the southeastern coast of Lemoyne.', x: 85.2, y: 68.5 },
-      { key: 'tumbleweed', name: 'Tumbleweed', desc: 'Far western desert town in Gaptooth Ridge, New Austin.', x: 16.4, y: 82.4 },
-      { key: 'strawberry', name: 'Strawberry', desc: 'Western mountain logging town in Big Valley, West Elizabeth.', x: 43.4, y: 51.4 }
-    ];
+    const CALIBRATION = {"a":1.02389,"b":-0.12112,"tx":8.226,"c":-0.10066,"d":1.02653,"ty":-6.03,"anchors":[{"name":"Colter","x":51.77,"y":11.38},{"name":"Saint Denis","x":86.93,"y":55.16},{"name":"Tumbleweed","x":14.62,"y":75.93},{"name":"Strawberry","x":47.68,"y":45.27}]};
+
+    function applyAffineCalibration(rawX, rawY) {
+      const nx = CALIBRATION.a * rawX + CALIBRATION.b * rawY + CALIBRATION.tx;
+      const ny = CALIBRATION.c * rawX + CALIBRATION.d * rawY + CALIBRATION.ty;
+      return {
+        x: Number(Math.min(100, Math.max(0, nx)).toFixed(2)),
+        y: Number(Math.min(100, Math.max(0, ny)).toFixed(2))
+      };
+    }
 
     const RAW_MAP_EVENTS = [
       // CHAPTER 1 & AMBARINO (chapter: 1 or 6)
@@ -1418,8 +1624,18 @@
       { id: 160, chapter: 7, x: 49.7, y: 62.5, prompt: 'Where did John Marston, Uncle, and Charles build a barn and fence while singing the "Housebuilding Song"?', revealName: 'Beecher’s Hope' }
     ];
 
+    // Pre-bake calibrated coordinates directly onto every event object
+    const MAP_EVENTS = RAW_MAP_EVENTS.map((ev) => {
+      const calibrated = applyAffineCalibration(ev.x, ev.y);
+      return {
+        ...ev,
+        x: calibrated.x,
+        y: calibrated.y
+      };
+    });
+
     // =========================================================================
-    // 4. STORAGE, AFFINE 4-TAP CALIBRATOR & INDEXEDDB MAP PERSISTENCE
+    // 4. STORAGE & INDEXEDDB MAP PERSISTENCE
     // =========================================================================
     const STORAGE_KEY = 'red_deadle_v4';
     const IDB_NAME = 'RedDeadleMapDB';
@@ -1430,9 +1646,9 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         return raw
           ? JSON.parse(raw)
-          : { days: {}, stats: { daysPlayed: 0 }, affineCalibration: null };
+          : { days: {}, stats: { daysPlayed: 0 } };
       } catch (e) {
-        return { days: {}, stats: { daysPlayed: 0 }, affineCalibration: null };
+        return { days: {}, stats: { daysPlayed: 0 } };
       }
     }
 
@@ -1483,89 +1699,8 @@
       });
     }
 
-    // 2D Affine Least-Squares Solver from 4 Anchor Points
-    function computeAffineCalibration(tappedPoints) {
-      // Solve [x', y'] = [a*x + b*y + tx, c*x + d*y + ty] via normal equations (X^T X) beta = X^T Y
-      let sXX = 0, sXY = 0, sX = 0, sYY = 0, sY = 0, n = tappedPoints.length;
-      let bX0 = 0, bX1 = 0, bX2 = 0;
-      let bY0 = 0, bY1 = 0, bY2 = 0;
-
-      for (let i = 0; i < n; i++) {
-        const bx = BASE_ANCHORS[i].x;
-        const by = BASE_ANCHORS[i].y;
-        const ux = tappedPoints[i].x;
-        const uy = tappedPoints[i].y;
-
-        sXX += bx * bx;
-        sXY += bx * by;
-        sX += bx;
-        sYY += by * by;
-        sY += by;
-
-        bX0 += bx * ux;
-        bX1 += by * ux;
-        bX2 += ux;
-
-        bY0 += bx * uy;
-        bY1 += by * uy;
-        bY2 += uy;
-      }
-
-      const A = [
-        [sXX, sXY, sX],
-        [sXY, sYY, sY],
-        [sX,  sY,  n]
-      ];
-
-      function solve3x3(mat, rhs) {
-        const M = mat.map((row, idx) => [...row, rhs[idx]]);
-        for (let col = 0; col < 3; col++) {
-          let pivot = col;
-          for (let r = col + 1; r < 3; r++) {
-            if (Math.abs(M[r][col]) > Math.abs(M[pivot][col])) pivot = r;
-          }
-          [M[col], M[pivot]] = [M[pivot], M[col]];
-          const div = M[col][col] || 1e-9;
-          for (let c = col; c < 4; c++) M[col][c] /= div;
-          for (let r = 0; r < 3; r++) {
-            if (r !== col) {
-              const factor = M[r][col];
-              for (let c = col; c < 4; c++) M[r][c] -= factor * M[col][c];
-            }
-          }
-        }
-        return [M[0][3], M[1][3], M[2][3]];
-      }
-
-      const [a, b, tx] = solve3x3(A, [bX0, bX1, bX2]);
-      const [c, d, ty] = solve3x3(A, [bY0, bY1, bY2]);
-
-      return {
-        a: Number(a.toFixed(5)),
-        b: Number(b.toFixed(5)),
-        tx: Number(tx.toFixed(3)),
-        c: Number(c.toFixed(5)),
-        d: Number(d.toFixed(5)),
-        ty: Number(ty.toFixed(3)),
-        anchors: tappedPoints.map((p, idx) => ({
-          name: BASE_ANCHORS[idx].name,
-          x: Number(p.x.toFixed(2)),
-          y: Number(p.y.toFixed(2))
-        }))
-      };
-    }
-
     function getCalibratedCoord(ev) {
-      const cal = APP_STATE.affineCalibration;
-      if (!cal) {
-        return { x: ev.x, y: ev.y };
-      }
-      const nx = cal.a * ev.x + cal.b * ev.y + cal.tx;
-      const ny = cal.c * ev.x + cal.d * ev.y + cal.ty;
-      return {
-        x: Math.min(100, Math.max(0, nx)),
-        y: Math.min(100, Math.max(0, ny))
-      };
+      return { x: ev.x, y: ev.y };
     }
 
     // =========================================================================
@@ -1583,8 +1718,8 @@
       const targetCharacter = eligibleChars[Math.floor(rng() * eligibleChars.length)];
 
       const eligibleEvents = spoilerSafePreCh5
-        ? RAW_MAP_EVENTS.filter((e) => e.chapter <= 4)
-        : RAW_MAP_EVENTS;
+        ? MAP_EVENTS.filter((e) => e.chapter <= 4)
+        : MAP_EVENTS;
 
       const indices = Array.from({ length: eligibleEvents.length }, (_, i) => i);
       for (let i = indices.length - 1; i > 0; i--) {
@@ -1639,111 +1774,100 @@
     }
 
     // =========================================================================
-    // 6. UI NAVIGATION & HEADER UPDATES
+    // 6. UI HELPERS, TOASTS, TABS & HEADER BADGES
     // =========================================================================
+    let toastTimer = null;
     function showToast(msg) {
       const banner = document.getElementById('toastBanner');
-      const text = document.getElementById('toastText');
-      text.textContent = msg;
+      const textEl = document.getElementById('toastText');
+      textEl.textContent = msg;
       banner.classList.remove('opacity-0');
-      banner.classList.add('opacity-100');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => {
-        banner.classList.remove('opacity-100');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
         banner.classList.add('opacity-0');
-      }, 2800);
-    }
-
-    function updateHeaderAndBadges() {
-      const state = getActiveState();
-      const dayBadge = document.getElementById('dayBadge');
-      const spoilerTag = document.getElementById('spoilerSafetyTag');
-
-      if (CURRENT_MODE === 'daily') {
-        dayBadge.textContent = `DAY #${DAILY_INFO.dayNumber}`;
-        document.getElementById('statsDayLabel').textContent = `Day #${DAILY_INFO.dayNumber}`;
-        spoilerTag.classList.toggle('hidden', DAILY_INFO.dayNumber > 50);
-      } else {
-        dayBadge.textContent = `PRACTICE #${PRACTICE_SEED}`;
-        document.getElementById('statsDayLabel').textContent = `Practice #${PRACTICE_SEED}`;
-        spoilerTag.classList.add('hidden');
-      }
-
-      const totalScore = state.charScore + state.mapScore + state.dossierScore;
-      document.getElementById('totalScoreDisplay').textContent = totalScore.toLocaleString();
-
-      // Mode 1 badge
-      const charBadge = document.getElementById('tabBadgeChar');
-      if (state.charCompleted) {
-        charBadge.textContent = `${state.charScore.toLocaleString()}`;
-        charBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#277544]/40 text-[#a5f0c0] border border-[#48b872]/50';
-      } else {
-        charBadge.textContent = `${state.charGuesses.length}/6`;
-        charBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#2a2018] text-[#bfb299] border border-[#c89d54]/30';
-      }
-
-      // Mode 2 badge
-      const mapBadge = document.getElementById('tabBadgeMap');
-      if (state.mapCompleted) {
-        mapBadge.textContent = `${state.mapScore.toLocaleString()}`;
-        mapBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#277544]/40 text-[#a5f0c0] border border-[#48b872]/50';
-      } else {
-        mapBadge.textContent = `${state.mapResults.filter(Boolean).length}/5`;
-        mapBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#2a2018] text-[#bfb299] border border-[#c89d54]/30';
-      }
-
-      // Mode 3 badge
-      const dossierBadge = document.getElementById('tabBadgeDossier');
-      const isDossierLocked = CURRENT_MODE === 'daily' && !state.charCompleted;
-      if (isDossierLocked) {
-        dossierBadge.textContent = 'LOCKED';
-        dossierBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#8f1d1d]/40 text-[#f5b5b5] border border-[#c42b2b]/50';
-      } else if (state.dossierAnswers.every((a) => a !== null)) {
-        dossierBadge.textContent = `${state.dossierScore.toLocaleString()}`;
-        dossierBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#277544]/40 text-[#a5f0c0] border border-[#48b872]/50';
-      } else {
-        dossierBadge.textContent = 'OPEN';
-        dossierBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#c89d54]/25 text-[#e4ba6c] border border-[#c89d54]/50';
-      }
+      }, 2600);
     }
 
     function switchTab(tabName) {
+      ['character', 'map', 'dossier'].forEach((t) => {
+        const sec = document.getElementById(`section-${t}`);
+        if (sec) sec.classList.toggle('hidden', t !== tabName);
+      });
+
       document.querySelectorAll('.tab-btn').forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.tab === tabName);
       });
-      document.getElementById('section-character').classList.toggle('hidden', tabName !== 'character');
-      document.getElementById('section-map').classList.toggle('hidden', tabName !== 'map');
-      document.getElementById('section-dossier').classList.toggle('hidden', tabName !== 'dossier');
 
-      if (tabName === 'map') renderMapRound();
-      if (tabName === 'dossier') renderDossierSection();
+      if (tabName === 'map') {
+        renderMapRound();
+      } else if (tabName === 'dossier') {
+        renderDossierSection();
+      } else {
+        renderCharacterSection();
+      }
     }
 
     document.querySelectorAll('.tab-btn').forEach((btn) => {
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // Daily vs Practice Mode Switch
+    function updateHeaderAndBadges() {
+      const state = getActiveState();
+      const total = state.charScore + state.mapScore + state.dossierScore;
+      document.getElementById('totalScoreDisplay').textContent = total.toLocaleString();
+
+      const dayBadge = document.getElementById('dayBadge');
+      const statsDayLabel = document.getElementById('statsDayLabel');
+      const newPracticeBtn = document.getElementById('newPracticeBtn');
+      const modeDailyBtn = document.getElementById('modeDailyBtn');
+      const modePracticeBtn = document.getElementById('modePracticeBtn');
+
+      if (CURRENT_MODE === 'daily') {
+        dayBadge.textContent = `DAY #${DAILY_INFO.dayNumber}`;
+        statsDayLabel.textContent = `Day #${DAILY_INFO.dayNumber}`;
+        newPracticeBtn.classList.add('hidden');
+        modeDailyBtn.className = 'px-2.5 py-1.5 rounded-md text-xs font-western font-bold bg-[#8f1d1d] text-[#f3e9d2]';
+        modePracticeBtn.className = 'px-2.5 py-1.5 rounded-md text-xs font-western font-bold text-[#bfb299] hover:text-[#f3e9d2]';
+      } else {
+        dayBadge.textContent = `PRACTICE #${PRACTICE_SEED}`;
+        statsDayLabel.textContent = `Practice #${PRACTICE_SEED}`;
+        newPracticeBtn.classList.remove('hidden');
+        modePracticeBtn.className = 'px-2.5 py-1.5 rounded-md text-xs font-western font-bold bg-[#8f1d1d] text-[#f3e9d2]';
+        modeDailyBtn.className = 'px-2.5 py-1.5 rounded-md text-xs font-western font-bold text-[#bfb299] hover:text-[#f3e9d2]';
+      }
+
+      const charBadge = document.getElementById('tabBadgeChar');
+      charBadge.textContent = state.charCompleted
+        ? `${state.charScore.toLocaleString()}`
+        : `${state.charGuesses.length}/6`;
+
+      const mapCompletedCount = state.mapResults.filter(Boolean).length;
+      document.getElementById('tabBadgeMap').textContent = `${mapCompletedCount}/5`;
+
+      const dossierBadge = document.getElementById('tabBadgeDossier');
+      const isDossierLocked = CURRENT_MODE === 'daily' && !state.charCompleted;
+      const dossierAnswered = state.dossierAnswers.filter((a) => a !== null).length;
+      dossierBadge.textContent = isDossierLocked ? 'LOCKED' : `${dossierAnswered}/3`;
+    }
+
     document.getElementById('modeDailyBtn').addEventListener('click', () => {
+      if (CURRENT_MODE === 'daily') return;
       CURRENT_MODE = 'daily';
-      document.getElementById('modeDailyBtn').className = 'px-2.5 py-1.5 rounded-md text-xs font-western font-bold bg-[#8f1d1d] text-[#f3e9d2]';
-      document.getElementById('modePracticeBtn').className = 'px-2.5 py-1.5 rounded-md text-xs font-western font-bold text-[#bfb299] hover:text-[#f3e9d2]';
-      document.getElementById('newPracticeBtn').classList.add('hidden');
       pendingPin = null;
       renderAllSections();
+      showToast(`Switched to Daily Hunt #${DAILY_INFO.dayNumber}`);
     });
 
     document.getElementById('modePracticeBtn').addEventListener('click', () => {
+      if (CURRENT_MODE === 'practice') return;
       CURRENT_MODE = 'practice';
-      document.getElementById('modePracticeBtn').className = 'px-2.5 py-1.5 rounded-md text-xs font-western font-bold bg-[#8f1d1d] text-[#f3e9d2]';
-      document.getElementById('modeDailyBtn').className = 'px-2.5 py-1.5 rounded-md text-xs font-western font-bold text-[#bfb299] hover:text-[#f3e9d2]';
-      document.getElementById('newPracticeBtn').classList.remove('hidden');
       pendingPin = null;
       renderAllSections();
+      showToast('Switched to Unlimited Practice Mode');
     });
 
     document.getElementById('newPracticeBtn').addEventListener('click', () => {
-      PRACTICE_SEED = Math.floor(Math.random() * 900000) + 100000;
+      PRACTICE_SEED = Math.floor(100000 + Math.random() * 900000);
       PRACTICE_STATE = {
         charGuesses: [],
         charCompleted: false,
@@ -1758,247 +1882,254 @@
       };
       pendingPin = null;
       renderAllSections();
-      showToast('New Practice Hunt generated!');
+      showToast(`Rolled new Practice Seed #${PRACTICE_SEED}`);
     });
 
     // =========================================================================
-    // 7. MODE 1: CHARACTER DEDUCTION
+    // 7. MODE 1: OUTLAW GUESS (CHARACTER DEDUCTION)
     // =========================================================================
-    function calculateCharScore(attemptCount, won) {
+    let selectedAutocompleteName = null;
+
+    function scoreCharacterGuesses(guessCount, won) {
       if (!won) return 0;
-      if (attemptCount === 1) return 5000;
-      if (attemptCount >= 2 && attemptCount <= 4) return 4000;
-      if (attemptCount === 5) return 3000;
-      if (attemptCount === 6) return 1500;
-      return 0;
+      if (guessCount === 1) return 5000;
+      if (guessCount <= 4) return 4000;
+      if (guessCount === 5) return 3000;
+      return 1500;
     }
 
-    function formatChapterLabel(ch) {
-      if (ch === 7) return 'Epilogue 1';
-      if (ch === 8) return 'Epilogue 2';
-      return `Chapter ${ch}`;
-    }
+    function evaluateCharacterGuess(guessChar, targetChar) {
+      const nameExact = guessChar.name === targetChar.name;
 
-    function compareCharAttr(guess, target, field) {
-      if (field === 'age') {
-        if (guess.age === target.age) return { state: 'exact', label: `${guess.age}` };
-        const arrow = guess.age < target.age ? ' &uarr;' : ' &darr;';
-        if (Math.abs(guess.age - target.age) <= 5) {
-          return { state: 'partial', label: `${guess.age}${arrow}` };
-        }
-        return { state: 'wrong', label: `${guess.age}${arrow}` };
+      const ageDiff = targetChar.age - guessChar.age;
+      const ageStatus = ageDiff === 0 ? 'exact' : Math.abs(ageDiff) <= 5 ? 'partial' : 'wrong';
+      const ageArrow = ageDiff === 0 ? '' : ageDiff > 0 ? ' &uarr;' : ' &darr;';
+
+      const genderStatus = guessChar.gender === targetChar.gender ? 'exact' : 'wrong';
+
+      let factionStatus = 'wrong';
+      if (guessChar.faction === targetChar.faction) {
+        factionStatus = 'exact';
+      } else if (guessChar.tags.some((t) => targetChar.tags.includes(t))) {
+        factionStatus = 'partial';
       }
 
-      if (field === 'chapter') {
-        if (guess.chapter === target.chapter) {
-          return { state: 'exact', label: formatChapterLabel(guess.chapter) };
-        }
-        const arrow = guess.chapter < target.chapter ? ' &uarr;' : ' &darr;';
-        if (Math.abs(guess.chapter - target.chapter) === 1) {
-          return { state: 'partial', label: `${formatChapterLabel(guess.chapter)}${arrow}` };
-        }
-        return { state: 'wrong', label: `${formatChapterLabel(guess.chapter)}${arrow}` };
-      }
+      const weaponStatus = guessChar.weapon === targetChar.weapon ? 'exact' : 'wrong';
 
-      if (field === 'faction') {
-        if (guess.faction === target.faction) return { state: 'exact', label: guess.faction };
-        const lawGroups = ['Pinkerton Agency', 'New Hanover Law', 'Gray Family & Law', 'U.S. Army'];
-        const rivalGangs = ['O’Driscoll Boys', 'Guarma Rebels', 'Guarma Regime', 'Saint Denis Mafia'];
-        const plantationFamilies = ['Braithwaite Family', 'Gray Family', 'Gray Family & Law'];
-        if (
-          (lawGroups.includes(guess.faction) && lawGroups.includes(target.faction)) ||
-          (rivalGangs.includes(guess.faction) && rivalGangs.includes(target.faction)) ||
-          (plantationFamilies.includes(guess.faction) && plantationFamilies.includes(target.faction))
-        ) {
-          return { state: 'partial', label: guess.faction };
-        }
-        return { state: 'wrong', label: guess.faction };
-      }
+      const chDiff = targetChar.chapter - guessChar.chapter;
+      const chStatus = chDiff === 0 ? 'exact' : Math.abs(chDiff) === 1 ? 'partial' : 'wrong';
+      const chArrow = chDiff === 0 ? '' : chDiff > 0 ? ' &uarr;' : ' &darr;';
 
-      const val = guess[field];
-      return { state: val === target[field] ? 'exact' : 'wrong', label: val };
+      return {
+        nameExact,
+        ageStatus,
+        ageArrow,
+        genderStatus,
+        factionStatus,
+        weaponStatus,
+        chStatus,
+        chArrow
+      };
     }
 
     function renderCharacterSection() {
       const state = getActiveState();
       const target = getActiveChallenge().targetCharacter;
 
-      document.getElementById('charScoreDisplay').textContent = state.charScore.toLocaleString();
+      const spoilerTag = document.getElementById('spoilerSafetyTag');
+      if (CURRENT_MODE === 'daily' && DAILY_INFO.dayNumber <= 50) {
+        spoilerTag.textContent = 'Pre-Chapter 5 Safe (Days 1–50)';
+        spoilerTag.classList.remove('hidden');
+      } else {
+        spoilerTag.textContent = 'Full Story Roster Unlocked';
+      }
 
-      // Render 6 visual guess pips
-      const pipsEl = document.getElementById('guessPipsContainer');
-      const used = state.charGuesses.length;
-      pipsEl.innerHTML = Array.from({ length: 6 }, (_, i) => {
-        const isUsed = i < used;
-        const isWinPip = state.charWon && i === used - 1;
-        const bg = isWinPip
-          ? 'bg-[#48b872] border-[#a5f0c0]'
-          : isUsed
-          ? 'bg-[#8f1d1d] border-[#d64545]'
-          : 'bg-[#e4ba6c] border-[#fae0a5]';
-        return `<span class="w-3 h-3 rounded-full border ${bg} transition-all"></span>`;
-      }).join('');
+      document.getElementById('charGuessCount').textContent = state.charGuesses.length;
 
-      const rowsContainer = document.getElementById('charGuessRows');
+      const inputWrapper = document.getElementById('charInputWrapper');
+      const resultBanner = document.getElementById('charResultBanner');
+
+      if (state.charCompleted) {
+        inputWrapper.classList.add('hidden');
+        resultBanner.classList.remove('hidden');
+        document.getElementById('charResultTitle').textContent = state.charWon
+          ? `Wanted Outlaw Captured: ${target.name}!`
+          : `Outlaw Escaped! The Target Was ${target.name}`;
+        document.getElementById('charResultSubtitle').textContent = state.charWon
+          ? `Identified in ${state.charGuesses.length}/6 guesses for +${state.charScore.toLocaleString()} Bounty Points. Lore Dossier is now unlocked!`
+          : `Better luck tomorrow, partner. Lore Dossier is now unlocked for ${target.name}.`;
+      } else {
+        inputWrapper.classList.remove('hidden');
+        resultBanner.classList.add('hidden');
+      }
+
+      const container = document.getElementById('charGuessesContainer');
       if (state.charGuesses.length === 0) {
-        rowsContainer.innerHTML = `
-          <div class="text-center py-8 text-sm text-[#8a7c66] italic">
-            No outlaws guessed yet. Enter a name above to begin tracking today&apos;s target.
+        container.innerHTML = `
+          <div class="p-6 rounded-xl bg-[#140f0c]/70 border border-dashed border-[#c89d54]/25 text-center text-xs sm:text-sm text-[#8e7f69]">
+            Type any RDR2 character above to fire your first deduction shot.
           </div>`;
       } else {
-        rowsContainer.innerHTML = state.charGuesses
-          .map((guessId) => {
-            const g = CHARACTERS.find((c) => c.id === guessId);
-            if (!g) return '';
-            const cells = [
-              { state: g.id === target.id ? 'exact' : 'wrong', label: g.name },
-              compareCharAttr(g, target, 'age'),
-              compareCharAttr(g, target, 'gender'),
-              compareCharAttr(g, target, 'faction'),
-              compareCharAttr(g, target, 'weapon'),
-              compareCharAttr(g, target, 'chapter')
-            ];
+        container.innerHTML = state.charGuesses
+          .slice()
+          .reverse()
+          .map((guessName, idx) => {
+            const gChar = CHARACTERS.find((c) => c.name === guessName);
+            if (!gChar) return '';
+            const ev = evaluateCharacterGuess(gChar, target);
+            const animCls = idx === 0 ? 'tile-reveal' : '';
             return `
-              <div class="grid grid-cols-6 gap-2 text-center text-xs font-medium">
-                ${cells
-                  .map(
-                    (cell) => `
-                    <div class="tile-reveal tile-${cell.state} rounded-lg px-2 py-3 flex items-center justify-center shadow">
-                      <span>${cell.label}</span>
-                    </div>`
-                  )
-                  .join('')}
+              <div class="grid grid-cols-6 gap-2 text-center text-xs ${animCls}">
+                <div class="p-2.5 rounded-lg flex items-center justify-center font-bold ${ev.nameExact ? 'tile-exact' : 'tile-wrong'}">
+                  ${gChar.name}
+                </div>
+                <div class="p-2.5 rounded-lg flex items-center justify-center font-bold tile-${ev.ageStatus}">
+                  ${gChar.age}${ev.ageArrow}
+                </div>
+                <div class="p-2.5 rounded-lg flex items-center justify-center font-semibold tile-${ev.genderStatus}">
+                  ${gChar.gender}
+                </div>
+                <div class="p-2.5 rounded-lg flex items-center justify-center font-semibold tile-${ev.factionStatus}">
+                  ${gChar.faction}
+                </div>
+                <div class="p-2.5 rounded-lg flex items-center justify-center font-semibold tile-${ev.weaponStatus}">
+                  ${gChar.weapon}
+                </div>
+                <div class="p-2.5 rounded-lg flex items-center justify-center font-bold tile-${ev.chStatus}">
+                  ${formatChapterLabel(gChar.chapter)}${ev.chArrow}
+                </div>
               </div>`;
           })
           .join('');
       }
 
-      const searchContainer = document.getElementById('charSearchContainer');
-      const resultBanner = document.getElementById('charResultBanner');
-      if (state.charCompleted) {
-        searchContainer.classList.add('hidden');
-        resultBanner.classList.remove('hidden');
-        document.getElementById('charResultTitle').textContent = state.charWon
-          ? `Target Identified: ${target.name} (+${state.charScore.toLocaleString()} pts)`
-          : `Outlaw Escaped! Target was ${target.name}`;
-        document.getElementById('charResultSub').textContent = state.charWon
-          ? `Solved in ${state.charGuesses.length} of 6 attempts. The Lore Dossier is now unlocked!`
-          : `Better luck next hunt. The Lore Dossier is now unlocked.`;
-      } else {
-        searchContainer.classList.remove('hidden');
-        resultBanner.classList.add('hidden');
-      }
-
       updateHeaderAndBadges();
     }
 
-    function submitCharacterGuess(charObj) {
+    const charSearchInput = document.getElementById('charSearchInput');
+    const charAutocompleteList = document.getElementById('charAutocompleteList');
+    const submitCharGuessBtn = document.getElementById('submitCharGuessBtn');
+
+    function updateCharAutocomplete() {
       const state = getActiveState();
-      if (state.charCompleted) return;
-      if (state.charGuesses.includes(charObj.id)) {
-        showToast('You already guessed that character!');
+      const query = charSearchInput.value.trim().toLowerCase();
+      selectedAutocompleteName = null;
+      submitCharGuessBtn.disabled = true;
+
+      if (!query) {
+        charAutocompleteList.classList.add('hidden');
         return;
       }
 
-      state.charGuesses.push(charObj.id);
-      const target = getActiveChallenge().targetCharacter;
-      const isMatch = charObj.id === target.id;
+      const isSpoilerSafe = CURRENT_MODE === 'daily' && DAILY_INFO.dayNumber <= 50;
+      const pool = isSpoilerSafe ? CHARACTERS.filter((c) => c.chapter <= 4) : CHARACTERS;
 
-      if (isMatch || state.charGuesses.length >= 6) {
-        state.charCompleted = true;
-        state.charWon = isMatch;
-        state.charScore = calculateCharScore(state.charGuesses.length, isMatch);
-        if (CURRENT_MODE === 'daily') checkAllModesCompleted();
+      const matches = pool.filter(
+        (c) =>
+          !state.charGuesses.includes(c.name) &&
+          c.name.toLowerCase().includes(query)
+      );
+
+      if (matches.length === 0) {
+        charAutocompleteList.innerHTML = `<div class="px-3.5 py-2.5 text-xs text-[#8e7f69]">No matching unguessed outlaws found.</div>`;
+        charAutocompleteList.classList.remove('hidden');
+        return;
       }
 
-      if (CURRENT_MODE === 'daily') saveAllState(APP_STATE);
-      document.getElementById('charSearchInput').value = '';
-      document.getElementById('charDropdown').classList.add('hidden');
+      const exactMatch = matches.find((m) => m.name.toLowerCase() === query);
+      if (exactMatch) {
+        selectedAutocompleteName = exactMatch.name;
+        submitCharGuessBtn.disabled = false;
+      }
+
+      charAutocompleteList.innerHTML = matches
+        .slice(0, 12)
+        .map(
+          (c) => `
+          <button type="button" data-char="${c.name}" class="w-full px-3.5 py-2.5 text-left hover:bg-[#2a2018] flex items-center justify-between gap-2 transition">
+            <span class="text-xs sm:text-sm font-semibold text-[#f3e9d2]">${c.name}</span>
+            <span class="text-[11px] text-[#bfb299]">${c.faction} &bull; ${formatChapterLabel(c.chapter)}</span>
+          </button>`
+        )
+        .join('');
+      charAutocompleteList.classList.remove('hidden');
+
+      charAutocompleteList.querySelectorAll('button[data-char]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          selectedAutocompleteName = btn.dataset.char;
+          charSearchInput.value = selectedAutocompleteName;
+          charAutocompleteList.classList.add('hidden');
+          submitCharGuessBtn.disabled = false;
+          submitCharacterGuess();
+        });
+      });
+    }
+
+    function submitCharacterGuess() {
+      const state = getActiveState();
+      if (state.charCompleted) return;
+
+      const query = (selectedAutocompleteName || charSearchInput.value).trim().toLowerCase();
+      const isSpoilerSafe = CURRENT_MODE === 'daily' && DAILY_INFO.dayNumber <= 50;
+      const pool = isSpoilerSafe ? CHARACTERS.filter((c) => c.chapter <= 4) : CHARACTERS;
+      const chosen = pool.find((c) => c.name.toLowerCase() === query);
+
+      if (!chosen) {
+        showToast('Select a valid outlaw from the dropdown list.');
+        return;
+      }
+      if (state.charGuesses.includes(chosen.name)) {
+        showToast('You already guessed that outlaw!');
+        return;
+      }
+
+      state.charGuesses.push(chosen.name);
+      charSearchInput.value = '';
+      selectedAutocompleteName = null;
+      submitCharGuessBtn.disabled = true;
+      charAutocompleteList.classList.add('hidden');
+
+      const target = getActiveChallenge().targetCharacter;
+      if (chosen.name === target.name) {
+        state.charWon = true;
+        state.charCompleted = true;
+        state.charScore = scoreCharacterGuesses(state.charGuesses.length, true);
+      } else if (state.charGuesses.length >= 6) {
+        state.charWon = false;
+        state.charCompleted = true;
+        state.charScore = 0;
+      }
+
+      if (CURRENT_MODE === 'daily') {
+        if (state.charCompleted) checkAllModesCompleted();
+        saveAllState(APP_STATE);
+      }
+
       renderCharacterSection();
     }
 
-    // Autocomplete Search with Aliases
-    const charInput = document.getElementById('charSearchInput');
-    const charDropdown = document.getElementById('charDropdown');
-
-    function updateDropdown(query) {
-      const state = getActiveState();
-      const q = query.trim().toLowerCase();
-      const filtered = CHARACTERS.filter((c) => {
-        if (state.charGuesses.includes(c.id)) return false;
-        const nameMatch = c.name.toLowerCase().includes(q);
-        const aliasMatch = c.aliases && c.aliases.some((a) => a.toLowerCase().includes(q));
-        return nameMatch || aliasMatch;
-      });
-
-      if (filtered.length === 0) {
-        charDropdown.innerHTML = `<div class="px-4 py-3 text-xs text-[#8a7c66]">No matching characters found.</div>`;
-      } else {
-        charDropdown.innerHTML = filtered
-          .map(
-            (c) => `
-            <button type="button" data-id="${c.id}" class="w-full text-left px-4 py-2.5 hover:bg-[#2c2119] border-b border-[#c89d54]/10 flex items-center justify-between text-xs sm:text-sm">
-              <span class="font-semibold text-[#f3e9d2]">${c.name}</span>
-              <span class="text-[11px] text-[#bfb299]">${c.faction} &bull; ${formatChapterLabel(c.chapter)}</span>
-            </button>`
-          )
-          .join('');
-      }
-      charDropdown.classList.remove('hidden');
-    }
-
-    charInput.addEventListener('input', (e) => updateDropdown(e.target.value));
-    charInput.addEventListener('focus', (e) => updateDropdown(e.target.value));
-
-    charDropdown.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-id]');
-      if (!btn) return;
-      const found = CHARACTERS.find((c) => c.id === btn.dataset.id);
-      if (found) submitCharacterGuess(found);
-    });
-
-    document.getElementById('charSubmitBtn').addEventListener('click', () => {
-      const state = getActiveState();
-      const q = charInput.value.trim().toLowerCase();
-      if (!q) return;
-      const exact = CHARACTERS.find(
-        (c) =>
-          !state.charGuesses.includes(c.id) &&
-          (c.name.toLowerCase() === q || (c.aliases && c.aliases.some((a) => a.toLowerCase() === q)))
-      );
-      if (exact) {
-        submitCharacterGuess(exact);
-        return;
-      }
-      const firstMatch = CHARACTERS.find(
-        (c) =>
-          !state.charGuesses.includes(c.id) &&
-          (c.name.toLowerCase().includes(q) || (c.aliases && c.aliases.some((a) => a.toLowerCase().includes(q))))
-      );
-      if (firstMatch) {
-        submitCharacterGuess(firstMatch);
-      } else {
-        showToast('Select a valid RDR2 character from the list.');
+    charSearchInput.addEventListener('input', updateCharAutocomplete);
+    charSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitCharacterGuess();
       }
     });
+    submitCharGuessBtn.addEventListener('click', submitCharacterGuess);
 
     document.addEventListener('click', (e) => {
-      if (!document.getElementById('charSearchContainer').contains(e.target)) {
-        charDropdown.classList.add('hidden');
+      if (!e.target.closest('#charInputWrapper')) {
+        charAutocompleteList.classList.add('hidden');
       }
     });
 
     // =========================================================================
-    // 8. MODE 2: STORY PINPOINT MAP + 4-TAP ANCHOR CALIBRATOR + PINCH ZOOM
+    // 8. MODE 2: STORY PINPOINT MAP + PINCH ZOOM
     // =========================================================================
     let mapZoom = 1;
     let mapPanX = 0;
     let mapPanY = 0;
     let pendingPin = null;
-
-    // 4-Tap Calibrator State
-    let isCalibrating = false;
-    let calibTaps = []; // Array of { x, y } up to 4
 
     const mapViewport = document.getElementById('mapViewport');
     const mapStage = document.getElementById('mapStage');
@@ -2114,11 +2245,7 @@
         const pctX = Math.min(100, Math.max(0, (stageX / rect.width) * 100));
         const pctY = Math.min(100, Math.max(0, (stageY / rect.height) * 100));
 
-        if (isCalibrating) {
-          handleCalibratorMapTap(pctX, pctY);
-        } else {
-          handleNormalMapTap(pctX, pctY);
-        }
+        handleNormalMapTap(pctX, pctY);
       }
     });
 
@@ -2139,120 +2266,6 @@
       userPinEl.classList.remove('hidden');
       document.getElementById('lockPinBtn').disabled = false;
     }
-
-    // -------------------------------------------------------------------------
-    // 4-TAP ANCHOR CALIBRATOR LOGIC
-    // -------------------------------------------------------------------------
-    function openCalibrator() {
-      isCalibrating = true;
-      calibTaps = [];
-      mapViewport.classList.add('calibrating');
-      document.getElementById('calibratorPanel').classList.remove('hidden');
-      document.getElementById('normalGuessControls').classList.add('opacity-40', 'pointer-events-none');
-      renderCalibratorUI();
-    }
-
-    function closeCalibrator() {
-      isCalibrating = false;
-      calibTaps = [];
-      mapViewport.classList.remove('calibrating');
-      document.getElementById('calibratorPanel').classList.add('hidden');
-      document.getElementById('normalGuessControls').classList.remove('opacity-40', 'pointer-events-none');
-      document.getElementById('calibMarkersLayer').innerHTML = '';
-      renderMapRound();
-    }
-
-    function handleCalibratorMapTap(pctX, pctY) {
-      if (calibTaps.length >= 4) return;
-      calibTaps.push({ x: pctX, y: pctY });
-
-      if (calibTaps.length === 4) {
-        const affine = computeAffineCalibration(calibTaps);
-        APP_STATE.affineCalibration = affine;
-        saveAllState(APP_STATE);
-        showToast('4-Tap Calibration complete & saved!');
-      }
-
-      renderCalibratorUI();
-      renderMapRound();
-    }
-
-    function renderCalibratorUI() {
-      const step = calibTaps.length;
-      document.getElementById('calibUndoBtn').disabled = step === 0;
-
-      // Render numbered markers on map
-      const layer = document.getElementById('calibMarkersLayer');
-      layer.innerHTML = calibTaps
-        .map(
-          (pt, idx) => `
-          <div class="calib-anchor-marker" style="left:${pt.x}%; top:${pt.y}%;">
-            <div class="w-6 h-6 rounded-full bg-[#e4ba6c] text-[#120e0b] font-western font-black text-xs flex items-center justify-center border-2 border-[#120e0b] shadow-lg">
-              ${idx + 1}
-            </div>
-          </div>`
-        )
-        .join('');
-
-      // Update 4 anchor pips
-      BASE_ANCHORS.forEach((anc, idx) => {
-        const pip = document.getElementById(`anchorPip${idx}`);
-        if (idx < step) {
-          pip.className = 'px-2 py-1 rounded bg-[#277544]/50 border border-[#48b872] text-[#a5f0c0]';
-        } else if (idx === step) {
-          pip.className = 'px-2 py-1 rounded bg-[#8f1d1d] border border-[#e4ba6c] text-[#f3e9d2] font-bold';
-        } else {
-          pip.className = 'px-2 py-1 rounded bg-[#140f0c] border border-[#c89d54]/30 text-[#7d705c]';
-        }
-      });
-
-      const instrBox = document.getElementById('calibInstructionBox');
-      const completeBox = document.getElementById('calibCompleteBox');
-
-      if (step < 4) {
-        instrBox.classList.remove('hidden');
-        completeBox.classList.add('hidden');
-        const targetAnc = BASE_ANCHORS[step];
-        document.getElementById('calibStepBadge').textContent = `STEP ${step + 1} OF 4`;
-        document.getElementById('calibPromptTitle').textContent = `Tap ${targetAnc.name.toUpperCase()}`;
-        document.getElementById('calibPromptDesc').textContent = targetAnc.desc;
-      } else {
-        instrBox.classList.add('hidden');
-        completeBox.classList.remove('hidden');
-        const snippet = `const CALIBRATION = ${JSON.stringify(APP_STATE.affineCalibration)};`;
-        document.getElementById('calibSnippetPreview').textContent = snippet;
-      }
-    }
-
-    document.getElementById('startCalibrateBtn').addEventListener('click', openCalibrator);
-    document.getElementById('calibCancelBtn').addEventListener('click', closeCalibrator);
-
-    document.getElementById('calibUndoBtn').addEventListener('click', () => {
-      if (calibTaps.length > 0) {
-        calibTaps.pop();
-        renderCalibratorUI();
-      }
-    });
-
-    document.getElementById('calibResetBtn').addEventListener('click', () => {
-      APP_STATE.affineCalibration = null;
-      saveAllState(APP_STATE);
-      calibTaps = [];
-      renderCalibratorUI();
-      renderMapRound();
-      showToast('Calibration reset to default coordinates.');
-    });
-
-    document.getElementById('copyCalibSnippetBtn').addEventListener('click', () => {
-      const text = document.getElementById('calibSnippetPreview').textContent;
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('Calibration snippet copied to clipboard!');
-    });
 
     // Map Image Loader with Fallback & IndexedDB Custom Upload
     const mapImgEl = document.getElementById('rdr2MapImg');
