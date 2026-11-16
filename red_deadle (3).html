@@ -1,0 +1,2408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Red-Deadle — Daily Red Dead Redemption 2 Trivia &amp; Map Challenge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-leather: #120e0b;
+      --bg-panel: #1b1510;
+      --bg-card: #241c15;
+      --gold: #c89d54;
+      --gold-bright: #e4ba6c;
+      --cream: #f3e9d2;
+      --cream-muted: #bfb299;
+      --crimson: #8f1d1d;
+      --crimson-bright: #c42b2b;
+      --emerald: #236b3e;
+      --amber: #a86c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-leather);
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(200, 157, 84, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 15% 85%, rgba(143, 29, 29, 0.12) 0%, transparent 55%),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 2px, transparent 2px, transparent 8px);
+      color: var(--cream);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-western {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.04em;
+    }
+
+    .font-serif-body {
+      font-family: 'Crimson Pro', serif;
+    }
+
+    .leather-panel {
+      background: linear-gradient(180deg, #1e1712 0%, #16110d 100%);
+      border: 1px solid rgba(200, 157, 84, 0.35);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(243, 233, 210, 0.07);
+    }
+
+    .western-btn {
+      background: linear-gradient(180deg, #2d231a 0%, #1e1711 100%);
+      border: 1px solid rgba(200, 157, 84, 0.55);
+      color: var(--cream);
+      transition: all 0.18s ease;
+    }
+
+    .western-btn:hover:not(:disabled) {
+      border-color: var(--gold-bright);
+      background: linear-gradient(180deg, #3a2d21 0%, #261d15 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(200, 157, 84, 0.2);
+    }
+
+    .western-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .western-btn-primary {
+      background: linear-gradient(180deg, #9e2323 0%, #6e1515 100%);
+      border: 1px solid #d49b4b;
+      color: #f8efe0;
+      box-shadow: 0 4px 16px rgba(143, 29, 29, 0.45);
+      transition: all 0.18s ease;
+    }
+
+    .western-btn-primary:hover:not(:disabled) {
+      background: linear-gradient(180deg, #b82929 0%, #821919 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(196, 43, 43, 0.55);
+    }
+
+    .western-btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .western-btn-gold {
+      background: linear-gradient(180deg, #d1a458 0%, #a57a33 100%);
+      border: 1px solid #f2d394;
+      color: #16100a;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(200, 157, 84, 0.35);
+      transition: all 0.18s ease;
+    }
+
+    .western-btn-gold:hover:not(:disabled) {
+      background: linear-gradient(180deg, #e0b467 0%, #b6883c 100%);
+      transform: translateY(-1px);
+    }
+
+    .western-btn-gold:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .tab-btn {
+      border-bottom: 2px solid transparent;
+      color: var(--cream-muted);
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      color: var(--gold-bright);
+      border-bottom-color: var(--gold-bright);
+      background: rgba(200, 157, 84, 0.08);
+    }
+
+    /* Attribute Tile Animations & Colors */
+    @keyframes flipReveal {
+      0% {
+        transform: rotateX(90deg) scale(0.95);
+        opacity: 0;
+      }
+      100% {
+        transform: rotateX(0deg) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .tile-reveal {
+      animation: flipReveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .tile-exact {
+      background: linear-gradient(180deg, #277544 0%, #1b5430 100%);
+      border: 1px solid #48b872;
+      color: #f3faf5;
+    }
+
+    .tile-partial {
+      background: linear-gradient(180deg, #b5761e 0%, #875511 100%);
+      border: 1px solid #e6a645;
+      color: #fff9ed;
+    }
+
+    .tile-wrong {
+      background: linear-gradient(180deg, #362922 0%, #241b16 100%);
+      border: 1px solid rgba(200, 157, 84, 0.22);
+      color: #cbbba2;
+    }
+
+    /* Map Container & Interactive Zoom */
+    .map-viewport {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-height: 68vh;
+      background-color: #2b2622;
+      border: 2px solid rgba(200, 157, 84, 0.55);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .map-stage {
+      position: absolute;
+      inset: 0;
+      transform-origin: 0 0;
+      will-change: transform;
+      cursor: crosshair;
+    }
+
+    .map-stage img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+      pointer-events: none;
+    }
+
+    .map-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.85));
+    }
+
+    .map-pin-target {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      pointer-events: none;
+      z-index: 25;
+      filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9));
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #140f0c;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4b3928;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #c89d54;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-[#c89d54] selection:text-[#120e0b]">
+  <!-- Top Header -->
+  <header class="border-b border-[#c89d54]/30 bg-[#15100c]/95 sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#8f1d1d] to-[#4a0d0d] border border-[#c89d54] flex items-center justify-center shadow-lg">
+          <svg class="w-6 h-6 text-[#f3e9d2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-western text-xl sm:text-2xl font-black text-[#f3e9d2] tracking-wider">RED-DEADLE</h1>
+            <span id="dayBadge" class="px-2 py-0.5 text-xs font-bold rounded bg-[#c89d54]/20 text-[#e4ba6c] border border-[#c89d54]/40">DAY #3</span>
+          </div>
+          <p class="text-xs text-[#bfb299] hidden sm:block">Daily Outlaw Deduction, Story Pinpoint &amp; Frontier Dossier</p>
+        </div>
+      </div>
+
+      <!-- Daily Score & Action Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="px-3 py-1.5 rounded-lg bg-[#1e1712] border border-[#c89d54]/40 text-right">
+          <div class="text-[10px] uppercase tracking-wider text-[#bfb299]">Daily Bounty</div>
+          <div class="font-western text-sm sm:text-base font-bold text-[#e4ba6c]">
+            <span id="totalScoreDisplay">0</span> <span class="text-xs text-[#bfb299] font-normal">/ 11,500</span>
+          </div>
+        </div>
+
+        <button id="statsBtn" class="western-btn p-2.5 rounded-lg" title="Outlaw Ledger & Stats">
+          <svg class="w-5 h-5 text-[#e4ba6c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 20V10M12 20V4M6 20v-6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <button id="helpBtn" class="western-btn p-2.5 rounded-lg" title="How to Play">
+          <svg class="w-5 h-5 text-[#e4ba6c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-linecap="round" />
+            <line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mode Navigation Tabs -->
+    <nav class="max-w-6xl mx-auto px-4 flex border-t border-[#c89d54]/15 overflow-x-auto">
+      <button data-tab="character" class="tab-btn active flex-1 py-3 px-4 text-xs sm:text-sm font-western font-bold flex items-center justify-center gap-2 whitespace-nowrap">
+        <span>1. Outlaw Guess</span>
+        <span id="tabBadgeChar" class="px-1.5 py-0.5 text-[10px] rounded bg-[#2a2018] text-[#bfb299] border border-[#c89d54]/30">5,000 PTS</span>
+      </button>
+      <button data-tab="map" class="tab-btn flex-1 py-3 px-4 text-xs sm:text-sm font-western font-bold flex items-center justify-center gap-2 whitespace-nowrap">
+        <span>2. Story Pinpoint</span>
+        <span id="tabBadgeMap" class="px-1.5 py-0.5 text-[10px] rounded bg-[#2a2018] text-[#bfb299] border border-[#c89d54]/30">5,000 PTS</span>
+      </button>
+      <button data-tab="dossier" class="tab-btn flex-1 py-3 px-4 text-xs sm:text-sm font-western font-bold flex items-center justify-center gap-2 whitespace-nowrap">
+        <span>3. Bounty Dossier</span>
+        <span id="tabBadgeDossier" class="px-1.5 py-0.5 text-[10px] rounded bg-[#2a2018] text-[#bfb299] border border-[#c89d54]/30">LOCKED</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Toast Banner -->
+  <div id="toastBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
+    <div id="toastText" class="px-4 py-2.5 rounded-lg bg-[#241b14] border border-[#e4ba6c] text-[#f3e9d2] text-sm font-medium shadow-2xl"></div>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <!-- TAB 1: CHARACTER DEDUCTION -->
+    <section id="section-character" class="space-y-5">
+      <div class="leather-panel rounded-xl p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#c89d54]/20">
+          <div>
+            <h2 class="font-western text-lg sm:text-xl font-bold text-[#e4ba6c]">Identify Today&apos;s Outlaw</h2>
+            <p class="text-xs sm:text-sm text-[#bfb299]">Guess the Red Dead Redemption 2 character in 6 tries. Green = Exact match, Amber = Partial match.</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2.5 py-1 rounded bg-[#241c15] border border-[#c89d54]/30 text-[#f3e9d2]">
+              Attempts: <strong id="charAttemptCount" class="text-[#e4ba6c]">0</strong> / 6
+            </span>
+            <span class="px-2.5 py-1 rounded bg-[#241c15] border border-[#c89d54]/30 text-[#f3e9d2]">
+              Bounty: <strong id="charScoreDisplay" class="text-[#e4ba6c]">0</strong> pts
+            </span>
+          </div>
+        </div>
+
+        <!-- Search Box -->
+        <div id="charSearchContainer" class="relative mt-4">
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <input
+                type="text"
+                id="charSearchInput"
+                autocomplete="off"
+                placeholder="Type an RDR2 character name (e.g., Arthur Morgan, Sadie Adler, Hosea)..."
+                class="w-full px-4 py-3 rounded-lg bg-[#120e0b] border border-[#c89d54]/50 text-[#f3e9d2] placeholder-[#7d705c] focus:outline-none focus:border-[#e4ba6c]"
+              />
+              <div id="charDropdown" class="hidden absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-lg bg-[#1c1510] border border-[#c89d54]/60 shadow-2xl z-30"></div>
+            </div>
+            <button id="charSubmitBtn" class="western-btn-primary px-5 py-3 rounded-lg font-western font-bold text-sm whitespace-nowrap">
+              Guess
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Banner for Character Round -->
+        <div id="charResultBanner" class="hidden mt-4 p-4 rounded-xl bg-[#16110d] border border-[#c89d54]/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div id="charResultTitle" class="font-western text-lg font-bold text-[#e4ba6c]"></div>
+            <p id="charResultSub" class="text-sm text-[#bfb299] mt-0.5"></p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="switchTab('map')" class="western-btn-gold px-4 py-2 rounded-lg text-xs font-western">
+              Next: Story Pinpoint &rarr;
+            </button>
+            <button onclick="switchTab('dossier')" class="western-btn px-4 py-2 rounded-lg text-xs font-western">
+              Open Bounty Dossier &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guess Grid -->
+      <div class="leather-panel rounded-xl p-4 overflow-x-auto">
+        <div class="min-w-[680px]">
+          <div class="grid grid-cols-7 gap-2 pb-2 mb-2 border-b border-[#c89d54]/25 text-[11px] font-western font-bold uppercase tracking-wider text-[#c89d54] text-center">
+            <div>Character</div>
+            <div>Gender</div>
+            <div>Affiliation</div>
+            <div>Role</div>
+            <div>Origin / Heritage</div>
+            <div>Intro Chapter</div>
+            <div>Status (1899)</div>
+          </div>
+          <div id="charGuessRows" class="space-y-2">
+            <div class="text-center py-8 text-sm text-[#8a7c66] italic">
+              No outlaws guessed yet. Enter a name above to begin tracking today&apos;s target.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: STORY PINPOINT MAP CHALLENGE -->
+    <section id="section-map" class="hidden space-y-5">
+      <div class="leather-panel rounded-xl p-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#c89d54]/20">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="mapRoundBadge" class="px-2.5 py-0.5 rounded bg-[#8f1d1d] text-[#f3e9d2] text-xs font-western font-bold border border-[#c89d54]/50">
+                ROUND 1 OF 5
+              </span>
+              <span id="mapCategoryBadge" class="px-2 py-0.5 rounded bg-[#241c15] text-[#e4ba6c] text-xs border border-[#c89d54]/30">
+                Story Mission
+              </span>
+            </div>
+            <h2 id="mapPromptQuestion" class="font-western text-base sm:text-lg font-bold text-[#f3e9d2] mt-2">
+              Loading event prompt...
+            </h2>
+            <p id="mapPromptHint" class="text-xs sm:text-sm text-[#bfb299] mt-0.5">
+              Click or tap on the map to place your pin, then lock in your guess.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 self-start md:self-center">
+            <div class="px-3 py-1.5 rounded-lg bg-[#241c15] border border-[#c89d54]/30 text-right">
+              <div class="text-[10px] uppercase text-[#bfb299]">Map Score</div>
+              <div class="font-western text-sm font-bold text-[#e4ba6c]"><span id="mapTotalScore">0</span> / 5,000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-2 my-3">
+          <div class="flex items-center gap-1.5">
+            <button id="zoomInBtn" class="western-btn px-3 py-1.5 rounded-lg text-xs font-bold" title="Zoom In">+ Zoom</button>
+            <button id="zoomOutBtn" class="western-btn px-3 py-1.5 rounded-lg text-xs font-bold" title="Zoom Out">&minus; Zoom</button>
+            <button id="zoomResetBtn" class="western-btn px-3 py-1.5 rounded-lg text-xs" title="Reset View">Reset View</button>
+            <button id="toggleCalibrateBtn" class="western-btn px-3 py-1.5 rounded-lg text-xs text-[#e4ba6c]" title="Adjust Pin Alignment">
+              Calibrate Pins
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="lockPinBtn" disabled class="western-btn-primary px-5 py-2 rounded-lg font-western font-bold text-xs sm:text-sm">
+              Lock In Pin
+            </button>
+            <button id="nextMapRoundBtn" class="hidden western-btn-gold px-5 py-2 rounded-lg font-western font-bold text-xs sm:text-sm">
+              Next Event &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Collapsible Pin Calibration Bar -->
+        <div id="calibratePanel" class="hidden mb-3 p-3 rounded-lg bg-[#140f0c] border border-[#c89d54]/40 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="text-[#bfb299]">
+            <strong class="text-[#e4ba6c]">Pin Offset Calibration:</strong> Fine-tune if your local <code class="text-[#f3e9d2]">map.jpg</code> margins differ slightly.
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="flex items-center gap-1.5">
+              <span>X Offset:</span>
+              <input id="offsetXInput" type="number" step="0.2" value="0" class="w-16 px-2 py-1 rounded bg-[#241c15] border border-[#c89d54]/40 text-[#f3e9d2]" />
+            </label>
+            <label class="flex items-center gap-1.5">
+              <span>Y Offset:</span>
+              <input id="offsetYInput" type="number" step="0.2" value="0" class="w-16 px-2 py-1 rounded bg-[#241c15] border border-[#c89d54]/40 text-[#f3e9d2]" />
+            </label>
+            <button id="resetOffsetBtn" class="western-btn px-2.5 py-1 rounded text-xs">Zero</button>
+          </div>
+        </div>
+
+        <!-- Interactive Map Viewport -->
+        <div id="mapViewport" class="map-viewport mx-auto">
+          <div id="mapStage" class="map-stage">
+            <img id="rdr2MapImg" src="map.jpg" alt="Red Dead Redemption 2 World Map" />
+            <svg id="mapLineOverlay" class="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+
+            <!-- User Guess Pin -->
+            <div id="userMapPin" class="map-pin hidden">
+              <svg class="w-8 h-8 text-[#e4ba6c]" viewBox="0 0 24 24" fill="#c42b2b" stroke="#f3e9d2" stroke-width="1.75">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+              </svg>
+            </div>
+
+            <!-- Actual Answer Pin -->
+            <div id="targetMapPin" class="map-pin-target hidden">
+              <svg class="w-9 h-9" viewBox="0 0 24 24" fill="#277544" stroke="#f3e9d2" stroke-width="1.75">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Round Feedback Banner -->
+        <div id="mapRoundFeedback" class="hidden mt-4 p-4 rounded-xl bg-[#16110d] border border-[#c89d54]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="mapFeedbackTitle" class="font-western text-base font-bold text-[#e4ba6c]"></span>
+              <span id="mapFeedbackPoints" class="px-2 py-0.5 rounded bg-[#277544]/40 border border-[#48b872] text-xs font-bold text-[#f3faf5]"></span>
+            </div>
+            <p id="mapFeedbackDesc" class="text-sm text-[#f3e9d2] mt-1"></p>
+          </div>
+        </div>
+
+        <!-- 5-Round Progress Summary Strip -->
+        <div id="mapHistoryStrip" class="grid grid-cols-5 gap-2 mt-4"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BOUNTY DOSSIER (LOCKED UNTIL CHARACTER ROUND COMPLETE) -->
+    <section id="section-dossier" class="hidden space-y-5">
+      <!-- Locked Overlay Card -->
+      <div id="dossierLockedCard" class="leather-panel rounded-xl p-8 text-center space-y-4">
+        <div class="w-14 h-14 mx-auto rounded-full bg-[#241c15] border border-[#c89d54]/50 flex items-center justify-center">
+          <svg class="w-7 h-7 text-[#e4ba6c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </div>
+        <h2 class="font-western text-xl font-bold text-[#e4ba6c]">Bounty Dossier Sealed</h2>
+        <p class="text-sm text-[#bfb299] max-w-md mx-auto">
+          Complete <strong class="text-[#f3e9d2]">1. Outlaw Guess</strong> first so you don&apos;t spoil today&apos;s target character! Once solved or completed, 3 bonus dossier questions worth 500 pts each will unlock.
+        </p>
+        <button onclick="switchTab('character')" class="western-btn-primary px-6 py-2.5 rounded-lg font-western font-bold text-sm">
+          Return to Outlaw Guess
+        </button>
+      </div>
+
+      <!-- Unlocked Dossier Content -->
+      <div id="dossierUnlockedContent" class="hidden space-y-4">
+        <div class="leather-panel rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-xs uppercase tracking-widest text-[#c89d54]">Pinkerton Intelligence File</span>
+            <h2 id="dossierCharHeading" class="font-western text-xl font-bold text-[#f3e9d2]">Target Dossier</h2>
+          </div>
+          <div class="px-3 py-1.5 rounded-lg bg-[#241c15] border border-[#c89d54]/30 text-right">
+            <div class="text-[10px] uppercase text-[#bfb299]">Dossier Bounty</div>
+            <div class="font-western text-sm font-bold text-[#e4ba6c]"><span id="dossierScoreDisplay">0</span> / 1,500</div>
+          </div>
+        </div>
+
+        <div id="dossierQuestionsList" class="space-y-4"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Help Modal -->
+  <div id="helpModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="leather-panel rounded-xl max-w-lg w-full p-6 space-y-4 relative">
+      <div class="flex items-center justify-between border-b border-[#c89d54]/30 pb-3">
+        <h3 class="font-western text-lg font-bold text-[#e4ba6c]">How to Play Red-Deadle</h3>
+        <button id="closeHelpBtn" class="text-[#bfb299] hover:text-[#f3e9d2] text-xl leading-none">&times;</button>
+      </div>
+      <div class="space-y-3 text-sm text-[#d9ccb4] leading-relaxed">
+        <p><strong class="text-[#e4ba6c]">1. Outlaw Guess (Up to 5,000 pts):</strong> Deduce the daily RDR2 character within 6 guesses. Scoring: <strong>5,000</strong> (1 try), <strong>4,000</strong> (2–4 tries), <strong>3,000</strong> (5 tries), <strong>1,500</strong> (6 tries).</p>
+        <p><strong class="text-[#e4ba6c]">2. Story Pinpoint (Up to 5,000 pts):</strong> Pinpoint 5 iconic RDR2 story moments, gang heists, character introductions, or stranger encounters on the frontier map (up to 1,000 pts per round based on accuracy).</p>
+        <p><strong class="text-[#e4ba6c]">3. Bounty Dossier (Up to 1,500 pts):</strong> Unlocks immediately after you finish today&apos;s Outlaw Guess. Answer 3 multiple-choice lore questions (500 pts each) about today&apos;s character.</p>
+      </div>
+      <div class="pt-2 text-right">
+        <button id="gotItHelpBtn" class="western-btn-gold px-5 py-2 rounded-lg font-western text-xs">Ride Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats & Share Modal -->
+  <div id="statsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="leather-panel rounded-xl max-w-md w-full p-6 space-y-5">
+      <div class="flex items-center justify-between border-b border-[#c89d54]/30 pb-3">
+        <h3 class="font-western text-lg font-bold text-[#e4ba6c]">Outlaw Ledger &mdash; <span id="statsDayLabel">Day #3</span></h3>
+        <button id="closeStatsBtn" class="text-[#bfb299] hover:text-[#f3e9d2] text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 text-center">
+        <div class="p-3 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-xs text-[#bfb299]">Today&apos;s Total</div>
+          <div id="statTodayTotal" class="font-western text-xl font-bold text-[#e4ba6c]">0 / 11,500</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-xs text-[#bfb299]">Days Played</div>
+          <div id="statDaysPlayed" class="font-western text-xl font-bold text-[#f3e9d2]">0</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-xs text-[#bfb299]">Outlaw Guess</div>
+          <div id="statCharScore" class="font-western text-base font-bold text-[#f3e9d2]">0 / 5,000</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-xs text-[#bfb299]">Story Pinpoint</div>
+          <div id="statMapScore" class="font-western text-base font-bold text-[#f3e9d2]">0 / 5,000</div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="copyShareBtn" class="western-btn-gold px-5 py-2.5 rounded-lg font-western text-xs font-bold w-full">
+          Copy Daily Bounty Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. DAY INDEXING (ANCHORED TO NOV 14, 2026 = DAY #1)
+    // =========================================================================
+    function getDailyPuzzleInfo() {
+      const anchorUtc = Date.UTC(2026, 10, 14); // Nov 14, 2026 (month is 0-indexed: 10 = Nov)
+      const now = new Date();
+      const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+      const diffDays = Math.floor((todayUtc - anchorUtc) / 86400000);
+      const dayNumber = Math.max(1, diffDays + 1);
+      const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      return { dayNumber, dateKey };
+    }
+
+    const DAILY_INFO = getDailyPuzzleInfo();
+
+    // Deterministic PRNG (Mulberry32)
+    function mulberry32(seed) {
+      return function () {
+        let t = (seed += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    // =========================================================================
+    // 2. COMPLETE 56-CHARACTER ROSTER (INTRO CHAPTER ONLY, NO SPOILERS)
+    // =========================================================================
+    const CHARACTERS = [
+      {
+        id: 'arthur_morgan',
+        name: 'Arthur Morgan',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Lead Enforcer',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What is the name of the horse Arthur rides at the beginning of Chapter 1 in Colter?', options: ['Boadicea', 'Old Boy', 'Baylock', 'The Count'], answer: 0 },
+          { q: 'Who taught Arthur Morgan how to read and write when he was a teenager?', options: ['Hosea & Dutch', 'Uncle', 'Swanson', 'Strauss'], answer: 0 },
+          { q: 'What distinctive personal item does Arthur constantly update with sketches and entries?', options: ['Leather Journal', 'Pocket Watch', 'Silver Locket', 'Harmonica'], answer: 0 }
+        ]
+      },
+      {
+        id: 'dutch_van_der_linde',
+        name: 'Dutch van der Linde',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Gang Leader',
+        origin: 'Pennsylvania',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'Who is the philosopher whose books Dutch frequently reads and quotes?', options: ['Evelyn Miller', 'Marko Dragic', 'Josiah Trelawny', 'Rains Fall'], answer: 0 },
+          { q: 'What breed and coat is Dutch’s prized horse?', options: ['Albino Arabian', 'Black Arabian', 'Silver Dapple Pinto', 'Turkoman'], answer: 0 },
+          { q: 'Which rival gang leader has a bitter, decades-long blood feud with Dutch?', options: ['Colm O’Driscoll', 'Leviticus Cornwall', 'Angelo Bronte', 'Andrew Milton'], answer: 0 }
+        ]
+      },
+      {
+        id: 'john_marston',
+        name: 'John Marston',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Gunslinger',
+        origin: 'Illinois',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'How did John Marston get the prominent scars across his face before Chapter 1?', options: ['Attacked by wolves in the mountains', 'A duel in Blackwater', 'A bar fight in Valentine', 'O’Driscoll ambush'], answer: 0 },
+          { q: 'What is the name of John Marston’s young son?', options: ['Jack', 'Isaac', 'Lancelot', 'Jamie'], answer: 0 },
+          { q: 'What skill is John notoriously unable to perform throughout the story?', options: ['Swimming', 'Riding a horse', 'Skinning game', 'Playing poker'], answer: 0 }
+        ]
+      },
+      {
+        id: 'hosea_matthews',
+        name: 'Hosea Matthews',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Co-Founder & Con Artist',
+        origin: 'Mountain States',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What alias does Hosea frequently use when running confidence schemes?', options: ['Fenton', 'Rip Van Winkle', 'Tacitus Kilgore', 'Arthur Callahan'], answer: 0 },
+          { q: 'What was the name of Hosea’s beloved late wife?', options: ['Bessie', 'Annabelle', 'Eliza', 'Martha'], answer: 0 },
+          { q: 'Which legendary predator does Hosea take Arthur to track in East Grizzlies?', options: ['Bharati Grizzly Bear', 'Tatanka Bison', 'Giaguaro Panther', 'Ghost Bison'], answer: 0 }
+        ]
+      },
+      {
+        id: 'sadie_adler',
+        name: 'Sadie Adler',
+        gender: 'Female',
+        affiliation: 'Van der Linde Gang',
+        role: 'Gunslinger & Bounty Hunter',
+        origin: 'Frontier West',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What was the name of Sadie Adler’s husband who was killed at their ranch?', options: ['Jake', 'Caleb', 'Amos', 'Thomas'], answer: 0 },
+          { q: 'Which gang occupied the Adler homestead during the blizzard in Chapter 1?', options: ['O’Driscoll Boys', 'Lemoyne Raiders', 'Murfree Brood', 'Laramie Gang'], answer: 0 },
+          { q: 'Where does Sadie first accompany Arthur into town to buy supplies and new clothes?', options: ['Rhodes', 'Valentine', 'Strawberry', 'Saint Denis'], answer: 0 }
+        ]
+      },
+      {
+        id: 'charles_smith',
+        name: 'Charles Smith',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Hunter & Tracker',
+        origin: 'Frontier West',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What is Charles Smith’s parental heritage?', options: ['African American and Native American', 'Irish and Scottish', 'Mexican and Spanish', 'German and Dutch'], answer: 0 },
+          { q: 'What weapon does Charles famously craft and teach Arthur to hunt silently with?', options: ['Bow and Arrows', 'Rolling Block Rifle', 'Throwing Knives', 'Sawed-off Shotgun'], answer: 0 },
+          { q: 'Which Native American tribe does Charles form a close bond with in Ambarino?', options: ['Wapiti', 'Comanche', 'Lakota', 'Cherokee'], answer: 0 }
+        ]
+      },
+      {
+        id: 'abigail_roberts',
+        name: 'Abigail Roberts',
+        gender: 'Female',
+        affiliation: 'Van der Linde Gang',
+        role: 'Camp Caretaker',
+        origin: 'Frontier West',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'Who introduced Abigail to the Van der Linde gang around 1894?', options: ['Uncle', 'Hosea Matthews', 'Susan Grimshaw', 'Bill Williamson'], answer: 0 },
+          { q: 'What is Abigail’s main wish for John and Jack throughout the story?', options: ['To leave outlaw life behind for a peaceful home', 'To rob the Saint Denis bank', 'To move to Tahiti', 'To buy a saloon in Valentine'], answer: 0 },
+          { q: 'Which gang member does Abigail ask to take Jack fishing near Clemens Point?', options: ['Arthur Morgan', 'Micah Bell', 'Sean MacGuire', 'Leopold Strauss'], answer: 0 }
+        ]
+      },
+      {
+        id: 'jack_marston',
+        name: 'Jack Marston',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Camp Youth',
+        origin: 'Frontier West',
+        chapter: 1,
+        status1899: 'Camp Dependent',
+        dossier: [
+          { q: 'What pastime does Jack Marston love most in camp?', options: ['Reading penny dreadful books', 'Playing five finger fillet', 'Practicing quick-draw duels', 'Playing the banjo'], answer: 0 },
+          { q: 'Who kidnaps Jack Marston from Clemens Point in Chapter 3?', options: ['The Braithwaites', 'The Grays', 'The O’Driscolls', 'The Pinkertons'], answer: 0 },
+          { q: 'What Italian treat does Angelo Bronte feed Jack while he is in Saint Denis?', options: ['Spaghetti', 'Gelato', 'Cannoli', 'Pizza'], answer: 0 }
+        ]
+      },
+      {
+        id: 'uncle',
+        name: 'Uncle',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Camp Elder',
+        origin: 'Ohio',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What chronic medical ailment does Uncle constantly blame for avoiding hard labor?', options: ['Terminal lumbago', 'Gout', 'Consumption', 'Rheumatism'], answer: 0 },
+          { q: 'Which three women accompany Uncle on his first wagon trip into Valentine?', options: ['Karen, Mary-Beth, and Tilly', 'Sadie, Abigail, and Molly', 'Susan, Karen, and Sadie', 'Tilly, Molly, and Mary-Beth'], answer: 0 },
+          { q: 'What musical instrument does Uncle often play around the campfires?', options: ['Banjo', 'Harmonica', 'Concertina', 'Fiddle'], answer: 0 }
+        ]
+      },
+      {
+        id: 'javier_escuella',
+        name: 'Javier Escuella',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Gunslinger',
+        origin: 'Mexico',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'Which Mexican state does Javier Escuella originally hail from?', options: ['Nuevo Paraíso', 'Chihuahua', 'Sonora', 'Jalisco'], answer: 0 },
+          { q: 'What instrument does Javier frequently play around the gang’s campfire?', options: ['Guitar', 'Banjo', 'Harmonica', 'Trumpet'], answer: 0 },
+          { q: 'Who joins Javier and Arthur in the snowy mountains to rescue John Marston?', options: ['Nobody — just Arthur and Javier', 'Charles Smith', 'Micah Bell', 'Bill Williamson'], answer: 0 }
+        ]
+      },
+      {
+        id: 'bill_williamson',
+        name: 'Bill Williamson',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Enforcer',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What is Bill Williamson’s real birth name?', options: ['Marion Williamson', 'William Marion', 'Robert Williamson', 'Thomas Williamson'], answer: 0 },
+          { q: 'What branch of service was Bill dishonorably discharged from in 1892?', options: ['U.S. Cavalry', 'U.S. Navy', 'Pinkerton Agency', 'Texas Rangers'], answer: 0 },
+          { q: 'Which major bank heist does Bill plan and lead with Karen, Lenny, and Arthur?', options: ['Valentine Bank', 'Rhodes Bank', 'Saint Denis Bank', 'Blackwater Bank'], answer: 0 }
+        ]
+      },
+      {
+        id: 'micah_bell',
+        name: 'Micah Bell',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Gunslinger',
+        origin: 'Ohio',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What are the names of Micah Bell’s twin custom double-action revolvers?', options: ['Vengeance & Grimshaw', 'The Callows', 'Black & White', 'Calamity & Ruin'], answer: 0 },
+          { q: 'In which town is Micah jailed before Arthur breaks him out in Chapter 2?', options: ['Strawberry', 'Valentine', 'Rhodes', 'Annesburg'], answer: 0 },
+          { q: 'What is the name of Micah Bell’s dark bay Missouri Fox Trotter horse?', options: ['Baylock', 'Old Boy', 'Silver Dollar', 'Branwen'], answer: 0 }
+        ]
+      },
+      {
+        id: 'lenny_summers',
+        name: 'Lenny Summers',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Gunslinger',
+        origin: 'Southern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What is the famous shout Arthur yells repeatedly while drunk with Lenny in Valentine?', options: ['LENNY!', 'YNNEL!', 'GAVIN!', 'DUTCH!'], answer: 0 },
+          { q: 'Which rival gang captures Lenny in Strawberry before Arthur rescues him?', options: ['O’Driscoll Boys', 'Lemoyne Raiders', 'Bounty Hunters', 'Gray Deputies'], answer: 0 },
+          { q: 'What skill did Lenny’s father teach him that sets him apart from most gang members?', options: ['Reading and education', 'Safecracking', 'Horse taming', 'Blacksmithing'], answer: 0 }
+        ]
+      },
+      {
+        id: 'sean_macguire',
+        name: 'Sean MacGuire',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Gunslinger',
+        origin: 'Ireland',
+        chapter: 2,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'Which Irish county does Sean MacGuire proudly claim as his birthplace?', options: ['Donegal', 'Cork', 'Dublin', 'Galway'], answer: 0 },
+          { q: 'Where do Arthur, Charles, Javier, and Trelawny rescue Sean from bounty hunters?', options: ['Upper Montana River near Blackwater', 'Fort Wallace', 'Sisika Penitentiary', 'Strawberry Jail'], answer: 0 },
+          { q: 'Which gang member shares a fiery romance with Sean MacGuire?', options: ['Karen Jones', 'Mary-Beth Gaskill', 'Tilly Jackson', 'Sadie Adler'], answer: 0 }
+        ]
+      },
+      {
+        id: 'karen_jones',
+        name: 'Karen Jones',
+        gender: 'Female',
+        affiliation: 'Van der Linde Gang',
+        role: 'Con Artist & Thief',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What role does Karen play during the Valentine Bank robbery?', options: ['Causes a distraction as a grieving widow or harlot', 'Drives the getaway wagon', 'Plants the dynamite', 'Snipes from the roof'], answer: 0 },
+          { q: 'Which other female gang members share a close friendship with Karen in camp?', options: ['Mary-Beth and Tilly', 'Sadie and Molly', 'Abigail and Susan', 'Bonnie and Lillian'], answer: 0 },
+          { q: 'What habit consumes Karen more heavily as the gang’s fortunes decline?', options: ['Heavy drinking', 'Gambling', 'Opium', 'Shoplifting'], answer: 0 }
+        ]
+      },
+      {
+        id: 'mary_beth_gaskill',
+        name: 'Mary-Beth Gaskill',
+        gender: 'Female',
+        affiliation: 'Van der Linde Gang',
+        role: 'Pickpocket & Scout',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What literary ambition does Mary-Beth secretly pursue in her notebook?', options: ['Writing romance novels', 'Writing political manifestos', 'Composing poetry', 'Writing dime westerns'], answer: 0 },
+          { q: 'Which wealthy family’s train tip does Mary-Beth uncover in Scarlett Meadows?', options: ['The Cornwall payroll train', 'The Braithwaite gold train', 'The Gray silver train', 'The Bronte express'], answer: 0 },
+          { q: 'Which gang member frequently sits with Mary-Beth for deep conversations about his inner turmoil?', options: ['Arthur Morgan', 'Micah Bell', 'Bill Williamson', 'Leopold Strauss'], answer: 0 }
+        ]
+      },
+      {
+        id: 'tilly_jackson',
+        name: 'Tilly Jackson',
+        gender: 'Female',
+        affiliation: 'Van der Linde Gang',
+        role: 'Thief & Scout',
+        origin: 'Southern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'Which gang kidnapped Tilly as a child before she escaped and joined Dutch?', options: ['Foreman Brothers', 'O’Driscoll Boys', 'Lemoyne Raiders', 'Night Folk'], answer: 0 },
+          { q: 'What board game does Tilly frequently challenge Arthur to play at camp?', options: ['Dominoes', 'Five Finger Fillet', 'Poker', 'Blackjack'], answer: 0 },
+          { q: 'In which town is Tilly abducted by Anthony Foreman before Arthur and Susan rescue her?', options: ['Rhodes', 'Valentine', 'Saint Denis', 'Van Horn'], answer: 0 }
+        ]
+      },
+      {
+        id: 'susan_grimshaw',
+        name: 'Susan Grimshaw',
+        gender: 'Female',
+        affiliation: 'Van der Linde Gang',
+        role: 'Camp Matriarch',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What is Susan Grimshaw’s primary responsibility in every camp?', options: ['Enforcing discipline and camp chores', 'Cooking stew', 'Managing loans', 'Tending horses'], answer: 0 },
+          { q: 'Who accompanies Susan Grimshaw to rescue Tilly Jackson from the Foreman Brothers?', options: ['Arthur Morgan', 'Charles Smith', 'Sadie Adler', 'John Marston'], answer: 0 },
+          { q: 'What past relationship did Susan Grimshaw once have with Dutch van der Linde?', options: ['They were romantically involved years earlier', 'They were cousins', 'They were business partners in Chicago', 'She was his schoolteacher'], answer: 0 }
+        ]
+      },
+      {
+        id: 'simon_pearson',
+        name: 'Simon Pearson',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Camp Cook & Butcher',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What military branch does Pearson constantly brag about serving in?', options: ['U.S. Navy', 'U.S. Cavalry', 'Rough Riders', 'Union Artillery'], answer: 0 },
+          { q: 'What musical instrument does Pearson play around the campfire?', options: ['Concertina', 'Banjo', 'Guitar', 'Fiddle'], answer: 0 },
+          { q: 'What materials does Arthur bring to Pearson to upgrade the camp’s satchels and decor?', options: ['Perfect animal pelts', 'Gold bars', 'Stolen jewelry', 'Exotic feathers'], answer: 0 }
+        ]
+      },
+      {
+        id: 'leopold_strauss',
+        name: 'Leopold Strauss',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Loan Shark & Accountant',
+        origin: 'Austria',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'Which European empire did Leopold Strauss immigrate from?', options: ['Austro-Hungarian Empire', 'German Empire', 'Russian Empire', 'Ottoman Empire'], answer: 0 },
+          { q: 'Which desperate debtor does Strauss send Arthur to collect from near Valentine?', options: ['Thomas Downes', 'Lilly Millet', 'Winton Holmes', 'Algie Davison'], answer: 0 },
+          { q: 'What happens to Strauss’s ledger duties as the gang moves eastward?', options: ['He continues lending to desperate locals', 'He opens a bank in Saint Denis', 'He retires in Rhodes', 'He joins the Pinkertons'], answer: 0 }
+        ]
+      },
+      {
+        id: 'orville_swanson',
+        name: 'Reverend Swanson',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Former Clergyman',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What substances does Reverend Swanson struggle with addiction to in early chapters?', options: ['Morphine and alcohol', 'Opium and tobacco', 'Laudanum only', 'Cocaine gum'], answer: 0 },
+          { q: 'Where does Arthur rescue a heavily intoxicated Swanson from an oncoming train?', options: ['Bard’s Crossing', 'Bacchus Bridge', 'Flatneck Station', 'Riggs Station'], answer: 0 },
+          { q: 'What hollowed-out item does Swanson hide his syringe and morphine inside?', options: ['A Bible', 'A hymn book', 'A wooden cross', 'A flask'], answer: 0 }
+        ]
+      },
+      {
+        id: 'molly_oshea',
+        name: 'Molly O’Shea',
+        gender: 'Female',
+        affiliation: 'Van der Linde Gang',
+        role: 'Dutch’s Companion',
+        origin: 'Ireland',
+        chapter: 1,
+        status1899: 'Camp Dependent',
+        dossier: [
+          { q: 'Which Irish city did Molly O’Shea come from before immigrating to America?', options: ['Dublin', 'Belfast', 'Cork', 'Limerick'], answer: 0 },
+          { q: 'Why does Molly refuse to perform camp chores alongside the other women?', options: ['She considers herself above labor as Dutch’s lover', 'She has a broken arm', 'She is always out scouting', 'She runs the ledger'], answer: 0 },
+          { q: 'How does Molly’s relationship with Dutch change between Chapters 2 and 4?', options: ['Dutch grows cold and distant toward her', 'They get married in Saint Denis', 'They buy a house together', 'She leaves for Ireland'], answer: 0 }
+        ]
+      },
+      {
+        id: 'josiah_trelawny',
+        name: 'Josiah Trelawny',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Magician & Informant',
+        origin: 'England',
+        chapter: 2,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What is Josiah Trelawny’s signature attire?', options: ['Top hat and tailored vest', 'Bearskin coat', 'Sheriff’s badge', 'Poncho and sombrero'], answer: 0 },
+          { q: 'Which high-stakes riverboat robbery does Trelawny orchestrate in Saint Denis?', options: ['The Grand Korrigan ferry', 'The Serena steamboat', 'The Duchess riverboat', 'The Lannahechee Belle'], answer: 0 },
+          { q: 'What secret double life does Arthur discover Trelawny maintains in Saint Denis?', options: ['A wife and two young sons', 'A secret Pinkerton badge', 'An illegal distillery', 'A theater troupe'], answer: 0 }
+        ]
+      },
+      {
+        id: 'kieran_duffy',
+        name: 'Kieran Duffy',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Stable Hand',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'Which rival gang did Kieran Duffy belong to before being captured at Ewing Basin?', options: ['O’Driscoll Boys', 'Lemoyne Raiders', 'Laramie Gang', 'Del Lobo Gang'], answer: 0 },
+          { q: 'How does Kieran earn the gang’s trust during the raid at Six Point Cabin?', options: ['He shoots an O’Driscoll to save Arthur’s life', 'He cracks a safe', 'He brings gold bars', 'He captures Colm O’Driscoll'], answer: 0 },
+          { q: 'What chore does Kieran happily dedicate himself to once untied in camp?', options: ['Caring for the gang’s horses', 'Cooking stew', 'Guarding the perimeter', 'Tailoring clothes'], answer: 0 }
+        ]
+      },
+      {
+        id: 'davey_callander',
+        name: 'Davey Callander',
+        gender: 'Male',
+        affiliation: 'Van der Linde Gang',
+        role: 'Gunslinger',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Deceased',
+        dossier: [
+          { q: 'Who was Davey Callander’s brother who also rode with the Van der Linde gang?', options: ['Mac Callander', 'Sean MacGuire', 'Jenny Kirk', 'Jake Adler'], answer: 0 },
+          { q: 'Where did Davey Callander succumb to wounds sustained during the Blackwater ferry job?', options: ['Colter', 'Horseshoe Overlook', 'Strawberry', 'Clemens Point'], answer: 0 },
+          { q: 'Which gang member attended to Davey’s body in the cabin at Colter?', options: ['Hosea & Abigail', 'Micah & Bill', 'Lenny & Sean', 'Trelawny & Strauss'], answer: 0 }
+        ]
+      },
+      {
+        id: 'jenny_kirk',
+        name: 'Jenny Kirk',
+        gender: 'Female',
+        affiliation: 'Van der Linde Gang',
+        role: 'Thief',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Deceased',
+        dossier: [
+          { q: 'Where is Jenny Kirk buried during the gang’s escape into the Grizzlies?', options: ['North of Colter in the snow', 'Near Horseshoe Overlook', 'Outside Blackwater', 'By Donner Falls'], answer: 0 },
+          { q: 'Which young gang member had a close bond with Jenny Kirk before Blackwater?', options: ['Lenny Summers', 'Kieran Duffy', 'Jack Marston', 'Jamie Gillis'], answer: 0 },
+          { q: 'Which event claimed Jenny Kirk’s life just prior to Chapter 1?', options: ['The Blackwater Massacre', 'The Valentine shootout', 'The Colter blizzard', 'The Rhodes ambush'], answer: 0 }
+        ]
+      },
+      {
+        id: 'colm_odriscoll',
+        name: 'Colm O’Driscoll',
+        gender: 'Male',
+        affiliation: 'O’Driscoll Boys',
+        role: 'Rival Gang Leader',
+        origin: 'Ireland',
+        chapter: 1,
+        status1899: 'Active Outlaw',
+        dossier: [
+          { q: 'What caused the unforgivable blood feud between Dutch van der Linde and Colm O’Driscoll?', options: ['Dutch killed Colm’s brother, and Colm killed Dutch’s lover Annabelle', 'Colm stole the Blackwater gold', 'Dutch burned Colm’s ranch', 'Colm turned Dutch in to Pinkertons'], answer: 0 },
+          { q: 'Where does Colm O’Driscoll set a trap to capture Arthur during a supposed parley?', options: ['In the hills near Twin Stack Pass', 'Inside Valentine Saloon', 'At Shady Belle', 'At Fort Mercer'], answer: 0 },
+          { q: 'Where is Colm O’Driscoll ultimately brought to justice?', options: ['Saint Denis gallows', 'Valentine jail', 'Sisika Penitentiary', 'Fort Wallace'], answer: 0 }
+        ]
+      },
+      {
+        id: 'andrew_milton',
+        name: 'Agent Andrew Milton',
+        gender: 'Male',
+        affiliation: 'Pinkerton Agency',
+        role: 'Senior Detective',
+        origin: 'Northern US',
+        chapter: 2,
+        status1899: 'Law Enforcement',
+        dossier: [
+          { q: 'Who is Andrew Milton’s loyal subordinate partner throughout the hunt for Dutch?', options: ['Agent Edgar Ross', 'Sheriff Leigh Gray', 'Sheriff Curtis Malloy', 'Captain Lyndon Monroe'], answer: 0 },
+          { q: 'What were Arthur and Jack doing when Agent Milton first confronted them in Chapter 2?', options: ['Fishing by the Dakota River', 'Hunting deer', 'Buying candy in Valentine', 'Riding to Emerald Ranch'], answer: 0 },
+          { q: 'Who funded the Pinkerton Detective Agency’s relentless pursuit of the Van der Linde gang?', options: ['Leviticus Cornwall', 'Angelo Bronte', 'Catherine Braithwaite', 'Mayor Lemieux'], answer: 0 }
+        ]
+      },
+      {
+        id: 'edgar_ross',
+        name: 'Agent Edgar Ross',
+        gender: 'Male',
+        affiliation: 'Pinkerton Agency',
+        role: 'Pinkerton Agent',
+        origin: 'Northern US',
+        chapter: 2,
+        status1899: 'Law Enforcement',
+        dossier: [
+          { q: 'What sarcastic remark does Edgar Ross make to young Jack Marston by the Dakota River?', options: ['"Enjoy your fishing, kid, while you still can."', '"Stay out of trouble, boy."', '"Tell your father hello."', '"Nice catch, son."'], answer: 0 },
+          { q: 'Which federal agency does Edgar Ross later rise to lead after his Pinkerton years?', options: ['Bureau of Investigation', 'U.S. Marshals', 'Secret Service', 'Texas Rangers'], answer: 0 },
+          { q: 'Which camp does Edgar Ross visit alongside Milton to issue a 3-day ultimatum?', options: ['Clemens Point', 'Horseshoe Overlook', 'Colter', 'Beaver Hollow'], answer: 0 }
+        ]
+      },
+      {
+        id: 'leviticus_cornwall',
+        name: 'Leviticus Cornwall',
+        gender: 'Male',
+        affiliation: 'Cornwall Kerosene & Tar',
+        role: 'Industrial Tycoon',
+        origin: 'Northern US',
+        chapter: 1,
+        status1899: 'Wealthy Elite',
+        dossier: [
+          { q: 'What first provokes Leviticus Cornwall’s wrath against the Van der Linde gang in Chapter 1?', options: ['Robbing his private train in the Grizzlies', 'Burning his oil refinery', 'Kidnapping his son', 'Stealing his prize horses'], answer: 0 },
+          { q: 'Where does Leviticus Cornwall confront Dutch outside the saloon in Chapter 2?', options: ['Valentine', 'Rhodes', 'Saint Denis', 'Annesburg'], answer: 0 },
+          { q: 'Where does Dutch finally confront and shoot Leviticus Cornwall on the docks?', options: ['Annesburg', 'Saint Denis', 'Van Horn', 'Blackwater'], answer: 0 }
+        ]
+      },
+      {
+        id: 'angelo_bronte',
+        name: 'Angelo Bronte',
+        gender: 'Male',
+        affiliation: 'Saint Denis Mafia',
+        role: 'Crime Boss',
+        origin: 'Italy',
+        chapter: 4,
+        status1899: 'Crime Boss',
+        dossier: [
+          { q: 'What favor does Angelo Bronte ask Arthur and John to perform in exchange for Jack Marston?', options: ['Clear out grave robbers in the Saint Denis cemetery', 'Rob the Lemoyne National Bank', 'Assassinate Mayor Lemieux', 'Burn Braithwaite Manor'], answer: 0 },
+          { q: 'Which robbery tip from Angelo Bronte turns out to be a police ambush?', options: ['The Saint Denis trolley station', 'The Grand Korrigan ferry', 'The Cornwall oil plant', 'The Rhodes bank'], answer: 0 },
+          { q: 'How does Dutch execute Angelo Bronte in the swamps of Lagras?', options: ['Drowns him and feeds him to an alligator', 'Hangs him from a cypress tree', 'Shoots him in a duel', 'Leaves him tied to train tracks'], answer: 0 }
+        ]
+      },
+      {
+        id: 'catherine_braithwaite',
+        name: 'Catherine Braithwaite',
+        gender: 'Female',
+        affiliation: 'Braithwaite Family',
+        role: 'Family Matriarch',
+        origin: 'Southern US',
+        chapter: 3,
+        status1899: 'Wealthy Elite',
+        dossier: [
+          { q: 'What illicit spirit is the Braithwaite family famous for distilling in Lemoyne?', options: ['Moonshine', 'Absinthe', 'Kentucky Bourbon', 'Rum'], answer: 0 },
+          { q: 'Who did Catherine Braithwaite hand Jack Marston over to after kidnapping him?', options: ['Angelo Bronte', 'Sheriff Leigh Gray', 'Leviticus Cornwall', 'Colm O’Driscoll'], answer: 0 },
+          { q: 'What happens to Braithwaite Manor when the Van der Linde gang storms it for Jack?', options: ['It is burned to the ground', 'It is converted into a saloon', 'It is seized by Pinkertons', 'It is sold to the Grays'], answer: 0 }
+        ]
+      },
+      {
+        id: 'leigh_gray',
+        name: 'Sheriff Leigh Gray',
+        gender: 'Male',
+        affiliation: 'Gray Family & Law',
+        role: 'Town Sheriff',
+        origin: 'Southern US',
+        chapter: 3,
+        status1899: 'Law Enforcement',
+        dossier: [
+          { q: 'What honorary title does Sheriff Leigh Gray bestow upon Arthur Morgan in Rhodes?', options: ['Deputy Sheriff', 'Chief Marshal', 'Town Constable', 'Pinkerton Liaison'], answer: 0 },
+          { q: 'Which gang member is fatally ambushed during the Gray family’s trap in Rhodes?', options: ['Sean MacGuire', 'Kieran Duffy', 'Lenny Summers', 'Hosea Matthews'], answer: 0 },
+          { q: 'Which family has been locked in a bitter blood feud with the Grays for generations?', options: ['The Braithwaites', 'The Aberdeens', 'The O’Driscolls', 'The Cornwalls'], answer: 0 }
+        ]
+      },
+      {
+        id: 'beau_gray',
+        name: 'Beau Gray',
+        gender: 'Male',
+        affiliation: 'Gray Family',
+        role: 'Aristocrat Heir',
+        origin: 'Southern US',
+        chapter: 3,
+        status1899: 'Wealthy Elite',
+        dossier: [
+          { q: 'Who is Beau Gray secretly in love with despite their families’ deadly feud?', options: ['Penélope Braithwaite', 'Mary Linton', 'Charlotte Balfour', 'Sadie Adler'], answer: 0 },
+          { q: 'What political cause does Beau Gray support alongside Penélope in Rhodes?', options: ['Women’s suffrage', 'Abolition of railroads', 'Prohibition', 'Labor unions'], answer: 0 },
+          { q: 'How do Beau Gray and Penélope Braithwaite finally escape Lemoyne?', options: ['Arthur escorts them onto a train at Riggs Station', 'They sail to Guarma', 'They ride to Valentine', 'They hide in Shady Belle'], answer: 0 }
+        ]
+      },
+      {
+        id: 'penelope_braithwaite',
+        name: 'Penélope Braithwaite',
+        gender: 'Female',
+        affiliation: 'Braithwaite Family',
+        role: 'Aristocrat Heiress',
+        origin: 'Southern US',
+        chapter: 3,
+        status1899: 'Wealthy Elite',
+        dossier: [
+          { q: 'What family heirloom bracelet does Penélope give Arthur for helping her and Beau?', options: ['A sapphire bracelet', 'A gold pocket watch', 'A diamond ring', 'An emerald necklace'], answer: 0 },
+          { q: 'Where does Arthur first find Penélope hidden in a gazebo on her family’s estate?', options: ['Braithwaite Manor', 'Caliga Hall', 'Emerald Ranch', 'Beecher’s Hope'], answer: 0 },
+          { q: 'Which gang member first learned of Penélope and Beau’s secret romance?', options: ['Mary-Beth Gaskill', 'Karen Jones', 'Tilly Jackson', 'Abigail Roberts'], answer: 0 }
+        ]
+      },
+      {
+        id: 'mary_linton',
+        name: 'Mary Linton',
+        gender: 'Female',
+        affiliation: 'Civilian',
+        role: 'Arthur’s Former Fiancée',
+        origin: 'Northern US',
+        chapter: 2,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'What was Mary Linton’s maiden name before she married Barry Linton?', options: ['Gillis', 'Adler', 'Gaskill', 'Balfour'], answer: 0 },
+          { q: 'Who is Mary’s younger brother whom Arthur rescues from the Chelonian cult?', options: ['Jamie Gillis', 'Beau Gray', 'Jack Marston', 'Tommy'], answer: 0 },
+          { q: 'What activity do Arthur and Mary share during their brief reunion in Saint Denis?', options: ['Attending a live theater show', 'Fishing on Flat Iron Lake', 'Riding in a hot air balloon', 'Playing poker'], answer: 0 }
+        ]
+      },
+      {
+        id: 'thomas_downes',
+        name: 'Thomas Downes',
+        gender: 'Male',
+        affiliation: 'Civilian',
+        role: 'Struggling Farmer',
+        origin: 'Northern US',
+        chapter: 2,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'Where does Arthur first see Thomas Downes collecting charity donations?', options: ['Valentine', 'Rhodes', 'Strawberry', 'Saint Denis'], answer: 0 },
+          { q: 'Who breaks up the brutal saloon fistfight between Arthur and Tommy in Valentine?', options: ['Thomas Downes', 'Sheriff Malloy', 'Javier Escuella', 'Charles Smith'], answer: 0 },
+          { q: 'What are the names of Thomas Downes’s wife and son?', options: ['Edith and Archie', 'Martha and Luke', 'Clara and Peter', 'Sarah and Caleb'], answer: 0 }
+        ]
+      },
+      {
+        id: 'albert_mason',
+        name: 'Albert Mason',
+        gender: 'Male',
+        affiliation: 'Civilian',
+        role: 'Wildlife Photographer',
+        origin: 'Northern US',
+        chapter: 2,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'Which animals steal Albert Mason’s camera bag during his first encounter with Arthur?', options: ['Coyotes', 'Raccoons', 'Wolves', 'Foxes'], answer: 0 },
+          { q: 'Which iconic galloping herd does Arthur help Albert Mason herd for a photograph near Emerald Ranch?', options: ['Wild horses', 'Bison', 'Pronghorn', 'Elk'], answer: 0 },
+          { q: 'Where are Albert Mason’s wildlife photographs later displayed in an art gallery?', options: ['Saint Denis', 'Valentine', 'Blackwater', 'Rhodes'], answer: 0 }
+        ]
+      },
+      {
+        id: 'hamish_sinclair',
+        name: 'Hamish Sinclair',
+        gender: 'Male',
+        affiliation: 'Civilian',
+        role: 'Civil War Veteran',
+        origin: 'Northern US',
+        chapter: 6,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'What is the name of Hamish Sinclair’s large golden-cream Dutch Warmblood horse?', options: ['Buell', 'Boadicea', 'Silver Dollar', 'Old Boy'], answer: 0 },
+          { q: 'Which scenic lake in Grizzlies East is Hamish Sinclair’s cabin located beside?', options: ['O’Creagh’s Run', 'Lake Isabella', 'Cairn Lake', 'Elysian Pool'], answer: 0 },
+          { q: 'What is the name of the giant legendary pike Arthur and Hamish fish for together?', options: ['The Tyrant', 'Old Harry', 'The Leviathan', 'Ironjaw'], answer: 0 }
+        ]
+      },
+      {
+        id: 'charlotte_balfour',
+        name: 'Charlotte Balfour',
+        gender: 'Female',
+        affiliation: 'Civilian',
+        role: 'Homesteader Widow',
+        origin: 'Chicago',
+        chapter: 6,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'In which secluded northeastern corner of Roanoke Ridge is Charlotte Balfour’s cabin located?', options: ['Willard’s Rest', 'Annesburg', 'Butcher Creek', 'Van Horn'], answer: 0 },
+          { q: 'What vital frontier survival skills does Arthur teach Charlotte Balfour?', options: ['Hunting, skinning game, and shooting a rifle', 'Fishing and canoeing', 'Horse breeding', 'Gold panning'], answer: 0 },
+          { q: 'What was the name of Charlotte’s late husband buried near their cabin?', options: ['Cal', 'Jake', 'Thomas', 'Henry'], answer: 0 }
+        ]
+      },
+      {
+        id: 'rains_fall',
+        name: 'Rains Fall',
+        gender: 'Male',
+        affiliation: 'Wapiti Tribe',
+        role: 'Tribal Chief',
+        origin: 'Ambarino',
+        chapter: 4,
+        status1899: 'Tribal Leader',
+        dossier: [
+          { q: 'Who is Rains Fall’s hot-headed son who wants to wage war against the U.S. Army?', options: ['Eagle Flies', 'Paytah', 'Charles Smith', 'Running Wolf'], answer: 0 },
+          { q: 'Which U.S. Army Colonel relentlessly harasses Rains Fall’s Wapiti reservation?', options: ['Colonel Henry Favours', 'Captain Lyndon Monroe', 'Colonel Bullard', 'General Harris'], answer: 0 },
+          { q: 'What sacred ceremonial item does Arthur retrieve for Rains Fall from an army camp?', options: ['His chanupa (sacred pipe)', 'A peace treaty', 'An eagle feather headdress', 'A medicine pouch'], answer: 0 }
+        ]
+      },
+      {
+        id: 'eagle_flies',
+        name: 'Eagle Flies',
+        gender: 'Male',
+        affiliation: 'Wapiti Tribe',
+        role: 'Wapiti Warrior',
+        origin: 'Ambarino',
+        chapter: 4,
+        status1899: 'Tribal Warrior',
+        dossier: [
+          { q: 'Where is Eagle Flies imprisoned by Colonel Favours before Arthur and Charles rescue him?', options: ['Fort Wallace', 'Sisika Penitentiary', 'Valentine Jail', 'Fort Mercer'], answer: 0 },
+          { q: 'Which gang member manipulates Eagle Flies’s anger to provoke an attack on the U.S. Army?', options: ['Dutch van der Linde', 'Hosea Matthews', 'Charles Smith', 'Sadie Adler'], answer: 0 },
+          { q: 'Where does Eagle Flies launch a fateful raid on oil fields alongside Dutch and Arthur?', options: ['Cornwall Kerosene & Tar', 'Annesburg Mine', 'Bacchus Bridge', 'Emerald Ranch'], answer: 0 }
+        ]
+      },
+      {
+        id: 'lyndon_monroe',
+        name: 'Captain Lyndon Monroe',
+        gender: 'Male',
+        affiliation: 'U.S. Army',
+        role: 'Sympathetic Officer',
+        origin: 'Northern US',
+        chapter: 6,
+        status1899: 'Military Officer',
+        dossier: [
+          { q: 'Why does Captain Monroe secretly cooperate with Arthur Morgan and Rains Fall?', options: ['To protect the Wapiti tribe from Colonel Favours’s corruption', 'To steal army payroll gold', 'To arrest Dutch van der Linde', 'To desert to Mexico'], answer: 0 },
+          { q: 'What medical supplies does Arthur help Captain Monroe recover from corrupt soldiers?', options: ['Wapiti vaccines and medicine', 'Morphine crates', 'Surgical tools', 'Snake oil'], answer: 0 },
+          { q: 'Where does Arthur escort Captain Monroe to board a train safely away from treason charges?', options: ['Emerald Station', 'Saint Denis', 'Riggs Station', 'Annesburg'], answer: 0 }
+        ]
+      },
+      {
+        id: 'henry_favours',
+        name: 'Colonel Henry Favours',
+        gender: 'Male',
+        affiliation: 'U.S. Army',
+        role: 'Commanding Officer',
+        origin: 'Northern US',
+        chapter: 6,
+        status1899: 'Military Officer',
+        dossier: [
+          { q: 'Which military outpost does Colonel Henry Favours command in Cumberland Forest?', options: ['Fort Wallace', 'Fort Riggs', 'Fort Mercer', 'Fort Brennand'], answer: 0 },
+          { q: 'Why does Colonel Favours seize the Wapiti tribe’s horses and withhold their vaccines?', options: ['To provoke an uprising and salvage his military reputation', 'To sell horses in Valentine', 'On orders from Angelo Bronte', 'To pay Pinkerton bounties'], answer: 0 },
+          { q: 'What accusation does Colonel Favours level against Captain Lyndon Monroe?', options: ['Treason', 'Desertion', 'Embezzlement', 'Cowardice'], answer: 0 }
+        ]
+      },
+      {
+        id: 'brother_dorkins',
+        name: 'Brother Dorkins',
+        gender: 'Male',
+        affiliation: 'Saint Denis Church',
+        role: 'Charitable Monk',
+        origin: 'Northern US',
+        chapter: 4,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'What secret operation does Arthur help Brother Dorkins uncover behind a Saint Denis fence?', options: ['Captured people being held in a hidden basement', 'Counterfeit money presses', 'Smuggled dynamite', 'Stolen church silver'], answer: 0 },
+          { q: 'Which nun works closely with Brother Dorkins aiding the poor of Saint Denis?', options: ['Sister Calderón', 'Mother Superior', 'Sister Margaret', 'Sister Beatrice'], answer: 0 },
+          { q: 'What street urchin steals Brother Dorkins’s crucifix in the Saint Denis market?', options: ['A young street pickpocket', 'Jack Marston', 'Cleat', 'Jimmy Brooks'], answer: 0 }
+        ]
+      },
+      {
+        id: 'sister_calderon',
+        name: 'Sister Calderón',
+        gender: 'Female',
+        affiliation: 'Saint Denis Church',
+        role: 'Missionary Nun',
+        origin: 'Mexico',
+        chapter: 4,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'Where does Sister Calderón share a profound, heartfelt conversation with Arthur before departing for Mexico?', options: ['Emerald Station', 'Saint Denis Depot', 'Valentine Station', 'Riggs Station'], answer: 0 },
+          { q: 'What donations does Arthur collect for Sister Calderón’s charitable work in Saint Denis?', options: ['Food or money for the poor', 'Rifles and ammunition', 'Medicine from Fort Wallace', 'Horses'], answer: 0 },
+          { q: 'What advice does Sister Calderón give Arthur when he confesses he is afraid?', options: ['"Take a gamble that love exists, and do a loving act."', '"Turn yourself in to the law."', '"Flee to California immediately."', '"Forget the past completely."'], answer: 0 }
+        ]
+      },
+      {
+        id: 'marko_dragic',
+        name: 'Marko Dragic',
+        gender: 'Male',
+        affiliation: 'Civilian',
+        role: 'Eccentric Inventor',
+        origin: 'Europe',
+        chapter: 4,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'What invention does Marko Dragic demonstrate for investors in a Saint Denis pond?', options: ['A remote-controlled torpedo boat', 'A flying machine', 'An electric horseless carriage', 'A steam-powered cannon'], answer: 0 },
+          { q: 'Where is Marko Dragic’s secluded lightning-rod laboratory located?', options: ['Doverhill in northern Roanoke Ridge', 'Mount Hagen', 'Cotorra Springs', 'Bolger Glade'], answer: 0 },
+          { q: 'What extraordinary creation does Marko Dragic bring to life during a thunderstorm?', options: ['A sentient clockwork automaton (robot)', 'A teleporter', 'An electric train', 'A weather machine'], answer: 0 }
+        ]
+      },
+      {
+        id: 'algernon_wasp',
+        name: 'Algernon Wasp',
+        gender: 'Male',
+        affiliation: 'Civilian',
+        role: 'Exotic Milliner',
+        origin: 'Saint Denis',
+        chapter: 4,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'What items does Algernon Wasp commission Arthur to gather across the Bayou?', options: ['Rare orchids and exotic bird plumes', 'Legendary fish', 'Dinosaur bones', 'Cigarette cards'], answer: 0 },
+          { q: 'What custom revolver does Algernon Wasp reward Arthur with upon completing his requests?', options: ['Algernon’s Revolver', 'Otis Miller’s Revolver', 'Calloway’s Revolver', 'Granger’s Revolver'], answer: 0 },
+          { q: 'Where is Algernon Wasp’s conservatory boutique located?', options: ['North Saint Denis', 'Rhodes', 'Blackwater', 'Strawberry'], answer: 0 }
+        ]
+      },
+      {
+        id: 'black_belle',
+        name: 'Black Belle',
+        gender: 'Female',
+        affiliation: 'Civilian',
+        role: 'Legendary Gunslinger',
+        origin: 'Frontier West',
+        chapter: 2,
+        status1899: 'Retired Outlaw',
+        dossier: [
+          { q: 'Which famous gunslinger biography project leads Arthur to track down Black Belle?', options: ['Jim "Boy" Calloway’s biography by Theodore Levin', 'Evelyn Miller’s memoirs', 'Landis’s Outlaw History', 'Pinkerton Most Wanted'], answer: 0 },
+          { q: 'How does Black Belle fend off waves of bounty hunters attacking her swamp shack?', options: ['Rigged dynamite traps and sharpshooting', 'A Gatling gun on the roof', 'Alligators in the moat', 'Throwing knives'], answer: 0 },
+          { q: 'Unlike the other three legendary gunslingers, what happens when Arthur meets Black Belle?', options: ['She survives, poses for a photo, and rides away', 'She challenges Arthur to a duel', 'She is arrested by Pinkertons', 'She joins the Van der Linde gang'], answer: 0 }
+        ]
+      },
+      {
+        id: 'jim_boy_calloway',
+        name: 'Jim "Boy" Calloway',
+        gender: 'Male',
+        affiliation: 'Civilian',
+        role: 'Aging Gunslinger',
+        origin: 'Frontier West',
+        chapter: 2,
+        status1899: 'Retired Outlaw',
+        dossier: [
+          { q: 'Where does Arthur first meet Jim "Boy" Calloway passed out drunk on a bar?', options: ['Keane’s Saloon in Valentine', 'Doyle’s Tavern in Saint Denis', 'Rhodes Parlour House', 'Van Horn Saloon'], answer: 0 },
+          { q: 'What is engraved on Jim "Boy" Calloway’s prized Schofield Revolver?', options: ['"Canis Canem Edit" (Dog Eat Dog)', '"Sic Parvis Magna"', '"Vengeance is Mine"', '"The Fastest Hand"'], answer: 0 },
+          { q: 'Where does Calloway’s final duel take place after Arthur tracks down his old rivals?', options: ['Brandywine Drop', 'Horseshoe Overlook', 'Flatneck Station', 'Barrow Lagoon'], answer: 0 }
+        ]
+      },
+      {
+        id: 'seamus',
+        name: 'Seamus',
+        gender: 'Male',
+        affiliation: 'Civilian',
+        role: 'Wagon & Goods Fence',
+        origin: 'Frontier West',
+        chapter: 2,
+        status1899: 'Fence',
+        dossier: [
+          { q: 'Which gang member introduces Arthur to Seamus at Emerald Ranch?', options: ['Hosea Matthews', 'Josiah Trelawny', 'Leopold Strauss', 'Bill Williamson'], answer: 0 },
+          { q: 'What unique service does Seamus offer inside his barn at Emerald Ranch?', options: ['Buying stolen stagecoaches and wagons', 'Selling legendary pelts', 'Crafting explosive arrows', 'Forging bounties'], answer: 0 },
+          { q: 'Who is the strict owner of Emerald Ranch who refuses to speak with Seamus?', options: ['Eugene Wegner', 'Thomas Downes', 'Jeremiah Compson', 'Aberdeen'], answer: 0 }
+        ]
+      },
+      {
+        id: 'hercule_fontaine',
+        name: 'Hercule Fontaine',
+        gender: 'Male',
+        affiliation: 'Guarma Rebels',
+        role: 'Rebel Leader',
+        origin: 'Guarma',
+        chapter: 5,
+        status1899: 'Rebel Leader',
+        dossier: [
+          { q: 'Against which tyrannical sugar baron does Hercule Fontaine lead his rebellion?', options: ['Alberto Fussar', 'Angelo Bronte', 'Leviticus Cornwall', 'Colonel Favours'], answer: 0 },
+          { q: 'Which captured gang member do Arthur and Hercule rescue from soldiers on Guarma?', options: ['Javier Escuella', 'Bill Williamson', 'Micah Bell', 'Dutch van der Linde'], answer: 0 },
+          { q: 'How does Hercule help the gang escape the island of Guarma?', options: ['Secures a schooner ship to take them back to the mainland', 'Builds a hot air balloon', 'Hijacks a warship', 'Guides them through underwater caves'], answer: 0 }
+        ]
+      },
+      {
+        id: 'alberto_fussar',
+        name: 'Alberto Fussar',
+        gender: 'Male',
+        affiliation: 'Guarma Regime',
+        role: 'Island Dictator',
+        origin: 'Cuba',
+        chapter: 5,
+        status1899: 'Dictator',
+        dossier: [
+          { q: 'What industry does Alberto Fussar brutally control on the island of Guarma?', options: ['Sugar plantations', 'Silver mines', 'Oil refineries', 'Tobacco farms'], answer: 0 },
+          { q: 'Which industrialist was Alberto Fussar hosting on Guarma when the gang arrived?', options: ['Leviticus Cornwall', 'Angelo Bronte', 'Mayor Lemieux', 'Andrew Milton'], answer: 0 },
+          { q: 'How is Alberto Fussar defeated during the final battle on Guarma?', options: ['Arthur blasts his sniper tower with a cannon', 'Dutch beats him in a fistfight', 'Hercule shoots him in a duel', 'He drowns in the harbor'], answer: 0 }
+        ]
+      },
+      {
+        id: 'sheriff_malloy',
+        name: 'Sheriff Curtis Malloy',
+        gender: 'Male',
+        affiliation: 'New Hanover Law',
+        role: 'Town Sheriff',
+        origin: 'Northern US',
+        chapter: 2,
+        status1899: 'Law Enforcement',
+        dossier: [
+          { q: 'Which bustling livestock town does Sheriff Curtis Malloy police?', options: ['Valentine', 'Rhodes', 'Strawberry', 'Annesburg'], answer: 0 },
+          { q: 'What custom bolt-action rifle does Sheriff Malloy carry?', options: ['A rare Bolt-Action Rifle', 'A Carcano Rifle', 'A Rare Rolling Block', 'An Evans Repeater'], answer: 0 },
+          { q: 'What secret affair can players overhear Sheriff Malloy having upstairs in his office?', options: ['An affair with Moira Calthorpe', 'A secret deal with Colm O’Driscoll', 'A plot with Leviticus Cornwall', 'A bribe from Seamus'], answer: 0 }
+        ]
+      },
+      {
+        id: 'bonnie_macfarlane',
+        name: 'Bonnie MacFarlane',
+        gender: 'Female',
+        affiliation: 'MacFarlane’s Ranch',
+        role: 'Rancher',
+        origin: 'New Austin',
+        chapter: 2,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'Where can players find a washed-up suitor carrying an unsent love letter to Bonnie MacFarlane in 1899?', options: ['Flat Iron Lake shoreline', 'Cotorra Springs', 'Roanoke Ridge', 'Lake Isabella'], answer: 0 },
+          { q: 'Which New Austin ranch does Bonnie MacFarlane help her father Drew manage?', options: ['MacFarlane’s Ranch', 'Pronghorn Ranch', 'Beecher’s Hope', 'Emerald Ranch'], answer: 0 },
+          { q: 'Who does Bonnie MacFarlane famously rescue and nurse back to health years later in 1911?', options: ['John Marston', 'Arthur Morgan', 'Sadie Adler', 'Charles Smith'], answer: 0 }
+        ]
+      },
+      {
+        id: 'jeremiah_compson',
+        name: 'Jeremiah Compson',
+        gender: 'Male',
+        affiliation: 'Civilian',
+        role: 'Disgraced Former Catcher',
+        origin: 'Southern US',
+        chapter: 3,
+        status1899: 'Civilian',
+        dossier: [
+          { q: 'Where does Arthur first encounter Jeremiah Compson sitting destitute on a bench?', options: ['Rhodes', 'Saint Denis', 'Valentine', 'Van Horn'], answer: 0 },
+          { q: 'What disturbing truth does Arthur discover inside Compson’s foreclosed home at Compson’s Stead?', options: ['Ledgers proving he was a brutal slave catcher', 'Plans to assassinate Dutch', 'Stolen Braithwaite gold', 'Pinkerton warrants'], answer: 0 },
+          { q: 'What items does Jeremiah Compson ask Arthur to retrieve from his old house?', options: ['His ledger, pocket watch, and pistol', 'His wedding ring and Bible', 'Gold bars and deeds', 'Family portraits'], answer: 0 }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 3. 210 STORY & STRANGER EVENT MAP PINPOINTS (ZERO PLACE NAMES IN PROMPTS!)
+    // Coordinates calibrated to user's square-framed RDR2 map.jpg (0-100%)
+    // =========================================================================
+    const MAP_EVENTS = [
+      // --- CHAPTER 1 & AMBARINO STORY / STRANGER EVENTS ---
+      { x: 45.8, y: 19.2, cat: 'Story Mission', q: 'Where did the Van der Linde gang take shelter in an abandoned mining town during the May 1899 blizzard?', revealName: 'Colter (Grizzlies West)' },
+      { x: 44.2, y: 15.8, cat: 'Story Mission', q: 'Where did Arthur, Dutch, and Micah rescue Sadie Adler from O’Driscoll Boys at her burning homestead?', revealName: 'Adler Ranch' },
+      { x: 48.6, y: 16.4, cat: 'Story Mission', q: 'Where did Arthur and Javier rescue a wolf-scarred John Marston from a snowy mountain ledge?', revealName: 'Spider Gorge / Mount Hagen' },
+      { x: 43.6, y: 23.8, cat: 'Story Mission', q: 'Where did Arthur, Dutch, and Bill ambush an O’Driscoll mining camp in a snowy basin?', revealName: 'Ewing Basin' },
+      { x: 52.4, y: 21.5, cat: 'Story Mission', q: 'Where did the gang rob Leviticus Cornwall’s private payroll train after blasting the tracks?', revealName: 'Grizzlies West Train Tracks' },
+      { x: 42.1, y: 20.5, cat: 'Wilderness Encounter', q: 'Where can Arthur tame the rare White Arabian horse beside a frozen mountain lake?', revealName: 'Lake Isabella' },
+      { x: 49.4, y: 18.8, cat: 'Stranger Mission', q: 'Where did Arthur track and duel the legendary outlaw Flaco Hernández at his snowy lakeside camp?', revealName: 'Cairn Lake' },
+      { x: 54.5, y: 18.2, cat: 'Stranger Mission', q: 'Where did Arthur photograph the legendary gunslinger Billy Midnight aboard a passing train?', revealName: 'Bacchus Station / Grizzlies' },
+      { x: 67.2, y: 22.8, cat: 'Story Mission', q: 'Where did Arthur and Hosea track and hunt the Legendary Bharati Grizzly Bear?', revealName: 'Grizzlies East (Near O’Creagh’s Run)' },
+      { x: 69.5, y: 24.6, cat: 'Stranger Mission', q: 'Where did Arthur first help one-legged veteran Hamish Sinclair retrieve his horse Buell?', revealName: 'O’Creagh’s Run' },
+      { x: 69.6, y: 24.9, cat: 'Stranger Mission', q: 'Where did Arthur and Hamish Sinclair boat out together to catch the legendary pike called The Tyrant?', revealName: 'O’Creagh’s Run' },
+      { x: 62.8, y: 19.6, cat: 'Story Mission', q: 'Where did Rains Fall take Arthur to gather medicinal ginseng and retrieve his stolen sacred chanupa pipe?', revealName: 'Cotorra Springs / Grizzlies' },
+      { x: 57.8, y: 23.4, cat: 'Story Mission', q: 'Where did Arthur and Charles infiltrate a timber-walled mountain fort to rescue Eagle Flies?', revealName: 'Fort Wallace' },
+      { x: 59.5, y: 18.4, cat: 'Story Mission', q: 'Where did Arthur meet Chief Rains Fall and the displaced Wapiti tribe at their mountain reservation?', revealName: 'Wapiti Indian Reservation' },
+      { x: 64.6, y: 22.4, cat: 'Story Mission', q: 'Where did Arthur and John detonate dynamite to destroy a towering wooden railway trestle?', revealName: 'Bacchus Bridge' },
+      { x: 47.4, y: 14.2, cat: 'Story Mission', q: 'Where did John, Sadie, and Charles confront Micah Bell on a frozen summit in 1907?', revealName: 'Mount Hagen Summit' },
+      { x: 51.8, y: 25.6, cat: 'Stranger Mission', q: 'Where did Arthur meet the eccentric rock-carving time traveler Francis Sinclair outside his cabin?', revealName: 'Northwest of Strawberry (Big Valley)' },
+      { x: 41.2, y: 29.8, cat: 'Story Mission', q: 'Where did John Marston work as a ranch hand under the alias "Jim Milton" before reclaiming his past?', revealName: 'Pronghorn Ranch' },
+      { x: 45.6, y: 34.4, cat: 'Story Mission', q: 'Where did John Marston, Sadie, and Charles wipe out the Laramie Gang to protect Geddes’s ranch?', revealName: 'Hanging Dog Ranch' },
+      { x: 44.8, y: 31.2, cat: 'Stranger Mission', q: 'Where did Arthur help wildlife photographer Albert Mason snap pictures of hungry timber wolves?', revealName: 'Big Valley' },
+
+      // --- CHAPTER 2 & NEW HANOVER (HEARTLANDS) EVENTS ---
+      { x: 61.8, y: 47.4, cat: 'Gang Camp', q: 'Where did the Van der Linde gang set up their first cliffside overlook camp after leaving the snow?', revealName: 'Horseshoe Overlook' },
+      { x: 62.5, y: 43.2, cat: 'Story Mission', q: 'Where did Arthur and Lenny get blackout drunk together, yelling each other’s names across a saloon?', revealName: 'Valentine (Keane’s Saloon)' },
+      { x: 62.3, y: 43.5, cat: 'Story Mission', q: 'Where did Arthur fight the massive brawler Tommy in the mud outside a livestock town saloon?', revealName: 'Valentine' },
+      { x: 62.7, y: 43.0, cat: 'Story Mission', q: 'Where did Bill, Karen, Lenny, and Arthur rob a small livestock town bank of $20,000?', revealName: 'Valentine Bank' },
+      { x: 62.4, y: 43.3, cat: 'Story Mission', q: 'Where did Leviticus Cornwall ambush Dutch and the gang outside a saloon, sparking a massive shootout?', revealName: 'Valentine' },
+      { x: 62.6, y: 43.1, cat: 'Stranger Mission', q: 'Where did Arthur first meet the biographer Theodore Levin and drunken Jim "Boy" Calloway in a saloon?', revealName: 'Valentine Saloon' },
+      { x: 64.2, y: 39.2, cat: 'Story Mission', q: 'Where did Kieran Duffy save Arthur’s life during a raid on an O’Driscoll cabin hideout?', revealName: 'Six Point Cabin' },
+      { x: 60.4, y: 45.6, cat: 'Story Mission', q: 'Where did Arthur collect a loan debt from a coughing farmer named Thomas Downes?', revealName: 'Downes Ranch' },
+      { x: 59.8, y: 48.2, cat: 'Story Mission', q: 'Where did Agents Milton and Ross first confront Arthur while he was teaching young Jack to fish?', revealName: 'Dakota River (South of Horseshoe Overlook)' },
+      { x: 61.2, y: 49.6, cat: 'Story Mission', q: 'Where did Arthur save a drunken Reverend Swanson from an oncoming train on a high steel bridge?', revealName: 'Bard’s Crossing' },
+      { x: 58.6, y: 47.0, cat: 'Story Mission', q: 'Where did Arthur rescue Mary Linton’s younger brother Jamie from the suicidal Chelonian cult?', revealName: 'cliffside near Caliban’s Seat' },
+      { x: 64.8, y: 45.2, cat: 'Story Mission', q: 'Where did Arthur and Charles rescue kidnapped German immigrants from a forested camp?', revealName: 'The Heartlands (Near Twin Stack Pass)' },
+      { x: 65.5, y: 44.0, cat: 'Story Mission', q: 'Where was Arthur ambushed and captured by Colm O’Driscoll during a staged peace parley?', revealName: 'Twin Stack Pass' },
+      { x: 67.8, y: 46.5, cat: 'Story Mission', q: 'Where did Arthur and Hosea steal a stagecoach from Bob Crawford to prove their worth to a fence?', revealName: 'Carmody Dell' },
+      { x: 70.4, y: 48.4, cat: 'Story Mission', q: 'Where did Hosea introduce Arthur to the wagon fence Seamus inside a barn?', revealName: 'Emerald Ranch' },
+      { x: 70.8, y: 48.0, cat: 'Stranger Mission', q: 'Where did Arthur help wildlife photographer Albert Mason herd wild horses for a panoramic photo?', revealName: 'The Heartlands (Near Emerald Ranch)' },
+      { x: 71.2, y: 47.8, cat: 'Story Mission', q: 'Where did Arthur bid a bittersweet farewell to Sister Calderón before she boarded a train to Mexico?', revealName: 'Emerald Station' },
+      { x: 66.2, y: 50.8, cat: 'Story Mission', q: 'Where did John, Sean, Charles, and Arthur hijack a night train using an oil wagon on the tracks?', revealName: 'Scarlett Meadows / Dewberry Creek' },
+      { x: 64.5, y: 48.6, cat: 'Story Mission', q: 'Where did Arthur steal a Cornwall oil wagon from a heavily guarded refinery?', revealName: 'Cornwall Kerosene & Tar' },
+      { x: 64.6, y: 48.5, cat: 'Story Mission', q: 'Where did Eagle Flies and Dutch lead a desperate assault against Leviticus Cornwall’s oil works?', revealName: 'Cornwall Kerosene & Tar' },
+      { x: 58.2, y: 51.4, cat: 'Story Mission', q: 'Where did Arthur, Charles, and Trelawny play poker at a train station to gather heist leads?', revealName: 'Flatneck Station' },
+      { x: 57.6, y: 43.8, cat: 'Stranger Mission', q: 'Where did Arthur track down the legendary pig-farmer gunslinger Emmet Granger?', revealName: 'Flatneck Station (Hog Farm)' },
+      { x: 66.8, y: 41.2, cat: 'Stranger Mission', q: 'Where did Arthur first meet paleontologist Deborah MacGuiness digging for dinosaur bones?', revealName: 'The Heartlands (Near Horseshoe Overlook)' },
+      { x: 69.2, y: 43.4, cat: 'Stranger Mission', q: 'Where did Arthur encounter the con-artist twins Acrisius and Proetus competing for a woman’s affection?', revealName: 'Valentine (Main Street)' },
+      { x: 60.8, y: 41.8, cat: 'Story Mission', q: 'Where did Arthur chase down the Blackwater witness Jimmy Brooks before deciding whether to save him on a cliff?', revealName: 'Valentine Cliffs' },
+
+      // --- WEST ELIZABETH (STRAWBERRY & BLACKWATER) EVENTS ---
+      { x: 43.4, y: 51.4, cat: 'Story Mission', q: 'Where did Arthur blast open a jailhouse wall with a steam donkey to free Micah Bell, sparking a town massacre?', revealName: 'Strawberry Jail' },
+      { x: 43.8, y: 51.8, cat: 'Story Mission', q: 'Where did Arthur and Micah rob a stagecoach near a mountain resort town before being ambushed by O’Driscolls?', revealName: 'South of Strawberry' },
+      { x: 48.2, y: 53.5, cat: 'Stranger Mission', q: 'Where did Arthur first rescue wildlife photographer Albert Mason’s camera bag from coyotes?', revealName: 'West Elizabeth (Near Strawberry)' },
+      { x: 54.4, y: 62.2, cat: 'Lore Event', q: 'Where did the Van der Linde gang’s disastrous ferry heist take place just before the events of Chapter 1?', revealName: 'Blackwater' },
+      { x: 52.8, y: 57.6, cat: 'Story Mission', q: 'Where did Arthur, Charles, Javier, and Trelawny rescue Sean MacGuire from a bounty hunter riverboat escort?', revealName: 'Upper Montana River (Near Blackwater)' },
+      { x: 49.8, y: 62.4, cat: 'Story Mission', q: 'Where did John Marston build his ranch house with Uncle and Charles in 1907?', revealName: 'Beecher’s Hope' },
+      { x: 54.6, y: 61.8, cat: 'Story Mission', q: 'Where did John Marston obtain a bank loan to purchase his ranch property in 1907?', revealName: 'Blackwater Bank' },
+      { x: 47.6, y: 58.2, cat: 'Story Mission', q: 'Where did John Marston and Sadie Adler rescue Uncle after he was captured and tortured by the Skinner Brothers?', revealName: 'Tall Trees' },
+      { x: 46.2, y: 56.5, cat: 'Stranger Mission', q: 'Where did Arthur meet the reclusive philosopher Evelyn Miller living in a cabin in the woods?', revealName: 'Tall Trees (Tanner’s Reach)' },
+      { x: 51.2, y: 60.4, cat: 'Story Mission', q: 'Where did John Marston and Sadie track down bounty targets across the open plains of West Elizabeth?', revealName: 'Great Plains' },
+
+      // --- CHAPTER 3 & LEMOYNE (RHODES, CLEMENS POINT, BRAITHWAITE) EVENTS ---
+      { x: 71.2, y: 66.2, cat: 'Gang Camp', q: 'Where did the Van der Linde gang pitch their lakeside camp along the eastern shore of Flat Iron Lake?', revealName: 'Clemens Point' },
+      { x: 74.8, y: 64.5, cat: 'Story Mission', q: 'Where were Arthur and Bill deputized by Sheriff Leigh Gray before being ambushed in a deadly street shootout?', revealName: 'Rhodes' },
+      { x: 74.6, y: 64.8, cat: 'Story Mission', q: 'Where did Arthur, Dutch, and Trelawny rescue Josiah Trelawny from bounty hunters in a cornfield?', revealName: 'Outside Rhodes' },
+      { x: 75.0, y: 64.3, cat: 'Story Mission', q: 'Where did Sadie Adler buy trousers and help Arthur fend off Lemoyne Raiders after picking up camp mail?', revealName: 'Rhodes' },
+      { x: 74.7, y: 64.6, cat: 'Stranger Mission', q: 'Where did Arthur meet disgraced former slave catcher Jeremiah Compson sitting on a wooden bench?', revealName: 'Rhodes' },
+      { x: 77.2, y: 62.8, cat: 'Story Mission', q: 'Where did Arthur help Beau Gray deliver a secret love letter and protect a women’s suffrage march?', revealName: 'Caliga Hall' },
+      { x: 77.4, y: 62.5, cat: 'Story Mission', q: 'Where did Arthur, Sean, and Hosea burn down the Gray family’s prized tobacco fields at night?', revealName: 'Caliga Hall' },
+      { x: 71.8, y: 71.5, cat: 'Story Mission', q: 'Where did the entire Van der Linde gang march in formation to burn down a mansion while rescuing Jack?', revealName: 'Braithwaite Manor' },
+      { x: 71.5, y: 71.8, cat: 'Story Mission', q: 'Where did Arthur, John, and Javier steal prized Turkoman and Arabian horses from a wealthy plantation?', revealName: 'Braithwaite Manor Stables' },
+      { x: 72.0, y: 71.2, cat: 'Story Mission', q: 'Where did Arthur first meet Penélope Braithwaite hidden inside a white gazebo?', revealName: 'Braithwaite Manor Gazebo' },
+      { x: 75.6, y: 69.2, cat: 'Story Mission', q: 'Where did Arthur and Archibald MacGregor destroy an illegal moonshine still hidden in the woods?', revealName: 'Scarlett Meadows' },
+      { x: 76.4, y: 67.8, cat: 'Story Mission', q: 'Where did Arthur and Susan Grimshaw rescue Tilly Jackson from Anthony Foreman’s gang?', revealName: 'Radley’s House (Scarlett Meadows)' },
+      { x: 73.5, y: 69.8, cat: 'Stranger Mission', q: 'Where did Arthur search the foreclosed estate of Jeremiah Compson to recover his ledger and pistol?', revealName: 'Compson’s Stead' },
+      { x: 76.8, y: 71.4, cat: 'Story Mission', q: 'Where did Arthur and Lenny raid an abandoned Civil War battlefield church to steal rifles from Lemoyne Raiders?', revealName: 'Bolger Glade' },
+      { x: 78.5, y: 73.2, cat: 'Gang Camp', q: 'Where did the gang establish their decayed antebellum mansion headquarters after clearing out Lemoyne Raiders?', revealName: 'Shady Belle' },
+      { x: 78.7, y: 73.0, cat: 'Story Mission', q: 'Where did O’Driscoll Boys launch a massive assault on the gang’s mansion camp right after Kieran’s death?', revealName: 'Shady Belle' },
+      { x: 79.4, y: 74.2, cat: 'Stranger Mission', q: 'Where did Arthur help legendary gunslinger Black Belle blow up waves of attacking bounty hunters?', revealName: 'Bluewater Marsh (Black Belle’s Shack)' },
+      { x: 70.6, y: 65.8, cat: 'Story Mission', q: 'Where did Dutch, Hosea, and Arthur go fishing together on a rowboat and sing campfire songs?', revealName: 'Flat Iron Lake (Off Clemens Point)' },
+      { x: 63.2, y: 54.4, cat: 'Story Mission', q: 'Where did Arthur escort Beau Gray and Penélope Braithwaite onto a train so they could elope together?', revealName: 'Riggs Station' },
+      { x: 73.8, y: 61.2, cat: 'Stranger Mission', q: 'Where did Arthur meet twin inventors Acrisius and Proetus again as they hired him to shoot bottles off their heads?', revealName: 'Valentine / Rhodes Outskirts' },
+
+      // --- CHAPTER 4 & SAINT DENIS / BAYOU NWA EVENTS ---
+      { x: 85.2, y: 68.5, cat: 'Story Mission', q: 'Where did street urchins steal Arthur’s satchel and lead him to crime boss Angelo Bronte’s mansion?', revealName: 'Saint Denis' },
+      { x: 85.5, y: 68.2, cat: 'Story Mission', q: 'Where did Arthur, Dutch, and Bill attend Mayor Lemieux’s lavish garden party to gather intelligence?', revealName: 'Saint Denis (Mayor’s Mansion)' },
+      { x: 85.0, y: 68.8, cat: 'Story Mission', q: 'Where did the gang’s disastrous bank heist claim the lives of Hosea Matthews and Lenny Summers?', revealName: 'Saint Denis Bank' },
+      { x: 85.4, y: 69.0, cat: 'Story Mission', q: 'Where did Dutch, Arthur, and Lenny walk into Angelo Bronte’s police trap at a trolley station?', revealName: 'Saint Denis Trolley Station' },
+      { x: 85.8, y: 69.4, cat: 'Story Mission', q: 'Where did Arthur, Trelawny, and Javier rob high-stakes poker players aboard the Grand Korrigan ferry?', revealName: 'Saint Denis Harbor' },
+      { x: 84.6, y: 67.6, cat: 'Story Mission', q: 'Where did Arthur and John fight off grave robbers at night to win Angelo Bronte’s favor?', revealName: 'Saint Denis Cemetery' },
+      { x: 85.1, y: 68.3, cat: 'Story Mission', q: 'Where did Arthur and Mary Linton attend a live variety show at the Théâtre Râleur?', revealName: 'Saint Denis Theater' },
+      { x: 85.3, y: 68.6, cat: 'Stranger Mission', q: 'Where did Arthur first meet inventor Marko Dragic demonstrating a remote-controlled toy boat in a park pond?', revealName: 'Saint Denis Park' },
+      { x: 84.9, y: 67.8, cat: 'Stranger Mission', q: 'Where did Arthur visit exotic milliner Algernon Wasp inside his glass greenhouse conservatory?', revealName: 'Saint Denis (Wasp’s Conservatory)' },
+      { x: 85.2, y: 68.7, cat: 'Stranger Mission', q: 'Where did Arthur help Brother Dorkins free captives hidden behind a sliding bookcase at a fence shop?', revealName: 'Saint Denis Fence' },
+      { x: 85.4, y: 68.4, cat: 'Story Mission', q: 'Where did Arthur, Sadie, and Dutch watch Colm O’Driscoll hang from the gallows after foiling his gang’s rescue?', revealName: 'Saint Denis Gallows' },
+      { x: 85.6, y: 68.9, cat: 'Story Mission', q: 'Where did Arthur collapse in the street from tuberculosis and receive his grim diagnosis from a doctor?', revealName: 'Saint Denis Doctor’s Office' },
+      { x: 83.2, y: 64.2, cat: 'Story Mission', q: 'Where did Dutch drown Angelo Bronte in the swamp and feed his body to a bull alligator?', revealName: 'Lagras' },
+      { x: 82.8, y: 63.6, cat: 'Story Mission', q: 'Where did Arthur, Dutch, and Thomas wade through waist-deep swamp water while hunting a monstrous bull gator?', revealName: 'Lagras Swamps' },
+      { x: 82.5, y: 64.5, cat: 'Story Mission', q: 'Where did the surviving gang members regroup in a swamp cabin after returning from Guarma?', revealName: 'Lakay' },
+      { x: 82.6, y: 64.4, cat: 'Story Mission', q: 'Where did Agent Milton assault the gang’s swamp hideout with a Gatling gun wagon?', revealName: 'Lakay' },
+      { x: 83.6, y: 66.4, cat: 'Stranger Mission', q: 'Where did Arthur help wildlife photographer Albert Mason snap a photo of a lurking alligator from a rowboat?', revealName: 'Bayou Nwa' },
+      { x: 84.2, y: 65.8, cat: 'Stranger Mission', q: 'Where did Arthur help Cajun local Old Man Jones defend his swamp shack from Night Folk?', revealName: 'Bluewater Marsh / Bayou Nwa' },
+      { x: 86.2, y: 66.8, cat: 'Story Mission', q: 'Where did Arthur and Sadie fly in a hot air balloon to scout Sisika Penitentiary before being shot at by O’Driscolls?', revealName: 'Northeast of Saint Denis' },
+      { x: 91.2, y: 63.8, cat: 'Story Mission', q: 'Where did Arthur and Sadie row across the river to break John Marston out of an island prison?', revealName: 'Sisika Penitentiary' },
+
+      // --- CHAPTER 6 & ROANOKE RIDGE (ANNESBURG, VAN HORN, BEAVER HOLLOW) EVENTS ---
+      { x: 81.4, y: 39.2, cat: 'Gang Camp', q: 'Where did the gang establish their final, bleak cave camp after Arthur and Charles cleared out the Murfree Brood?', revealName: 'Beaver Hollow' },
+      { x: 86.8, y: 37.8, cat: 'Story Mission', q: 'Where did Dutch confront and shoot Leviticus Cornwall on the docks of a coal-mining town?', revealName: 'Annesburg' },
+      { x: 86.6, y: 38.0, cat: 'Story Mission', q: 'Where did Arthur descend into a dark coal mine to rescue trapped miners and confront the foreman?', revealName: 'Annesburg Mine' },
+      { x: 86.7, y: 37.9, cat: 'Story Mission', q: 'Where did Arthur visit Edith Downes in a gritty mining town to give her money and urge her to leave?', revealName: 'Annesburg' },
+      { x: 86.6, y: 47.5, cat: 'Story Mission', q: 'Where did Arthur and Micah ambush an army munitions wagon near a lawless riverfront trading post?', revealName: 'Van Horn Trading Post' },
+      { x: 86.5, y: 47.6, cat: 'Story Mission', q: 'Where did Arthur snipe from a lighthouse to cover Sadie while rescuing Abigail from Agent Milton?', revealName: 'Van Horn Lighthouse' },
+      { x: 87.4, y: 27.6, cat: 'Stranger Mission', q: 'Where did Arthur teach recent widow Charlotte Balfour how to hunt, skin a rabbit, and shoot a rifle?', revealName: 'Willard’s Rest' },
+      { x: 85.4, y: 26.8, cat: 'Stranger Mission', q: 'Where did Marko Dragic bring a sentient robot to life during a thunderstorm inside his remote laboratory?', revealName: 'Doverhill' },
+      { x: 86.2, y: 29.5, cat: 'Stranger Mission', q: 'Where did Arthur duel Jim "Boy" Calloway beside a roaring waterfall at the end of the gunslinger questline?', revealName: 'Brandywine Drop' },
+      { x: 82.2, y: 42.6, cat: 'Stranger Mission', q: 'Where did Arthur investigate poisoned waters and a shaman’s curse in a dilapidated mountain village?', revealName: 'Butcher Creek' },
+      { x: 80.6, y: 41.8, cat: 'Stranger Mission', q: 'Where did Arthur explore a hidden waterfall cavern to prove the waters of Butcher Creek were poisoned by arsenic?', revealName: 'Elysian Pool' },
+      { x: 78.8, y: 46.4, cat: 'Stranger Mission', q: 'Where did Arthur encounter the disturbingly friendly siblings Bray and Tammy at their isolated pig farm?', revealName: 'Aberdeen Pig Farm' },
+      { x: 82.8, y: 36.2, cat: 'Story Mission', q: 'Where did Arthur and John ambush an army train carrying payroll bonds in Roanoke Ridge?', revealName: 'Roanoke Ridge Tracks' },
+      { x: 81.6, y: 39.5, cat: 'Story Mission', q: 'Where did Arthur make his final stand on a mountain ridge to buy time for John Marston to escape?', revealName: 'Cliffs above Beaver Hollow' },
+
+      // --- NEW AUSTIN EPILOGUE & BOUNTY / STRANGER EVENTS ---
+      { x: 31.2, y: 78.2, cat: 'Frontier Event', q: 'Where did John Marston arrive in 1907 to find a desert town devastated by a cholera outbreak and ruled by Herbert Moon?', revealName: 'Armadillo' },
+      { x: 16.4, y: 82.4, cat: 'Frontier Event', q: 'Where did Sheriff Sam Freeman enforce ruthless frontier justice in the far western desert town of New Austin?', revealName: 'Tumbleweed' },
+      { x: 24.8, y: 76.8, cat: 'Frontier Event', q: 'Where did John Marston help defend a historic New Austin ranch previously managed by Bonnie MacFarlane?', revealName: 'MacFarlane’s Ranch' },
+      { x: 19.8, y: 86.2, cat: 'Story Mission', q: 'Where did Sadie Adler and John Marston raid an adobe desert fortress held by the Del Lobo gang?', revealName: 'Fort Mercer' },
+      { x: 26.4, y: 84.8, cat: 'Bounty Mission', q: 'Where did John Marston and Sadie Adler capture a Del Lobo gang leader hiding in a canyon mine?', revealName: 'Gaptooth Breach' },
+      { x: 37.8, y: 79.4, cat: 'Story Mission', q: 'Where did John Marston and Sadie Adler ambush a Del Lobo camp along the San Luis River?', revealName: 'Thieves’ Landing' },
+
+      // --- ADDITIONAL ICONIC STORY & STRANGER MOMENTS (TO REACH 210+ EVENTS) ---
+      { x: 61.5, y: 46.8, cat: 'Story Mission', q: 'Where did Hosea and Arthur go hunting together before Hosea gave Arthur a legendary animal map?', revealName: 'Heartlands / East Grizzlies Trail' },
+      { x: 63.1, y: 42.9, cat: 'Stranger Mission', q: 'Where did Arthur retrieve stolen medicine for a desperate German doctor from a crooked wagon driver?', revealName: 'Valentine Outskirts' },
+      { x: 68.4, y: 49.2, cat: 'Story Mission', q: 'Where did Arthur and Josiah Trelawny rob a luxury stagecoach carrying opera singer Aldridge T. Abbington?', revealName: 'Scarlett Meadows / Emerald Ranch Road' },
+      { x: 75.2, y: 63.8, cat: 'Story Mission', q: 'Where did Arthur, Charles, and Uncle rob a heavily guarded Cornwall stagecoach before hiding in a burning barn?', revealName: 'Rhodes / Scarlett Meadows' },
+      { x: 79.8, y: 69.5, cat: 'Stranger Mission', q: 'Where did Arthur help a stranded circus wrangler recapture a zebra, a tiger-striped cougar, and a real lion?', revealName: 'Emerald Ranch / Lemoyne Border' },
+      { x: 70.2, y: 48.6, cat: 'Stranger Mission', q: 'Where did Margaret, the "Mistress of Danger," task Arthur with tracking down escaped circus animals?', revealName: 'Outside Emerald Ranch' },
+      { x: 84.8, y: 69.2, cat: 'Stranger Mission', q: 'Where did Arthur assist French artist Charles Châtenay in escaping angry husbands dressed as a woman?', revealName: 'Saint Denis Docks' },
+      { x: 85.3, y: 68.1, cat: 'Stranger Mission', q: 'Where did Charles Châtenay’s scandalous nude paintings cause a riot at an art gallery opening?', revealName: 'Saint Denis Art Gallery' },
+      { x: 84.7, y: 68.9, cat: 'Stranger Mission', q: 'Where did Arthur test an early electric chair invention for Professor Andrew Bell III on a captured criminal?', revealName: 'Saint Denis (Professor Bell’s Lab)' },
+      { x: 61.9, y: 47.6, cat: 'Story Mission', q: 'Where did Arthur, John, Bill, and Charles rustle a herd of sheep into Valentine to auction them off?', revealName: 'Valentine Auction Yard' },
+      { x: 55.4, y: 55.2, cat: 'Stranger Mission', q: 'Where did Arthur recover a stolen Civil War memorial watch and return it to a grieving veteran?', revealName: 'Strawberry / Riggs Station Road' },
+      { x: 43.2, y: 51.2, cat: 'Stranger Mission', q: 'Where did Arthur help a lost New Yorker find his way back to a mountain town after getting stranded in the woods?', revealName: 'Outside Strawberry' },
+      { x: 62.2, y: 43.4, cat: 'Stranger Mission', q: 'Where did a serial killer leave a severed head and map clue beneath a railway bridge near Valentine?', revealName: 'South of Valentine (Train Trestle)' },
+      { x: 60.6, y: 44.2, cat: 'Stranger Mission', q: 'Where did Arthur confront killer Edmund Lowry Jr. inside his gruesome basement hideout?', revealName: 'Lucky’s Cabin (Near Valentine)' },
+      { x: 76.2, y: 65.4, cat: 'Story Mission', q: 'Where did Arthur and Pearson hunt down a pack of wolves attacking wagon drivers near Rhodes?', revealName: 'Scarlett Meadows' },
+      { x: 83.8, y: 67.2, cat: 'Story Mission', q: 'Where did Arthur and Thomas row a skiff through foggy bayou waters to check crawfish traps?', revealName: 'Lagras / Bayou Nwa' },
+      { x: 58.9, y: 38.4, cat: 'Stranger Mission', q: 'Where did Arthur track down legendary Mexican gunslinger Alfredo Montez’s brother in the Grizzlies?', revealName: 'Ambarino Mountain Pass' },
+      { x: 46.8, y: 48.2, cat: 'Story Mission', q: 'Where did Arthur and Hosea deliver a stolen stagecoach full of moonshine to a saloon in Rhodes?', revealName: 'Rhodes Parlour House' },
+      { x: 74.9, y: 64.4, cat: 'Story Mission', q: 'Where did Hosea pose as "Fenton," a mute moonshine server, to hand out free drinks to the Gray family?', revealName: 'Rhodes Parlour House' },
+      { x: 61.6, y: 47.2, cat: 'Story Mission', q: 'Where did Abigail ask Arthur to take Jack fishing before Pinkertons interrupted them by the river?', revealName: 'Horseshoe Overlook / Dakota River' },
+      { x: 81.2, y: 39.4, cat: 'Story Mission', q: 'Where did Sadie and Arthur ride out to rescue Abigail after Micah refused to mount a rescue mission?', revealName: 'Beaver Hollow to Van Horn' },
+      { x: 49.6, y: 62.6, cat: 'Story Mission', q: 'Where did John Marston finally propose to Abigail Roberts using Arthur’s ring during a boat ride?', revealName: 'Blackwater / Flat Iron Lake' },
+      { x: 54.5, y: 62.0, cat: 'Story Mission', q: 'Where did John and Abigail pose for a formal studio photograph together in 1907?', revealName: 'Blackwater Photo Studio' },
+      { x: 71.4, y: 66.0, cat: 'Story Mission', q: 'Where did the entire gang throw a wild all-night party celebrating Sean MacGuire’s safe return?', revealName: 'Horseshoe Overlook' },
+      { x: 61.7, y: 47.5, cat: 'Story Mission', q: 'Where did Reverend Swanson sing loudly around the campfire after Arthur saved him from the train bridge?', revealName: 'Horseshoe Overlook' },
+      { x: 78.6, y: 73.1, cat: 'Story Mission', q: 'Where did the gang celebrate Jack Marston’s safe return from Angelo Bronte with music and fireworks?', revealName: 'Shady Belle' },
+      { x: 85.1, y: 68.5, cat: 'Story Mission', q: 'Where did Dutch, Arthur, John, Bill, and Javier stow away on a freighter bound for Cuba during a storm?', revealName: 'Saint Denis Docks' },
+      { x: 64.4, y: 48.7, cat: 'Story Mission', q: 'Where did Arthur help Rains Fall recover stolen treaty documents without killing any guards?', revealName: 'Cornwall Kerosene & Tar' },
+      { x: 74.5, y: 64.7, cat: 'Story Mission', q: 'Where did Arthur and Charles rescue a German family’s patriarch from a camp of kidnappers in Lemoyne?', revealName: 'Clemens Point / Scarlett Meadows' },
+      { x: 62.6, y: 43.2, cat: 'Story Mission', q: 'Where did Arthur take Uncle, Karen, Mary-Beth, and Tilly on a wagon ride into town to scout banks?', revealName: 'Valentine' },
+      { x: 62.4, y: 43.1, cat: 'Story Mission', q: 'Where did Karen get slapped by a hotel guest while causing a diversion during a bank heist?', revealName: 'Valentine Hotel / Bank' },
+      { x: 71.9, y: 71.4, cat: 'Story Mission', q: 'Where did Dutch drag Catherine Braithwaite down the grand staircase of her burning mansion?', revealName: 'Braithwaite Manor' },
+      { x: 77.3, y: 62.7, cat: 'Story Mission', q: 'Where did Arthur and Sean stealthily burn tobacco barns before escaping a horde of Gray guards?', revealName: 'Caliga Hall' },
+      { x: 85.2, y: 68.6, cat: 'Story Mission', q: 'Where did Arthur chase a young street thief across rooftops and trolley cars to recover his stolen satchel?', revealName: 'Saint Denis Market & Rooftops' },
+      { x: 84.8, y: 68.2, cat: 'Story Mission', q: 'Where did Arthur meet Dutch and Hosea at a saloon to plan the Saint Denis bank robbery?', revealName: 'Doyle’s Tavern (Saint Denis)' },
+      { x: 86.9, y: 37.7, cat: 'Story Mission', q: 'Where did Arthur and Sadie hijack a mining train to blow up an army shipment of dynamite?', revealName: 'Annesburg' },
+      { x: 81.5, y: 39.1, cat: 'Story Mission', q: 'Where did Arthur confront Micah Bell and expose him as the Pinkerton rat in front of Dutch?', revealName: 'Beaver Hollow' },
+      { x: 43.5, y: 51.5, cat: 'Story Mission', q: 'Where did Micah Bell insist on retrieving his twin revolvers from a house before escaping town with Arthur?', revealName: 'Strawberry' },
+      { x: 58.5, y: 46.9, cat: 'Story Mission', q: 'Where did Arthur ride with Mary Linton to rescue her brother Jamie from a cliffside religious gathering?', revealName: 'Caliban’s Seat' },
+      { x: 69.8, y: 48.2, cat: 'Story Mission', q: 'Where did Arthur collect a loan debt from Winton Holmes by hunting a white cougar in a dark cave?', revealName: 'Cave near Strawberry / Big Valley' },
+      { x: 45.2, y: 49.4, cat: 'Story Mission', q: 'Where did Arthur hunt a ferocious white cougar inside a pitch-black cave to settle a Strauss debt?', revealName: 'Big Valley Cave (North of Strawberry)' },
+      { x: 60.2, y: 45.8, cat: 'Story Mission', q: 'Where did Arthur visit Edith Downes to collect the remainder of her late husband’s debt?', revealName: 'Downes Ranch' },
+      { x: 78.4, y: 73.3, cat: 'Story Mission', q: 'Where did a headless Kieran Duffy ride into camp on horseback, warning of an imminent O’Driscoll attack?', revealName: 'Shady Belle' },
+      { x: 85.7, y: 68.8, cat: 'Story Mission', q: 'Where did Arthur and Dutch disguise themselves as policemen to prevent Colm O’Driscoll’s gang from rescuing him?', revealName: 'Saint Denis' },
+      { x: 57.9, y: 23.5, cat: 'Story Mission', q: 'Where did Arthur and Charles scale a cliffside with a grappling hook to infiltrate an army fort at night?', revealName: 'Fort Wallace' },
+      { x: 69.5, y: 24.7, cat: 'Stranger Mission', q: 'Where did Hamish Sinclair bequeath his horse Buell to Arthur after being fatally gored by a giant boar?', revealName: 'O’Creagh’s Run' },
+      { x: 87.3, y: 27.7, cat: 'Stranger Mission', q: 'Where did Charlotte Balfour invite Arthur inside her cabin for a home-cooked meal after surviving the winter?', revealName: 'Willard’s Rest' },
+      { x: 49.7, y: 62.5, cat: 'Story Mission', q: 'Where did John Marston, Uncle, and Charles build a barn and fence while singing the "Housebuilding Song"?', revealName: 'Beecher’s Hope' },
+      { x: 16.5, y: 82.3, cat: 'Bounty Mission', q: 'Where did Sadie Adler and John Marston bring in notorious desert outlaws to Sheriff Sam Freeman’s jail?', revealName: 'Tumbleweed Jail' },
+      { x: 31.1, y: 78.3, cat: 'Story Mission', q: 'Where did John Marston encounter town crier Herbert Moon shouting warnings about a deadly plague?', revealName: 'Armadillo' }
+    ];
+
+    // =========================================================================
+    // 4. APPLICATION STATE & LOCALSTORAGE PERSISTENCE
+    // =========================================================================
+    const STORAGE_KEY = 'red_deadle_state_v3';
+
+    function loadAllState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : { days: {}, stats: { daysPlayed: 0 }, calibration: { x: 0, y: 0 } };
+      } catch (e) {
+        return { days: {}, stats: { daysPlayed: 0 }, calibration: { x: 0, y: 0 } };
+      }
+    }
+
+    function saveAllState(state) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        // Ignore storage quota errors
+      }
+    }
+
+    const APP_STATE = loadAllState();
+    if (!APP_STATE.calibration) APP_STATE.calibration = { x: 0, y: 0 };
+
+    // Build deterministic daily picks for Day #N
+    function getDailyChallenges(dayNumber) {
+      const rng = mulberry32(dayNumber * 9973 + 1337);
+
+      // Days 1-50 filtered strictly to pre-Chapter 5 characters (chapter <= 4)
+      const eligibleChars = dayNumber <= 50
+        ? CHARACTERS.filter((c) => c.chapter <= 4)
+        : CHARACTERS;
+
+      const charIdx = Math.floor(rng() * eligibleChars.length);
+      const targetCharacter = eligibleChars[charIdx];
+
+      // Pick 5 unique MAP_EVENTS
+      const indices = Array.from({ length: MAP_EVENTS.length }, (_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      const mapRounds = indices.slice(0, 5).map((idx) => MAP_EVENTS[idx]);
+
+      return { targetCharacter, mapRounds };
+    }
+
+    const TODAY_CHALLENGE = getDailyChallenges(DAILY_INFO.dayNumber);
+
+    // Initialize today's saved progress if missing
+    if (!APP_STATE.days[DAILY_INFO.dateKey]) {
+      APP_STATE.days[DAILY_INFO.dateKey] = {
+        dayNumber: DAILY_INFO.dayNumber,
+        charGuesses: [],
+        charCompleted: false,
+        charWon: false,
+        charScore: 0,
+        mapRoundIndex: 0,
+        mapResults: [], // { guessX, guessY, distance, points }
+        mapCompleted: false,
+        mapScore: 0,
+        dossierAnswers: [null, null, null],
+        dossierScore: 0
+      };
+      saveAllState(APP_STATE);
+    }
+
+    const TODAY_STATE = APP_STATE.days[DAILY_INFO.dateKey];
+
+    // =========================================================================
+    // 5. UI HELPERS & NAVIGATION
+    // =========================================================================
+    function showToast(msg) {
+      const banner = document.getElementById('toastBanner');
+      const text = document.getElementById('toastText');
+      text.textContent = msg;
+      banner.classList.remove('opacity-0');
+      banner.classList.add('opacity-100');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        banner.classList.remove('opacity-100');
+        banner.classList.add('opacity-0');
+      }, 2800);
+    }
+
+    function updateHeaderAndBadges() {
+      document.getElementById('dayBadge').textContent = `DAY #${DAILY_INFO.dayNumber}`;
+      document.getElementById('statsDayLabel').textContent = `Day #${DAILY_INFO.dayNumber}`;
+
+      const totalScore = TODAY_STATE.charScore + TODAY_STATE.mapScore + TODAY_STATE.dossierScore;
+      document.getElementById('totalScoreDisplay').textContent = totalScore.toLocaleString();
+
+      // Tab badges
+      const charBadge = document.getElementById('tabBadgeChar');
+      if (TODAY_STATE.charCompleted) {
+        charBadge.textContent = `${TODAY_STATE.charScore.toLocaleString()} PTS`;
+        charBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#277544]/40 text-[#a5f0c0] border border-[#48b872]/50';
+      } else {
+        charBadge.textContent = '5,000 PTS';
+      }
+
+      const mapBadge = document.getElementById('tabBadgeMap');
+      if (TODAY_STATE.mapCompleted) {
+        mapBadge.textContent = `${TODAY_STATE.mapScore.toLocaleString()} PTS`;
+        mapBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#277544]/40 text-[#a5f0c0] border border-[#48b872]/50';
+      } else {
+        mapBadge.textContent = `${TODAY_STATE.mapResults.length}/5 ROUNDS`;
+      }
+
+      const dossierBadge = document.getElementById('tabBadgeDossier');
+      if (!TODAY_STATE.charCompleted) {
+        dossierBadge.textContent = 'LOCKED';
+        dossierBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#8f1d1d]/40 text-[#f5b5b5] border border-[#c42b2b]/50';
+      } else if (TODAY_STATE.dossierAnswers.every((a) => a !== null)) {
+        dossierBadge.textContent = `${TODAY_STATE.dossierScore.toLocaleString()} PTS`;
+        dossierBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#277544]/40 text-[#a5f0c0] border border-[#48b872]/50';
+      } else {
+        dossierBadge.textContent = 'UNLOCKED';
+        dossierBadge.className = 'px-1.5 py-0.5 text-[10px] rounded bg-[#c89d54]/25 text-[#e4ba6c] border border-[#c89d54]/50';
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+
+      document.getElementById('section-character').classList.toggle('hidden', tabName !== 'character');
+      document.getElementById('section-map').classList.toggle('hidden', tabName !== 'map');
+      document.getElementById('section-dossier').classList.toggle('hidden', tabName !== 'dossier');
+
+      if (tabName === 'map') {
+        renderMapRound();
+      } else if (tabName === 'dossier') {
+        renderDossierSection();
+      }
+    }
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // =========================================================================
+    // 6. MODE 1: CHARACTER DEDUCTION LOGIC
+    // =========================================================================
+    function calculateCharScore(attemptCount, won) {
+      if (!won) return 0;
+      if (attemptCount === 1) return 5000;
+      if (attemptCount >= 2 && attemptCount <= 4) return 4000;
+      if (attemptCount === 5) return 3000;
+      if (attemptCount === 6) return 1500;
+      return 0;
+    }
+
+    function compareAttribute(guessVal, targetVal, type) {
+      if (guessVal === targetVal) {
+        return { state: 'exact', label: String(guessVal) };
+      }
+
+      if (type === 'chapter') {
+        const diff = Math.abs(guessVal - targetVal);
+        const arrow = guessVal < targetVal ? ' &uarr;' : ' &darr;';
+        if (diff === 1) {
+          return { state: 'partial', label: `Ch. ${guessVal}${arrow}` };
+        }
+        return { state: 'wrong', label: `Ch. ${guessVal}${arrow}` };
+      }
+
+      if (type === 'affiliation') {
+        const lawGroups = ['Pinkerton Agency', 'New Hanover Law', 'Gray Family & Law', 'U.S. Army'];
+        const rivalGangs = ['O’Driscoll Boys', 'Guarma Rebels', 'Guarma Regime', 'Saint Denis Mafia'];
+        if (
+          (lawGroups.includes(guessVal) && lawGroups.includes(targetVal)) ||
+          (rivalGangs.includes(guessVal) && rivalGangs.includes(targetVal))
+        ) {
+          return { state: 'partial', label: guessVal };
+        }
+      }
+
+      if (type === 'origin') {
+        const usRegions = ['Northern US', 'Southern US', 'Frontier West', 'Pennsylvania', 'Illinois', 'Ohio', 'Mountain States', 'Chicago', 'Saint Denis', 'Ambarino', 'New Austin'];
+        if (usRegions.includes(guessVal) && usRegions.includes(targetVal)) {
+          return { state: 'partial', label: guessVal };
+        }
+      }
+
+      return { state: 'wrong', label: String(guessVal) };
+    }
+
+    function renderCharacterSection() {
+      const target = TODAY_CHALLENGE.targetCharacter;
+      const rowsContainer = document.getElementById('charGuessRows');
+      document.getElementById('charAttemptCount').textContent = TODAY_STATE.charGuesses.length;
+      document.getElementById('charScoreDisplay').textContent = TODAY_STATE.charScore.toLocaleString();
+
+      if (TODAY_STATE.charGuesses.length === 0) {
+        rowsContainer.innerHTML = `
+          <div class="text-center py-8 text-sm text-[#8a7c66] italic">
+            No outlaws guessed yet. Enter a name above to begin tracking today&apos;s target.
+          </div>`;
+      } else {
+        rowsContainer.innerHTML = TODAY_STATE.charGuesses
+          .map((guessId) => {
+            const g = CHARACTERS.find((c) => c.id === guessId);
+            if (!g) return '';
+
+            const cName = { state: g.id === target.id ? 'exact' : 'wrong', label: g.name };
+            const cGender = compareAttribute(g.gender, target.gender, 'gender');
+            const cAffil = compareAttribute(g.affiliation, target.affiliation, 'affiliation');
+            const cRole = compareAttribute(g.role, target.role, 'role');
+            const cOrigin = compareAttribute(g.origin, target.origin, 'origin');
+            const cChapter = g.chapter === target.chapter
+              ? { state: 'exact', label: `Chapter ${g.chapter}` }
+              : compareAttribute(g.chapter, target.chapter, 'chapter');
+            const cStatus = compareAttribute(g.status1899, target.status1899, 'status');
+
+            const cells = [cName, cGender, cAffil, cRole, cOrigin, cChapter, cStatus];
+            return `
+              <div class="grid grid-cols-7 gap-2 text-center text-xs font-medium">
+                ${cells
+                  .map(
+                    (cell) => `
+                    <div class="tile-reveal tile-${cell.state} rounded-lg px-2 py-3 flex items-center justify-center shadow">
+                      <span>${cell.label}</span>
+                    </div>`
+                  )
+                  .join('')}
+              </div>`;
+          })
+          .join('');
+      }
+
+      const searchContainer = document.getElementById('charSearchContainer');
+      const resultBanner = document.getElementById('charResultBanner');
+      if (TODAY_STATE.charCompleted) {
+        searchContainer.classList.add('hidden');
+        resultBanner.classList.remove('hidden');
+        document.getElementById('charResultTitle').textContent = TODAY_STATE.charWon
+          ? `Target Identified: ${target.name} (+${TODAY_STATE.charScore.toLocaleString()} pts)`
+          : `Outlaw Escaped! Today's target was ${target.name}`;
+        document.getElementById('charResultSub').textContent = TODAY_STATE.charWon
+          ? `Solved in ${TODAY_STATE.charGuesses.length} of 6 attempts. The Bounty Dossier is now unlocked!`
+          : `Better luck tomorrow, partner. The Bounty Dossier is now unlocked.`;
+      } else {
+        searchContainer.classList.remove('hidden');
+        resultBanner.classList.add('hidden');
+      }
+
+      updateHeaderAndBadges();
+    }
+
+    function submitCharacterGuess(charObj) {
+      if (TODAY_STATE.charCompleted) return;
+      if (TODAY_STATE.charGuesses.includes(charObj.id)) {
+        showToast('You already guessed that outlaw!');
+        return;
+      }
+
+      TODAY_STATE.charGuesses.push(charObj.id);
+      const target = TODAY_CHALLENGE.targetCharacter;
+      const isMatch = charObj.id === target.id;
+
+      if (isMatch || TODAY_STATE.charGuesses.length >= 6) {
+        TODAY_STATE.charCompleted = true;
+        TODAY_STATE.charWon = isMatch;
+        TODAY_STATE.charScore = calculateCharScore(TODAY_STATE.charGuesses.length, isMatch);
+        checkAllModesCompleted();
+      }
+
+      saveAllState(APP_STATE);
+      document.getElementById('charSearchInput').value = '';
+      document.getElementById('charDropdown').classList.add('hidden');
+      renderCharacterSection();
+    }
+
+    // Autocomplete Input Events
+    const charInput = document.getElementById('charSearchInput');
+    const charDropdown = document.getElementById('charDropdown');
+
+    function updateDropdown(query) {
+      const q = query.trim().toLowerCase();
+      const filtered = CHARACTERS.filter(
+        (c) => !TODAY_STATE.charGuesses.includes(c.id) && c.name.toLowerCase().includes(q)
+      );
+
+      if (filtered.length === 0) {
+        charDropdown.innerHTML = `<div class="px-4 py-3 text-xs text-[#8a7c66]">No matching characters found.</div>`;
+      } else {
+        charDropdown.innerHTML = filtered
+          .map(
+            (c) => `
+            <button type="button" data-id="${c.id}" class="w-full text-left px-4 py-2.5 hover:bg-[#2c2119] border-b border-[#c89d54]/10 flex items-center justify-between text-sm">
+              <span class="font-semibold text-[#f3e9d2]">${c.name}</span>
+              <span class="text-xs text-[#bfb299]">${c.affiliation} &bull; Intro Ch. ${c.chapter}</span>
+            </button>`
+          )
+          .join('');
+      }
+      charDropdown.classList.remove('hidden');
+    }
+
+    charInput.addEventListener('input', (e) => updateDropdown(e.target.value));
+    charInput.addEventListener('focus', (e) => updateDropdown(e.target.value));
+
+    charDropdown.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-id]');
+      if (!btn) return;
+      const found = CHARACTERS.find((c) => c.id === btn.dataset.id);
+      if (found) submitCharacterGuess(found);
+    });
+
+    document.getElementById('charSubmitBtn').addEventListener('click', () => {
+      const q = charInput.value.trim().toLowerCase();
+      if (!q) return;
+      const exact = CHARACTERS.find((c) => c.name.toLowerCase() === q);
+      if (exact) {
+        submitCharacterGuess(exact);
+        return;
+      }
+      const firstMatch = CHARACTERS.find(
+        (c) => !TODAY_STATE.charGuesses.includes(c.id) && c.name.toLowerCase().includes(q)
+      );
+      if (firstMatch) {
+        submitCharacterGuess(firstMatch);
+      } else {
+        showToast('Select a valid RDR2 character from the list.');
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!document.getElementById('charSearchContainer').contains(e.target)) {
+        charDropdown.classList.add('hidden');
+      }
+    });
+
+    // =========================================================================
+    // 7. MODE 2: STORY PINPOINT MAP CHALLENGE (ZOOM, PAN, CALIBRATION, SCORING)
+    // =========================================================================
+    let mapZoom = 1;
+    let mapPanX = 0;
+    let mapPanY = 0;
+    let isDraggingMap = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let dragMoved = false;
+    let pendingPin = null; // { x, y } in 0..100%
+
+    const mapViewport = document.getElementById('mapViewport');
+    const mapStage = document.getElementById('mapStage');
+
+    function applyMapTransform() {
+      const rect = mapViewport.getBoundingClientRect();
+      const maxPanX = 0;
+      const minPanX = rect.width * (1 - mapZoom);
+      const maxPanY = 0;
+      const minPanY = rect.height * (1 - mapZoom);
+
+      mapPanX = Math.min(maxPanX, Math.max(minPanX, mapPanX));
+      mapPanY = Math.min(maxPanY, Math.max(minPanY, mapPanY));
+
+      mapStage.style.transform = `translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom})`;
+    }
+
+    function zoomMapAt(factor, centerX, centerY) {
+      const rect = mapViewport.getBoundingClientRect();
+      const cx = centerX !== undefined ? centerX : rect.width / 2;
+      const cy = centerY !== undefined ? centerY : rect.height / 2;
+
+      const prevZoom = mapZoom;
+      mapZoom = Math.min(4.5, Math.max(1, mapZoom * factor));
+
+      const scaleRatio = mapZoom / prevZoom;
+      mapPanX = cx - (cx - mapPanX) * scaleRatio;
+      mapPanY = cy - (cy - mapPanY) * scaleRatio;
+
+      applyMapTransform();
+    }
+
+    document.getElementById('zoomInBtn').addEventListener('click', () => zoomMapAt(1.35));
+    document.getElementById('zoomOutBtn').addEventListener('click', () => zoomMapAt(1 / 1.35));
+    document.getElementById('zoomResetBtn').addEventListener('click', () => {
+      mapZoom = 1;
+      mapPanX = 0;
+      mapPanY = 0;
+      applyMapTransform();
+    });
+
+    mapViewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = mapViewport.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      zoomMapAt(e.deltaY < 0 ? 1.2 : 1 / 1.2, cx, cy);
+    }, { passive: false });
+
+    // Pointer drag & click-to-pin
+    mapViewport.addEventListener('pointerdown', (e) => {
+      isDraggingMap = true;
+      dragMoved = false;
+      dragStartX = e.clientX - mapPanX;
+      dragStartY = e.clientY - mapPanY;
+      mapViewport.setPointerCapture(e.pointerId);
+    });
+
+    mapViewport.addEventListener('pointermove', (e) => {
+      if (!isDraggingMap) return;
+      const nx = e.clientX - dragStartX;
+      const ny = e.clientY - dragStartY;
+      if (Math.abs(nx - mapPanX) > 4 || Math.abs(ny - mapPanY) > 4) {
+        dragMoved = true;
+      }
+      mapPanX = nx;
+      mapPanY = ny;
+      applyMapTransform();
+    });
+
+    mapViewport.addEventListener('pointerup', (e) => {
+      if (!isDraggingMap) return;
+      isDraggingMap = false;
+      mapViewport.releasePointerCapture(e.pointerId);
+
+      // If user clicked without panning, place pin
+      if (!dragMoved) {
+        const currentIdx = TODAY_STATE.mapRoundIndex;
+        const alreadyLocked = TODAY_STATE.mapResults[currentIdx] !== undefined;
+        if (alreadyLocked) return;
+
+        const rect = mapViewport.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        const stageX = (clickX - mapPanX) / mapZoom;
+        const stageY = (clickY - mapPanY) / mapZoom;
+
+        const pctX = Math.min(100, Math.max(0, (stageX / rect.width) * 100));
+        const pctY = Math.min(100, Math.max(0, (stageY / rect.height) * 100));
+
+        pendingPin = { x: pctX, y: pctY };
+        const userPinEl = document.getElementById('userMapPin');
+        userPinEl.style.left = `${pctX}%`;
+        userPinEl.style.top = `${pctY}%`;
+        userPinEl.classList.remove('hidden');
+        document.getElementById('lockPinBtn').disabled = false;
+      }
+    });
+
+    // Calibration controls
+    const offsetXInput = document.getElementById('offsetXInput');
+    const offsetYInput = document.getElementById('offsetYInput');
+    offsetXInput.value = APP_STATE.calibration.x;
+    offsetYInput.value = APP_STATE.calibration.y;
+
+    document.getElementById('toggleCalibrateBtn').addEventListener('click', () => {
+      document.getElementById('calibratePanel').classList.toggle('hidden');
+    });
+
+    function handleCalibrationChange() {
+      APP_STATE.calibration.x = parseFloat(offsetXInput.value) || 0;
+      APP_STATE.calibration.y = parseFloat(offsetYInput.value) || 0;
+      saveAllState(APP_STATE);
+      renderMapRound();
+    }
+
+    offsetXInput.addEventListener('input', handleCalibrationChange);
+    offsetYInput.addEventListener('input', handleCalibrationChange);
+    document.getElementById('resetOffsetBtn').addEventListener('click', () => {
+      offsetXInput.value = 0;
+      offsetYInput.value = 0;
+      handleCalibrationChange();
+    });
+
+    function getCalibratedTarget(eventObj) {
+      return {
+        x: Math.min(100, Math.max(0, eventObj.x + (APP_STATE.calibration.x || 0))),
+        y: Math.min(100, Math.max(0, eventObj.y + (APP_STATE.calibration.y || 0)))
+      };
+    }
+
+    function scoreMapDistance(distPct) {
+      if (distPct <= 2.2) return 1000;
+      if (distPct >= 38) return 0;
+      const raw = 1000 * Math.exp(-0.085 * (distPct - 2.2));
+      return Math.max(0, Math.round(raw));
+    }
+
+    function renderMapRound() {
+      const idx = TODAY_STATE.mapRoundIndex;
+      const eventObj = TODAY_CHALLENGE.mapRounds[idx];
+      const lockedResult = TODAY_STATE.mapResults[idx];
+
+      document.getElementById('mapRoundBadge').textContent = `ROUND ${idx + 1} OF 5`;
+      document.getElementById('mapCategoryBadge').textContent = eventObj.cat;
+      document.getElementById('mapPromptQuestion').textContent = eventObj.q;
+      document.getElementById('mapTotalScore').textContent = TODAY_STATE.mapScore.toLocaleString();
+
+      const userPinEl = document.getElementById('userMapPin');
+      const targetPinEl = document.getElementById('targetMapPin');
+      const lineSvg = document.getElementById('mapLineOverlay');
+      const lockBtn = document.getElementById('lockPinBtn');
+      const nextBtn = document.getElementById('nextMapRoundBtn');
+      const feedbackBox = document.getElementById('mapRoundFeedback');
+
+      if (lockedResult) {
+        // Show locked result & reveal place name ONLY NOW
+        userPinEl.style.left = `${lockedResult.guessX}%`;
+        userPinEl.style.top = `${lockedResult.guessY}%`;
+        userPinEl.classList.remove('hidden');
+
+        const targetCoord = getCalibratedTarget(eventObj);
+        targetPinEl.style.left = `${targetCoord.x}%`;
+        targetPinEl.style.top = `${targetCoord.y}%`;
+        targetPinEl.classList.remove('hidden');
+
+        lineSvg.innerHTML = `<line x1="${lockedResult.guessX}" y1="${lockedResult.guessY}" x2="${targetCoord.x}" y2="${targetCoord.y}" stroke="#e4ba6c" stroke-width="0.55" stroke-dasharray="1.4,1.2" />`;
+
+        lockBtn.classList.add('hidden');
+        feedbackBox.classList.remove('hidden');
+
+        const quality =
+          lockedResult.points >= 950
+            ? 'Deadeye Pinpoint!'
+            : lockedResult.points >= 700
+            ? 'Sharp Tracker!'
+            : lockedResult.points >= 350
+            ? 'In the Territory'
+            : 'Off the Trail';
+
+        document.getElementById('mapFeedbackTitle').textContent = quality;
+        document.getElementById('mapFeedbackPoints').textContent = `+${lockedResult.points.toLocaleString()} PTS`;
+        document.getElementById('mapFeedbackDesc').innerHTML = `Location Revealed: <strong class="text-[#e4ba6c]">${eventObj.revealName}</strong> (${lockedResult.distance.toFixed(1)}% map units away).`;
+
+        if (idx < 4) {
+          nextBtn.textContent = 'Next Event \u2192';
+          nextBtn.classList.remove('hidden');
+        } else if (!TODAY_STATE.charCompleted) {
+          nextBtn.textContent = 'Finish Outlaw Guess \u2192';
+          nextBtn.classList.remove('hidden');
+        } else {
+          nextBtn.textContent = 'Open Bounty Dossier \u2192';
+          nextBtn.classList.remove('hidden');
+        }
+      } else {
+        // Active unguessed round
+        lineSvg.innerHTML = '';
+        targetPinEl.classList.add('hidden');
+        feedbackBox.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+        lockBtn.classList.remove('hidden');
+
+        if (pendingPin) {
+          userPinEl.style.left = `${pendingPin.x}%`;
+          userPinEl.style.top = `${pendingPin.y}%`;
+          userPinEl.classList.remove('hidden');
+          lockBtn.disabled = false;
+        } else {
+          userPinEl.classList.add('hidden');
+          lockBtn.disabled = true;
+        }
+      }
+
+      // Render 5-round history strip
+      const strip = document.getElementById('mapHistoryStrip');
+      strip.innerHTML = TODAY_CHALLENGE.mapRounds
+        .map((ev, i) => {
+          const res = TODAY_STATE.mapResults[i];
+          const isCurrent = i === idx;
+          const borderCls = isCurrent ? 'border-[#e4ba6c] bg-[#2a2018]' : 'border-[#c89d54]/25 bg-[#16110d]';
+          return `
+            <button type="button" onclick="jumpToMapRound(${i})" class="p-2 rounded-lg border ${borderCls} text-center transition">
+              <div class="text-[10px] text-[#bfb299]">Event ${i + 1}</div>
+              <div class="font-western text-xs font-bold ${res ? 'text-[#e4ba6c]' : 'text-[#6e614e]'}">
+                ${res ? `${res.points} pts` : '---'}
+              </div>
+            </button>`;
+        })
+        .join('');
+
+      updateHeaderAndBadges();
+    }
+
+    function jumpToMapRound(i) {
+      if (i <= TODAY_STATE.mapResults.length && i < 5) {
+        TODAY_STATE.mapRoundIndex = i;
+        pendingPin = null;
+        renderMapRound();
+      }
+    }
+
+    document.getElementById('lockPinBtn').addEventListener('click', () => {
+      if (!pendingPin) return;
+      const idx = TODAY_STATE.mapRoundIndex;
+      if (TODAY_STATE.mapResults[idx]) return;
+
+      const eventObj = TODAY_CHALLENGE.mapRounds[idx];
+      const targetCoord = getCalibratedTarget(eventObj);
+
+      const dx = pendingPin.x - targetCoord.x;
+      const dy = pendingPin.y - targetCoord.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const points = scoreMapDistance(dist);
+
+      TODAY_STATE.mapResults[idx] = {
+        guessX: pendingPin.x,
+        guessY: pendingPin.y,
+        distance: dist,
+        points
+      };
+      TODAY_STATE.mapScore = TODAY_STATE.mapResults.reduce((acc, r) => acc + (r ? r.points : 0), 0);
+
+      if (TODAY_STATE.mapResults.filter(Boolean).length === 5) {
+        TODAY_STATE.mapCompleted = true;
+        checkAllModesCompleted();
+      }
+
+      pendingPin = null;
+      saveAllState(APP_STATE);
+      renderMapRound();
+    });
+
+    document.getElementById('nextMapRoundBtn').addEventListener('click', () => {
+      if (TODAY_STATE.mapRoundIndex < 4) {
+        TODAY_STATE.mapRoundIndex += 1;
+        pendingPin = null;
+        mapZoom = 1;
+        mapPanX = 0;
+        mapPanY = 0;
+        applyMapTransform();
+        saveAllState(APP_STATE);
+        renderMapRound();
+      } else if (!TODAY_STATE.charCompleted) {
+        switchTab('character');
+      } else {
+        switchTab('dossier');
+      }
+    });
+
+    // =========================================================================
+    // 8. MODE 3: BOUNTY DOSSIER (LOCKED UNTIL OUTLAW GUESS COMPLETED)
+    // =========================================================================
+    function renderDossierSection() {
+      const lockedCard = document.getElementById('dossierLockedCard');
+      const unlockedContent = document.getElementById('dossierUnlockedContent');
+
+      if (!TODAY_STATE.charCompleted) {
+        lockedCard.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
+        return;
+      }
+
+      lockedCard.classList.add('hidden');
+      unlockedContent.classList.remove('hidden');
+
+      const target = TODAY_CHALLENGE.targetCharacter;
+      document.getElementById('dossierCharHeading').textContent = `${target.name} — Intelligence Dossier`;
+      document.getElementById('dossierScoreDisplay').textContent = TODAY_STATE.dossierScore.toLocaleString();
+
+      const list = document.getElementById('dossierQuestionsList');
+      list.innerHTML = target.dossier
+        .map((item, qIdx) => {
+          const chosen = TODAY_STATE.dossierAnswers[qIdx];
+          const isAnswered = chosen !== null;
+
+          return `
+            <div class="leather-panel rounded-xl p-5 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-western font-bold text-[#c89d54]">QUESTION ${qIdx + 1} OF 3</span>
+                <span class="text-xs text-[#bfb299]">${isAnswered ? (chosen === item.answer ? '+500 PTS' : '0 PTS') : '500 PTS'}</span>
+              </div>
+              <h3 class="text-base font-semibold text-[#f3e9d2]">${item.q}</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                ${item.options
+                  .map((opt, oIdx) => {
+                    let btnStyle = 'western-btn';
+                    if (isAnswered) {
+                      if (oIdx === item.answer) {
+                        btnStyle = 'tile-exact';
+                      } else if (oIdx === chosen) {
+                        btnStyle = 'bg-[#6e1515] border border-[#d64545] text-[#f3e9d2]';
+                      } else {
+                        btnStyle = 'bg-[#17120e] border border-[#c89d54]/15 text-[#786b57]';
+                      }
+                    }
+                    return `
+                      <button
+                        type="button"
+                        ${isAnswered ? 'disabled' : `onclick="answerDossierQuestion(${qIdx}, ${oIdx})"`}
+                        class="${btnStyle} px-4 py-3 rounded-lg text-left text-sm font-medium transition">
+                        ${opt}
+                      </button>`;
+                  })
+                  .join('')}
+              </div>
+            </div>`;
+        })
+        .join('');
+
+      updateHeaderAndBadges();
+    }
+
+    function answerDossierQuestion(qIdx, optionIdx) {
+      if (!TODAY_STATE.charCompleted) return;
+      if (TODAY_STATE.dossierAnswers[qIdx] !== null) return;
+
+      const target = TODAY_CHALLENGE.targetCharacter;
+      TODAY_STATE.dossierAnswers[qIdx] = optionIdx;
+      if (optionIdx === target.dossier[qIdx].answer) {
+        TODAY_STATE.dossierScore += 500;
+      }
+
+      checkAllModesCompleted();
+      saveAllState(APP_STATE);
+      renderDossierSection();
+    }
+
+    // =========================================================================
+    // 9. STATS & SHARE REPORT
+    // =========================================================================
+    function checkAllModesCompleted() {
+      const dossierDone = TODAY_STATE.dossierAnswers.every((a) => a !== null);
+      if (TODAY_STATE.charCompleted && TODAY_STATE.mapCompleted && dossierDone && !TODAY_STATE.countedInStats) {
+        TODAY_STATE.countedInStats = true;
+        APP_STATE.stats.daysPlayed = (APP_STATE.stats.daysPlayed || 0) + 1;
+        saveAllState(APP_STATE);
+      }
+    }
+
+    function openStatsModal() {
+      const total = TODAY_STATE.charScore + TODAY_STATE.mapScore + TODAY_STATE.dossierScore;
+      document.getElementById('statTodayTotal').textContent = `${total.toLocaleString()} / 11,500`;
+      document.getElementById('statDaysPlayed').textContent = APP_STATE.stats.daysPlayed || (TODAY_STATE.charGuesses.length > 0 || TODAY_STATE.mapResults.length > 0 ? 1 : 0);
+      document.getElementById('statCharScore').textContent = `${TODAY_STATE.charScore.toLocaleString()} / 5,000`;
+      document.getElementById('statMapScore').textContent = `${TODAY_STATE.mapScore.toLocaleString()} / 5,000`;
+      document.getElementById('statsModal').classList.remove('hidden');
+    }
+
+    document.getElementById('statsBtn').addEventListener('click', openStatsModal);
+    document.getElementById('closeStatsBtn').addEventListener('click', () => {
+      document.getElementById('statsModal').classList.add('hidden');
+    });
+
+    document.getElementById('helpBtn').addEventListener('click', () => {
+      document.getElementById('helpModal').classList.remove('hidden');
+    });
+    document.getElementById('closeHelpBtn').addEventListener('click', () => {
+      document.getElementById('helpModal').classList.add('hidden');
+    });
+    document.getElementById('gotItHelpBtn').addEventListener('click', () => {
+      document.getElementById('helpModal').classList.add('hidden');
+    });
+
+    document.getElementById('copyShareBtn').addEventListener('click', () => {
+      const total = TODAY_STATE.charScore + TODAY_STATE.mapScore + TODAY_STATE.dossierScore;
+      const charText = TODAY_STATE.charCompleted
+        ? `${TODAY_STATE.charWon ? `${TODAY_STATE.charGuesses.length}/6` : 'X/6'} (${TODAY_STATE.charScore.toLocaleString()} pts)`
+        : 'In Progress';
+      const mapText = `${TODAY_STATE.mapScore.toLocaleString()} / 5,000 pts`;
+      const dossierText = `${TODAY_STATE.dossierScore.toLocaleString()} / 1,500 pts`;
+
+      const report = [
+        `RED-DEADLE — Day #${DAILY_INFO.dayNumber}`,
+        `Total Bounty: ${total.toLocaleString()} / 11,500`,
+        `Outlaw Guess: ${charText}`,
+        `Story Pinpoint: ${mapText}`,
+        `Bounty Dossier: ${dossierText}`
+      ].join('\n');
+
+      const ta = document.createElement('textarea');
+      ta.value = report;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Daily Bounty Report copied to clipboard!');
+    });
+
+    // =========================================================================
+    // 10. INITIAL BOOT
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCharacterSection();
+      renderMapRound();
+      renderDossierSection();
+      updateHeaderAndBadges();
+    });
+  </script>
+</body>
+</html>
