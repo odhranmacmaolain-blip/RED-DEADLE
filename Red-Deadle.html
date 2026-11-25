@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Red-Deadle — Daily Red Dead Redemption 2 Trivia &amp; Map Challenge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-leather: #120e0b;
+      --bg-panel: #1c1510;
+      --bg-card: #241c15;
+      --gold: #c89d54;
+      --gold-bright: #e4ba6c;
+      --cream: #f3e9d2;
+      --cream-muted: #bfb299;
+      --crimson: #8f1d1d;
+      --crimson-bright: #c42b2b;
+      --emerald: #236b3e;
+      --amber: #a86c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-leather);
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(200, 157, 84, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 15% 85%, rgba(143, 29, 29, 0.12) 0%, transparent 55%),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 2px, transparent 2px, transparent 8px);
+      color: var(--cream);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-western {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.04em;
+    }
+
+    .font-serif-body {
+      font-family: 'Crimson Pro', serif;
+    }
+
+    .leather-panel {
+      background: linear-gradient(180deg, #1f1712 0%, #17110d 100%);
+      border: 1px solid rgba(200, 157, 84, 0.35);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(243, 233, 210, 0.07);
+    }
+
+    .western-btn {
+      background: linear-gradient(180deg, #2d231a 0%, #1e1711 100%);
+      border: 1px solid rgba(200, 157, 84, 0.55);
+      color: var(--cream);
+      transition: all 0.16s ease;
+    }
+
+    .western-btn:hover:not(:disabled) {
+      border-color: var(--gold-bright);
+      background: linear-gradient(180deg, #3a2d21 0%, #261d15 100%);
+      transform: translateY(-1px);
+    }
+
+    .western-btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .western-btn-primary {
+      background: linear-gradient(180deg, #9e2323 0%, #6e1515 100%);
+      border: 1px solid #d49b4b;
+      color: #f8efe0;
+      box-shadow: 0 4px 16px rgba(143, 29, 29, 0.45);
+      transition: all 0.16s ease;
+    }
+
+    .western-btn-primary:hover:not(:disabled) {
+      background: linear-gradient(180deg, #b82929 0%, #821919 100%);
+      transform: translateY(-1px);
+    }
+
+    .western-btn-primary:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .western-btn-gold {
+      background: linear-gradient(180deg, #e0b25e 0%, #a87b30 100%);
+      border: 1px solid #fae0a5;
+      color: #16100a;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(200, 157, 84, 0.35);
+      transition: all 0.16s ease;
+    }
+
+    .western-btn-gold:hover:not(:disabled) {
+      background: linear-gradient(180deg, #ecc06f 0%, #ba8938 100%);
+      transform: translateY(-1px);
+    }
+
+    .western-btn-gold:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .tab-btn {
+      border-bottom: 2px solid transparent;
+      color: var(--cream-muted);
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      color: var(--gold-bright);
+      border-bottom-color: var(--gold-bright);
+      background: rgba(200, 157, 84, 0.08);
+    }
+
+    @keyframes flipReveal {
+      0% {
+        transform: rotateX(90deg) scale(0.95);
+        opacity: 0;
+      }
+      100% {
+        transform: rotateX(0deg) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .tile-reveal {
+      animation: flipReveal 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .tile-exact {
+      background: linear-gradient(180deg, #277544 0%, #1b5430 100%);
+      border: 1px solid #48b872;
+      color: #f3faf5;
+    }
+
+    .tile-partial {
+      background: linear-gradient(180deg, #b5761e 0%, #875511 100%);
+      border: 1px solid #e6a645;
+      color: #fff9ed;
+    }
+
+    .tile-wrong {
+      background: linear-gradient(180deg, #362922 0%, #241b16 100%);
+      border: 1px solid rgba(200, 157, 84, 0.22);
+      color: #cbbba2;
+    }
+
+    /* Map Container & Interactive Zoom */
+    .map-viewport {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-height: 70vh;
+      background-color: #26201b;
+      border: 2px solid rgba(200, 157, 84, 0.55);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .map-stage {
+      position: absolute;
+      inset: 0;
+      transform-origin: 0 0;
+      will-change: transform;
+      cursor: crosshair;
+    }
+
+    .map-stage img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+      pointer-events: none;
+    }
+
+    .map-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9));
+    }
+
+    .map-pin-target {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      pointer-events: none;
+      z-index: 25;
+      filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9));
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #140f0c;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4b3928;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #c89d54;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-[#c89d54] selection:text-[#120e0b]">
+
+  <!-- Top Header -->
+  <header class="border-b border-[#c89d54]/30 bg-[#15100c]/95 sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#8f1d1d] to-[#4a0d0d] border border-[#c89d54] flex items-center justify-center shadow-lg shrink-0">
+          <svg class="w-6 h-6 text-[#f3e9d2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="font-western text-lg sm:text-2xl font-black text-[#f3e9d2] tracking-wider">RED-DEADLE</h1>
+            <span id="dayBadge" class="px-2 py-0.5 text-[11px] font-bold rounded bg-[#c89d54]/20 text-[#e4ba6c] border border-[#c89d54]/40">DAY #3</span>
+          </div>
+          <p class="text-[11px] text-[#bfb299] hidden sm:block">Outlaw Deduction, Story Pinpoint &amp; Frontier Dossier</p>
+        </div>
+      </div>
+
+      <!-- Mode Switcher & Score Controls -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-wrap">
+        <!-- Daily vs Practice Mode Toggle -->
+        <div class="inline-flex rounded-lg bg-[#120e0b] p-0.5 border border-[#c89d54]/40">
+          <button id="modeDailyBtn" type="button" class="px-2.5 py-1.5 rounded-md text-xs font-western font-bold bg-[#8f1d1d] text-[#f3e9d2]">
+            Daily
+          </button>
+          <button id="modePracticeBtn" type="button" class="px-2.5 py-1.5 rounded-md text-xs font-western font-bold text-[#bfb299] hover:text-[#f3e9d2]">
+            Practice
+          </button>
+        </div>
+
+        <button id="newPracticeBtn" type="button" class="hidden western-btn px-2.5 py-1.5 rounded-lg text-xs font-western text-[#e4ba6c]" title="Roll New Practice Seed">
+          &#8635; New Seed
+        </button>
+
+        <div class="px-2.5 py-1 rounded-lg bg-[#1c1510] border border-[#c89d54]/40 text-right">
+          <div class="text-[9px] uppercase tracking-wider text-[#bfb299]">Bounty Score</div>
+          <div class="font-western text-xs sm:text-sm font-bold text-[#e4ba6c]">
+            <span id="totalScoreDisplay">0</span> <span class="text-[10px] text-[#bfb299] font-normal">/ 11,500</span>
+          </div>
+        </div>
+
+        <button id="archiveBtn" type="button" class="western-btn p-2 rounded-lg" title="Past Days Archive">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#e4ba6c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </button>
+
+        <button id="statsBtn" type="button" class="western-btn p-2 rounded-lg" title="Outlaw Stats & Share">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#e4ba6c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 20V10M12 20V4M6 20v-6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <button id="helpBtn" type="button" class="western-btn p-2 rounded-lg" title="How to Play">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#e4ba6c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-linecap="round" />
+            <line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mode Navigation Tabs -->
+    <nav class="max-w-6xl mx-auto px-2 sm:px-4 flex border-t border-[#c89d54]/15 overflow-x-auto">
+      <button data-tab="character" type="button" class="tab-btn active flex-1 py-2.5 px-3 text-xs sm:text-sm font-western font-bold flex items-center justify-center gap-1.5 whitespace-nowrap">
+        <span>1. Outlaw Guess</span>
+        <span id="tabBadgeChar" class="px-1.5 py-0.5 text-[10px] rounded bg-[#2a2018] text-[#bfb299] border border-[#c89d54]/30">5,000</span>
+      </button>
+      <button data-tab="map" type="button" class="tab-btn flex-1 py-2.5 px-3 text-xs sm:text-sm font-western font-bold flex items-center justify-center gap-1.5 whitespace-nowrap">
+        <span>2. Map (5 Rds)</span>
+        <span id="tabBadgeMap" class="px-1.5 py-0.5 text-[10px] rounded bg-[#2a2018] text-[#bfb299] border border-[#c89d54]/30">0/5</span>
+      </button>
+      <button data-tab="dossier" type="button" class="tab-btn flex-1 py-2.5 px-3 text-xs sm:text-sm font-western font-bold flex items-center justify-center gap-1.5 whitespace-nowrap">
+        <span>3. Lore Dossier</span>
+        <span id="tabBadgeDossier" class="px-1.5 py-0.5 text-[10px] rounded bg-[#2a2018] text-[#bfb299] border border-[#c89d54]/30">LOCKED</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Toast Notification -->
+  <div id="toastBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
+    <div id="toastText" class="px-4 py-2.5 rounded-lg bg-[#241b14] border border-[#e4ba6c] text-[#f3e9d2] text-xs sm:text-sm font-medium shadow-2xl"></div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-3 sm:px-4 py-5 space-y-5">
+
+    <!-- Full-Game Victory Banner (Shown when all 3 modes are finished) -->
+    <div id="gameCompleteBanner" class="hidden leather-panel rounded-xl p-5 sm:p-6 border-2 border-[#e4ba6c] text-center space-y-3">
+      <div class="inline-block px-3 py-1 rounded-full bg-[#277544]/40 border border-[#48b872] text-xs font-western font-bold text-[#f3faf5] tracking-wider">
+        BOUNTY COMPLETE
+      </div>
+      <h2 id="gameCompleteTitle" class="font-western text-2xl sm:text-3xl font-black text-[#e4ba6c] tracking-wide">
+        YOU WON!
+      </h2>
+      <p id="gameCompleteSubtitle" class="text-sm sm:text-base text-[#f3e9d2]">
+        You finished all 3 challenges with a bounty score of <strong class="text-[#e4ba6c]">0 / 11,500</strong>!
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+        <button id="victoryArchiveBtn" type="button" class="western-btn-gold px-5 py-2.5 rounded-lg font-western text-xs sm:text-sm font-bold">
+          &#128197; Play Past Days Archive
+        </button>
+        <button id="victoryStatsBtn" type="button" class="western-btn px-4 py-2.5 rounded-lg font-western text-xs sm:text-sm font-bold text-[#e4ba6c]">
+          View Stats &amp; Share
+        </button>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TAB 1: OUTLAW GUESS (CHARACTER DEDUCTION)                           -->
+    <!-- =================================================================== -->
+    <section id="section-character" class="space-y-4">
+      <div class="leather-panel rounded-xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#c89d54]/20">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded bg-[#8f1d1d] text-[#f3e9d2] text-xs font-western font-bold border border-[#c89d54]/50">
+                OUTLAW DEDUCTION
+              </span>
+              <span id="spoilerSafetyTag" class="px-2 py-0.5 rounded bg-[#241c15] text-[#e4ba6c] text-xs border border-[#c89d54]/30">
+                Pre-Chapter 5 Safe (Days 1–50)
+              </span>
+            </div>
+            <h2 class="font-western text-base sm:text-xl font-bold text-[#f3e9d2] mt-2">
+              Identify Today&apos;s Mystery Outlaw in 6 Guesses
+            </h2>
+            <p class="text-xs text-[#bfb299] mt-0.5">
+              1 Try: <strong class="text-[#e4ba6c]">5,000 pts</strong> &bull; 2–4 Tries: <strong class="text-[#e4ba6c]">4,000 pts</strong> &bull; 5 Tries: <strong class="text-[#e4ba6c]">3,000 pts</strong> &bull; 6 Tries: <strong class="text-[#e4ba6c]">1,500 pts</strong>
+            </p>
+          </div>
+          <div class="px-3 py-1.5 rounded-lg bg-[#241c15] border border-[#c89d54]/30 text-right self-start sm:self-center shrink-0">
+            <div class="text-[10px] uppercase text-[#bfb299]">Guesses Used</div>
+            <div class="font-western text-sm font-bold text-[#e4ba6c]"><span id="charGuessCount">0</span> / 6</div>
+          </div>
+        </div>
+
+        <!-- Search & Guess Input -->
+        <div id="charInputWrapper" class="relative max-w-xl mx-auto">
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <input
+                id="charSearchInput"
+                type="text"
+                autocomplete="off"
+                placeholder="Type an RDR2 character name (e.g., Arthur Morgan, Sadie Adler)..."
+                class="w-full px-3.5 py-2.5 rounded-lg bg-[#120e0b] border border-[#c89d54]/50 text-sm text-[#f3e9d2] placeholder-[#7d6f5b] focus:outline-none focus:border-[#e4ba6c]"
+              />
+              <div id="charAutocompleteList" class="hidden absolute left-0 right-0 top-full mt-1 max-h-60 overflow-y-auto rounded-lg bg-[#1b140f] border border-[#c89d54]/60 shadow-2xl z-30 divide-y divide-[#c89d54]/15"></div>
+            </div>
+            <button id="submitCharGuessBtn" type="button" disabled class="western-btn-primary px-4 sm:px-5 py-2.5 rounded-lg font-western font-bold text-xs sm:text-sm shrink-0">
+              Guess
+            </button>
+          </div>
+        </div>
+
+        <!-- End-of-Round Banner -->
+        <div id="charResultBanner" class="hidden p-4 rounded-xl bg-[#140f0c] border border-[#c89d54]/60 text-center space-y-2">
+          <h3 id="charResultTitle" class="font-western text-lg sm:text-xl font-bold text-[#e4ba6c]"></h3>
+          <p id="charResultSubtitle" class="text-xs sm:text-sm text-[#f3e9d2]"></p>
+          <div class="flex flex-wrap justify-center gap-2 pt-2">
+            <button type="button" onclick="switchTab('map')" class="western-btn-gold px-4 py-2 rounded-lg font-western text-xs font-bold">
+              Play Story Pinpoint (5 Rds) &rarr;
+            </button>
+            <button type="button" onclick="switchTab('dossier')" class="western-btn px-4 py-2 rounded-lg font-western text-xs font-bold text-[#e4ba6c]">
+              Open Lore Dossier &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Guess Column Headers & Rows -->
+        <div class="overflow-x-auto pb-1">
+          <div class="min-w-[640px] space-y-2">
+            <div class="grid grid-cols-6 gap-2 text-center text-[10px] sm:text-xs font-western uppercase text-[#c89d54] px-1">
+              <div>Outlaw</div>
+              <div>1899 Age</div>
+              <div>Gender</div>
+              <div>Faction</div>
+              <div>Weapon</div>
+              <div>Intro Chapter</div>
+            </div>
+            <div id="charGuessesContainer" class="space-y-2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: STORY PINPOINT MAP CHALLENGE                                 -->
+    <!-- =================================================================== -->
+    <section id="section-map" class="hidden space-y-4">
+      <div class="leather-panel rounded-xl p-4 sm:p-5">
+        <!-- Round Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3.5 border-b border-[#c89d54]/20">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="mapRoundBadge" class="px-2.5 py-0.5 rounded bg-[#8f1d1d] text-[#f3e9d2] text-xs font-western font-bold border border-[#c89d54]/50">
+                ROUND 1 OF 5
+              </span>
+              <span id="mapCategoryBadge" class="px-2 py-0.5 rounded bg-[#241c15] text-[#e4ba6c] text-xs border border-[#c89d54]/30">
+                Story Event
+              </span>
+            </div>
+            <h2 id="mapPromptQuestion" class="font-western text-sm sm:text-lg font-bold text-[#f3e9d2] mt-2 leading-snug">
+              Loading story prompt...
+            </h2>
+            <p id="mapPromptHint" class="text-xs text-[#bfb299] mt-0.5">
+              Pinch or use +/&minus; to zoom, drag to pan, and tap the map to place your pin.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 self-start md:self-center shrink-0">
+            <div class="px-3 py-1.5 rounded-lg bg-[#241c15] border border-[#c89d54]/30 text-right">
+              <div class="text-[10px] uppercase text-[#bfb299]">Map Score</div>
+              <div class="font-western text-sm font-bold text-[#e4ba6c]"><span id="mapTotalScore">0</span> / 5,000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-2 my-3">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button id="zoomInBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs font-bold" title="Zoom In">+</button>
+            <button id="zoomOutBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs font-bold" title="Zoom Out">&minus;</button>
+            <button id="zoomResetBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs" title="Reset Zoom">Reset</button>
+
+            <label class="western-btn px-2.5 py-1.5 rounded-lg text-xs cursor-pointer inline-flex items-center gap-1" title="Upload custom map image saved in browser">
+              <span>&#128506; Select Map Image</span>
+              <input id="mapFileInput" type="file" accept="image/*" class="hidden" />
+            </label>
+
+            <button id="calibrateToggleBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs text-[#e4ba6c]" title="Calibrate every town & settlement on your map">
+              &#127919; Calibrate Towns
+            </button>
+          </div>
+
+          <div id="normalGuessControls" class="flex items-center gap-2">
+            <button id="lockPinBtn" type="button" disabled class="western-btn-primary px-4 sm:px-5 py-2 rounded-lg font-western font-bold text-xs sm:text-sm">
+              Lock In Pin
+            </button>
+            <button id="nextMapRoundBtn" type="button" class="hidden western-btn-gold px-4 sm:px-5 py-2 rounded-lg font-western font-bold text-xs sm:text-sm">
+              Next Event &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Town & Settlement Calibration Bar -->
+        <div id="calibrationPanel" class="hidden mb-3 p-3.5 rounded-xl bg-[#140f0c] border border-[#e4ba6c]/60 space-y-2.5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="px-2 py-0.5 rounded bg-[#8f1d1d] text-[10px] font-western font-bold text-[#f3e9d2] border border-[#c89d54]/40">
+                SETTLEMENT CALIBRATION (<span id="calProgressText">1 / 25</span>)
+              </span>
+              <h3 id="calTownPrompt" class="font-western text-sm sm:text-base font-bold text-[#e4ba6c] mt-1">
+                Tap the exact location of: Colter
+              </h3>
+              <p id="calTownRegion" class="text-xs text-[#bfb299]">Region: Ambarino (Grizzlies West)</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button id="calPrevBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs">&larr; Prev</button>
+              <button id="calNextBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs">Skip &rarr;</button>
+              <button id="calResetAllBtn" type="button" class="western-btn px-2.5 py-1.5 rounded-lg text-xs text-[#f28b82]">Reset All</button>
+              <button id="calDoneBtn" type="button" class="western-btn-gold px-3 py-1.5 rounded-lg text-xs font-western">Done</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map Load Error Notice (if map.jpg missing and none uploaded yet) -->
+        <div id="mapMissingNotice" class="hidden mb-3 p-3 rounded-lg bg-[#3b1515] border border-[#d64545] text-xs text-[#f8d7da]">
+          Could not find <code class="font-bold">map.jpg</code> or <code class="font-bold">map.png</code> in this folder. Click <strong>Select Map Image</strong> in the toolbar above to load your RDR2 map image (it will stay saved in your browser).
+        </div>
+
+        <!-- Interactive Map Viewport -->
+        <div id="mapViewport" class="map-viewport mx-auto">
+          <div id="mapStage" class="map-stage">
+            <img id="rdr2MapImg" src="map.jpg" alt="Red Dead Redemption 2 Map" />
+            <svg id="mapLineOverlay" class="absolute inset-0 w-full h-full pointer-events-none z-15" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+
+            <!-- User Guess Pin -->
+            <div id="userMapPin" class="map-pin hidden">
+              <svg class="w-8 h-8" viewBox="0 0 24 24" fill="#c42b2b" stroke="#f3e9d2" stroke-width="1.75">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+              </svg>
+            </div>
+
+            <!-- Actual Target Pin -->
+            <div id="targetMapPin" class="map-pin-target hidden">
+              <svg class="w-9 h-9" viewBox="0 0 24 24" fill="#277544" stroke="#f3e9d2" stroke-width="1.75">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Round Result Feedback -->
+        <div id="mapRoundFeedback" class="hidden mt-4 p-4 rounded-xl bg-[#140f0c] border border-[#c89d54]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="mapFeedbackTitle" class="font-western text-base font-bold text-[#e4ba6c]"></span>
+              <span id="mapFeedbackPoints" class="px-2 py-0.5 rounded bg-[#277544]/40 border border-[#48b872] text-xs font-bold text-[#f3faf5]"></span>
+            </div>
+            <p id="mapFeedbackDesc" class="text-sm text-[#f3e9d2] mt-1"></p>
+          </div>
+        </div>
+
+        <!-- 5-Round Progress Strip -->
+        <div id="mapHistoryStrip" class="grid grid-cols-5 gap-2 mt-4"></div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: LORE DOSSIER (LOCKED IN DAILY MODE UNTIL MODE 1 COMPLETE)   -->
+    <!-- =================================================================== -->
+    <section id="section-dossier" class="hidden space-y-4">
+      <!-- Wax-Sealed Spoiler Lock Card -->
+      <div id="dossierLockedCard" class="leather-panel rounded-xl p-8 text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-[#9e2323] to-[#590d0d] border-2 border-[#e4ba6c] flex items-center justify-center shadow-xl">
+          <svg class="w-7 h-7 text-[#f3e9d2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </div>
+        <h2 class="font-western text-xl font-bold text-[#e4ba6c]">Pinkerton Dossier Wax-Sealed</h2>
+        <p class="text-sm text-[#bfb299] max-w-md mx-auto">
+          Complete <strong class="text-[#f3e9d2]">1. Outlaw Guess</strong> first so these 3 character-specific lore questions don&apos;t spoil today&apos;s mystery outlaw!
+        </p>
+        <button type="button" onclick="switchTab('character')" class="western-btn-primary px-6 py-2.5 rounded-lg font-western font-bold text-sm">
+          Return to Outlaw Guess
+        </button>
+      </div>
+
+      <!-- Unlocked Questions -->
+      <div id="dossierUnlockedContent" class="hidden space-y-4">
+        <div class="leather-panel rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-[11px] uppercase tracking-widest text-[#c89d54]">Pinkerton Intelligence File</span>
+            <h2 id="dossierCharHeading" class="font-western text-lg sm:text-xl font-bold text-[#f3e9d2]">Target Dossier</h2>
+          </div>
+          <div class="px-3 py-1.5 rounded-lg bg-[#241c15] border border-[#c89d54]/30 text-right">
+            <div class="text-[10px] uppercase text-[#bfb299]">Dossier Bounty</div>
+            <div class="font-western text-sm font-bold text-[#e4ba6c]"><span id="dossierScoreDisplay">0</span> / 1,500</div>
+          </div>
+        </div>
+
+        <div id="dossierQuestionsList" class="space-y-4"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- CHARACTER LEDGER MODAL (SPOILER-SAFE ATTRIBUTES ONLY)                 -->
+  <!-- ===================================================================== -->
+  <div id="ledgerModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="leather-panel rounded-xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-[#c89d54]/30 flex items-center justify-between gap-2">
+        <div>
+          <h3 class="font-western text-base sm:text-lg font-bold text-[#e4ba6c]">Frontier Character Ledger (56 Outlaws)</h3>
+          <p class="text-xs text-[#bfb299]">Spoiler-safe index showing Intro Chapter only (no death or fate spoilers).</p>
+        </div>
+        <button id="closeLedgerBtn" type="button" class="text-[#bfb299] hover:text-[#f3e9d2] text-2xl leading-none px-2">&times;</button>
+      </div>
+      <div class="p-3 border-b border-[#c89d54]/20">
+        <input id="ledgerFilterInput" type="text" placeholder="Filter by name, faction, weapon, or chapter..." class="w-full px-3 py-2 rounded-lg bg-[#120e0b] border border-[#c89d54]/40 text-xs sm:text-sm text-[#f3e9d2] focus:outline-none focus:border-[#e4ba6c]" />
+      </div>
+      <div class="overflow-y-auto p-3 sm:p-4">
+        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+          <thead>
+            <tr class="border-b border-[#c89d54]/30 text-[#c89d54] font-western text-[11px] uppercase">
+              <th class="py-2 px-2">Name</th>
+              <th class="py-2 px-2">1899 Age</th>
+              <th class="py-2 px-2">Gender</th>
+              <th class="py-2 px-2">Faction</th>
+              <th class="py-2 px-2">Signature Weapon</th>
+              <th class="py-2 px-2">Intro Chapter</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerTableBody" class="divide-y divide-[#c89d54]/10"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- HELP MODAL                                                            -->
+  <!-- ===================================================================== -->
+  <div id="helpModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="leather-panel rounded-xl max-w-lg w-full p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-[#c89d54]/30 pb-3">
+        <h3 class="font-western text-lg font-bold text-[#e4ba6c]">How to Play Red-Deadle</h3>
+        <button id="closeHelpBtn" type="button" class="text-[#bfb299] hover:text-[#f3e9d2] text-2xl leading-none">&times;</button>
+      </div>
+      <div class="space-y-3 text-xs sm:text-sm text-[#d9ccb4] leading-relaxed">
+        <p><strong class="text-[#e4ba6c]">1. Outlaw Guess (5,000 pts):</strong> Identify the RDR2 character in 6 tries. <strong>5,000</strong> (1 try), <strong>4,000</strong> (2–4 tries), <strong>3,000</strong> (5 tries), <strong>1,500</strong> (6 tries).</p>
+        <p><strong class="text-[#e4ba6c]">2. Story Pinpoint (5,000 pts):</strong> Drop a pin on the RDR2 map for 5 story or stranger mission prompts (up to 1,000 pts each). Place names are hidden until after you lock in your pin.</p>
+        <p><strong class="text-[#e4ba6c]">3. Lore Dossier (1,500 pts):</strong> Unlocks after completing Mode 1 in Daily mode (always open in Practice mode). Answer 3 trivia questions about the target outlaw at 500 pts each.</p>
+        <p><strong class="text-[#e4ba6c]">Spoiler Protection:</strong> Days #1–#50 strictly feature pre-Chapter 5 characters and story events.</p>
+      </div>
+      <div class="text-right pt-1">
+        <button id="gotItHelpBtn" type="button" class="western-btn-gold px-5 py-2 rounded-lg font-western text-xs">Ride Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- STATS & SHARE MODAL                                                   -->
+  <!-- ===================================================================== -->
+  <!-- ARCHIVE MODAL (PLAY ANY PAST DAY #1 TO TODAY)                         -->
+  <!-- ===================================================================== -->
+  <div id="archiveModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="leather-panel rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-[#c89d54]/30 flex items-center justify-between gap-2">
+        <div>
+          <h3 class="font-western text-base sm:text-lg font-bold text-[#e4ba6c]">Frontier Bounty Archive</h3>
+          <p class="text-xs text-[#bfb299]">Replay or finish any previous day&apos;s Outlaw Guess, Map &amp; Lore Dossier.</p>
+        </div>
+        <button id="closeArchiveBtn" type="button" class="text-[#bfb299] hover:text-[#f3e9d2] text-2xl leading-none px-2">&times;</button>
+      </div>
+      <div id="archiveListContainer" class="overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- STATS & SHARE MODAL                                                   -->
+  <!-- ===================================================================== -->
+  <div id="statsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="leather-panel rounded-xl max-w-md w-full p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-[#c89d54]/30 pb-3">
+        <h3 class="font-western text-lg font-bold text-[#e4ba6c]">Outlaw Ledger &mdash; <span id="statsDayLabel">Day #3</span></h3>
+        <button id="closeStatsBtn" type="button" class="text-[#bfb299] hover:text-[#f3e9d2] text-2xl leading-none">&times;</button>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5 text-center">
+        <div class="p-2.5 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-[11px] text-[#bfb299]">Current Bounty</div>
+          <div id="statTodayTotal" class="font-western text-base sm:text-lg font-bold text-[#e4ba6c]">0 / 11,500</div>
+        </div>
+        <div class="p-2.5 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-[11px] text-[#bfb299]">High Score</div>
+          <div id="statHighScore" class="font-western text-base sm:text-lg font-bold text-[#48b872]">0</div>
+        </div>
+        <div class="p-2.5 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-[11px] text-[#bfb299]">Average Score</div>
+          <div id="statAvgScore" class="font-western text-base sm:text-lg font-bold text-[#f3e9d2]">0</div>
+        </div>
+        <div class="p-2.5 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-[11px] text-[#bfb299]">Day Streak</div>
+          <div id="statDayStreak" class="font-western text-base sm:text-lg font-bold text-[#e4ba6c]">0 Days</div>
+        </div>
+        <div class="p-2.5 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-[11px] text-[#bfb299]">Days Played</div>
+          <div id="statDaysPlayed" class="font-western text-sm sm:text-base font-bold text-[#f3e9d2]">0</div>
+        </div>
+        <div class="p-2.5 rounded-lg bg-[#140f0c] border border-[#c89d54]/30">
+          <div class="text-[11px] text-[#bfb299]">Outlaw / Map</div>
+          <div class="font-western text-xs sm:text-sm font-bold text-[#f3e9d2]">
+            <span id="statCharScore">0</span> / <span id="statMapScore">0</span>
+          </div>
+        </div>
+      </div>
+      <button id="copyShareBtn" type="button" class="western-btn-gold px-5 py-2.5 rounded-lg font-western text-xs font-bold w-full">
+        &#128203; Copy Bounty Report
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. DAILY EPOCH & DETERMINISTIC PRNG (NOV 14, 2026 = DAY #1)
+    // =========================================================================
+    const EPOCH_UTC = Date.UTC(2026, 10, 14); // November 14, 2026 = Day #1
+
+    function getDateKeyForDayNumber(dayNumber) {
+      const d = new Date(EPOCH_UTC + (dayNumber - 1) * 86400000);
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+    }
+
+    function getDailyInfo() {
+      const now = new Date();
+      const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+      const diffDays = Math.floor((todayUtc - EPOCH_UTC) / 86400000);
+      const dayNumber = Math.max(1, diffDays + 1);
+      const dateKey = getDateKeyForDayNumber(dayNumber);
+      return { dayNumber, dateKey };
+    }
+
+    const DAILY_INFO = getDailyInfo();
+    let ACTIVE_DAY_NUMBER = DAILY_INFO.dayNumber;
+    let ACTIVE_DATE_KEY = DAILY_INFO.dateKey;
+
+    function normalizeName(str) {
+      return String(str || '')
+        .toLowerCase()
+        .replace(/["'“”‘’.,-]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+// ... existing code ... -->
+    // =========================================================================
+    // 3. BAKED-IN AFFINE MAP CALIBRATION & STORY PINPOINT EVENTS
+    // =========================================================================
+    const CALIBRATION = {"a":1.02389,"b":-0.12112,"tx":8.226,"c":-0.10066,"d":1.02653,"ty":-6.03,"anchors":[{"name":"Colter","x":51.77,"y":11.38},{"name":"Saint Denis","x":86.93,"y":55.16},{"name":"Tumbleweed","x":14.62,"y":75.93},{"name":"Strawberry","x":47.68,"y":45.27}]};
+
+    function applyAffineCalibration(rawX, rawY) {
+      const nx = CALIBRATION.a * rawX + CALIBRATION.b * rawY + CALIBRATION.tx;
+      const ny = CALIBRATION.c * rawX + CALIBRATION.d * rawY + CALIBRATION.ty;
+      return {
+        x: Number(Math.min(100, Math.max(0, nx)).toFixed(2)),
+        y: Number(Math.min(100, Math.max(0, ny)).toFixed(2))
+      };
+    }
+
+    // All 25 Towns, Camps & Major Settlements for Direct Map Calibration
+    const SETTLEMENT_ANCHORS = [
+      { key: 'colter', name: 'Colter', region: 'Ambarino (Grizzlies West)', rawX: 45.8, rawY: 22.8 },
+      { key: 'wapiti', name: 'Wapiti Indian Reservation', region: 'Ambarino (Grizzlies East)', rawX: 59.5, rawY: 20.4 },
+      { key: 'fort_wallace', name: 'Fort Wallace', region: 'Ambarino / Cumberland Forest', rawX: 57.8, rawY: 25.4 },
+      { key: 'valentine', name: 'Valentine', region: 'New Hanover (The Heartlands)', rawX: 62.5, rawY: 43.2 },
+      { key: 'horseshoe', name: 'Horseshoe Overlook', region: 'New Hanover (The Heartlands)', rawX: 61.8, rawY: 47.4 },
+      { key: 'cornwall', name: 'Cornwall Kerosene & Tar', region: 'New Hanover (The Heartlands)', rawX: 64.5, rawY: 48.6 },
+      { key: 'emerald', name: 'Emerald Ranch & Station', region: 'New Hanover (The Heartlands)', rawX: 70.4, rawY: 48.4 },
+      { key: 'annesburg', name: 'Annesburg', region: 'New Hanover (Roanoke Ridge)', rawX: 86.8, rawY: 37.8 },
+      { key: 'beaver_hollow', name: 'Beaver Hollow', region: 'New Hanover (Roanoke Ridge)', rawX: 81.4, rawY: 39.2 },
+      { key: 'butcher_creek', name: 'Butcher Creek', region: 'New Hanover (Roanoke Ridge)', rawX: 82.2, rawY: 42.6 },
+      { key: 'van_horn', name: 'Van Horn Trading Post', region: 'New Hanover (Roanoke Ridge)', rawX: 86.6, rawY: 47.5 },
+      { key: 'strawberry', name: 'Strawberry', region: 'West Elizabeth (Big Valley)', rawX: 45.2, rawY: 53.0 },
+      { key: 'pronghorn', name: 'Pronghorn Ranch', region: 'West Elizabeth (Big Valley)', rawX: 41.2, rawY: 32.8 },
+      { key: 'blackwater', name: 'Blackwater', region: 'West Elizabeth (Great Plains)', rawX: 54.4, rawY: 62.2 },
+      { key: 'beechers', name: 'Beecher’s Hope', region: 'West Elizabeth (Great Plains)', rawX: 49.8, rawY: 62.4 },
+      { key: 'clemens', name: 'Clemens Point', region: 'Lemoyne (Scarlett Meadows)', rawX: 71.2, rawY: 66.2 },
+      { key: 'rhodes', name: 'Rhodes', region: 'Lemoyne (Scarlett Meadows)', rawX: 74.8, rawY: 64.5 },
+      { key: 'braithwaite', name: 'Braithwaite Manor', region: 'Lemoyne (Scarlett Meadows)', rawX: 71.8, rawY: 71.5 },
+      { key: 'shady_belle', name: 'Shady Belle', region: 'Lemoyne (Bayou Nwa)', rawX: 78.5, rawY: 73.2 },
+      { key: 'lagras', name: 'Lagras & Lakay', region: 'Lemoyne (Bayou Nwa)', rawX: 83.2, rawY: 64.2 },
+      { key: 'saint_denis', name: 'Saint Denis', region: 'Lemoyne (Bayou Nwa)', rawX: 85.2, rawY: 68.5 },
+      { key: 'sisika', name: 'Sisika Penitentiary', region: 'Lemoyne (Lannahechee River)', rawX: 91.2, rawY: 63.8 },
+      { key: 'thieves_landing', name: 'Thieves’ Landing', region: 'New Austin (Hennigan’s Stead)', rawX: 37.8, rawY: 79.4 },
+      { key: 'macfarlanes', name: 'MacFarlane’s Ranch', region: 'New Austin (Hennigan’s Stead)', rawX: 24.8, rawY: 76.8 },
+      { key: 'armadillo', name: 'Armadillo', region: 'New Austin (Cholla Springs)', rawX: 31.2, rawY: 78.2 },
+      { key: 'tumbleweed', name: 'Tumbleweed', region: 'New Austin (Gaptooth Ridge)', rawX: 16.4, rawY: 82.4 }
+    ];
+// ... existing code ... -->
+    // =========================================================================
+    // 4. STORAGE & INDEXEDDB MAP PERSISTENCE
+    // =========================================================================
+    const STORAGE_KEY = 'red_deadle_v4';
+    const IDB_NAME = 'RedDeadleMapDB';
+    const IDB_STORE = 'maps';
+
+    function loadAllState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (!parsed.days) parsed.days = {};
+          if (!parsed.customTowns) parsed.customTowns = {};
+          if (!parsed.stats) parsed.stats = { daysPlayed: 0 };
+          return parsed;
+        }
+        // Automatically carry over any saved progress from earlier versions
+        const legacyRaw = localStorage.getItem('red_deadle_v3') || localStorage.getItem('red_deadle_v2');
+        if (legacyRaw) {
+          const legacy = JSON.parse(legacyRaw);
+          const migrated = {
+            days: legacy.days || {},
+            customTowns: legacy.customTowns || {},
+            stats: legacy.stats || { daysPlayed: 0 }
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+          return migrated;
+        }
+        return { days: {}, customTowns: {}, stats: { daysPlayed: 0 } };
+      } catch (e) {
+        return { days: {}, customTowns: {}, stats: { daysPlayed: 0 } };
+      }
+    }
+
+    function saveAllState(state) {
+// ... existing code ... -->
