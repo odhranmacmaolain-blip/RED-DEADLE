@@ -1295,7 +1295,16 @@
       if (!appStorage.days[ACTIVE_DATE_KEY]) {
         appStorage.days[ACTIVE_DATE_KEY] = createFreshProgress();
       }
-      return appStorage.days[ACTIVE_DATE_KEY];
+      const prog = appStorage.days[ACTIVE_DATE_KEY];
+      if (!Array.isArray(prog.charGuesses)) prog.charGuesses = [];
+      if (!Array.isArray(prog.mapRounds)) prog.mapRounds = [];
+      if (typeof prog.mapRoundIndex !== 'number' || Number.isNaN(prog.mapRoundIndex)) {
+        prog.mapRoundIndex = Math.min(prog.mapRounds.length, 4);
+      }
+      if (!Array.isArray(prog.dossierAnswers) || prog.dossierAnswers.length !== 3) {
+        prog.dossierAnswers = [null, null, null];
+      }
+      return prog;
     }
 
     function persistIfDaily() {
@@ -2018,8 +2027,12 @@
 
     function renderMapStage() {
       const prog = getProgress();
-      const idx = Math.min(prog.mapRoundIndex, 4);
-      const ev = currentPuzzle.mapEvents[idx];
+      if (!currentPuzzle || !Array.isArray(currentPuzzle.mapEvents) || currentPuzzle.mapEvents.length === 0) {
+        currentPuzzle = getActivePuzzle();
+      }
+      const idx = Math.max(0, Math.min(Number(prog.mapRoundIndex) || 0, currentPuzzle.mapEvents.length - 1));
+      prog.mapRoundIndex = idx;
+      const ev = currentPuzzle.mapEvents[idx] || currentPuzzle.mapEvents[0];
       const roundResult = prog.mapRounds[idx];
 
       const mapScore = prog.mapRounds.reduce((s, r) => s + (r ? r.points : 0), 0);
